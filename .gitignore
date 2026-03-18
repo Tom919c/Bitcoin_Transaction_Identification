@@ -48,3 +48,6 @@ experiments/checkpoints/
 # OS
 .DS_Store
 Thumbs.db
+
+
+bitcoin-dataset/

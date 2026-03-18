@@ -1,11 +1,14 @@
 data:
-  raw_db: "postgresql://user:pass@localhost/bitcoin_db"  # 预处理阶段使用
+  raw_db: "postgresql://postgres:cq20050919;@localhost/bitcoin_db"  # 预处理阶段使用
+  node_table: "node_features"                             # 节点表名
+  edge_table: "transaction_edges"                         # 边表名
   processed_data_path: "./data/processed/data.pt"        # 供训练使用
   num_classes: 6
   label_map: "config/label_map.json"                      # 标签映射文件
 
 preprocessing:
   target_labels: ["INDIVIDUAL", "BET", "GAMBLING", "EXCHANGE", "BRIDGE"]
+  chunk_size: 50000    # 分块读取大小（节点/边）
   zscore_params:  # 论文公式11-13
     c: 6
     alpha: 0.3
@@ -13,6 +16,8 @@ preprocessing:
     gamma: 0.2
     theta: 0.3
   max_nodes: 350000  # 目标子图规模
+  val_ratio: 0.2     # 从有标签节点中随机抽取验证集比例
+  test_ratio: 0.2    # 从有标签节点中随机抽取测试集比例
 
 model:
   name: "ResGraphSAGE"  # 可选 mlp, gcn, gat, sage, res_sage, appnp

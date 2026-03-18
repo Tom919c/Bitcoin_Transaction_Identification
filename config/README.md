@@ -6,14 +6,19 @@
 
 ### data 数据配置
 - `raw_db`: 原始数据库连接字符串
+- `node_table`: 节点特征表名（默认 `node_features`）
+- `edge_table`: 交易边表名（默认 `transaction_edges`）
 - `processed_data_path`: 处理后的data.pt文件路径
 - `num_classes`: 分类数量（6类）
 - `label_map`: 标签映射文件路径
 
 ### preprocessing 预处理配置
 - `target_labels`: 目标标签列表
+- `chunk_size`: 数据库分块读取大小
 - `zscore_params`: Z-score标准化参数
 - `max_nodes`: 最大节点数量
+- `val_ratio`: 从有标签节点中抽取验证集比例
+- `test_ratio`: 从有标签节点中抽取测试集比例
 
 ### model 模型配置
 - `name`: 模型名称（mlp/gcn/gat/sage/res_sage/appnp）
