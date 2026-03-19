@@ -9,6 +9,9 @@ data:
 preprocessing:
   target_labels: ["INDIVIDUAL", "BET", "GAMBLING", "EXCHANGE", "BRIDGE"]
   chunk_size: 50000    # 分块读取大小（节点/边）
+  resume_enabled: true  # 默认启用断点续跑（有缓存即复用）
+  checkpoint_dir: "./data/processed/checkpoints"  # 预处理阶段缓存目录
+  force_recompute: false  # true 时忽略缓存并全量重算
   zscore_params:  # 论文公式11-13
     c: 6
     alpha: 0.3

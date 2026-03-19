@@ -33,6 +33,63 @@ def _chunked(items: Sequence[str], chunk_size: int) -> Iterator[List[str]]:
         yield list(items[start:start + chunk_size])
 
 
+def _split_table_name(table_name: str) -> Tuple[str, str]:
+    """将 table_name 解析为 (schema, table)。无 schema 时返回 ('', table)。"""
+    parts = str(table_name).split('.', 1)
+    if len(parts) == 2:
+        return parts[0], parts[1]
+    return '', parts[0]
+
+
+def _sql_table_identifier(table_name: str):
+    """将可选 schema.table 转换为 psycopg2 Identifier。"""
+    from psycopg2 import sql
+
+    schema, table = _split_table_name(table_name)
+    if schema:
+        return sql.Identifier(schema, table)
+    return sql.Identifier(table)
+
+
+def get_table_columns(conn, table_name: str) -> List[str]:
+    """
+    获取表的列名（按 ordinal_position 顺序）。
+    """
+    schema, table = _split_table_name(table_name)
+    cursor = conn.cursor()
+    try:
+        if schema:
+            cursor.execute(
+                """
+                SELECT column_name
+                FROM information_schema.columns
+                WHERE table_schema = %s AND table_name = %s
+                ORDER BY ordinal_position
+                """,
+                (schema, table)
+            )
+        else:
+            cursor.execute(
+                """
+                SELECT c.column_name
+                FROM information_schema.columns c
+                WHERE c.table_name = %s
+                  AND c.table_schema = ANY(current_schemas(true))
+                ORDER BY
+                    array_position(current_schemas(true), c.table_schema),
+                    c.ordinal_position
+                """,
+                (table,)
+            )
+        columns = [str(row[0]) for row in cursor.fetchall()]
+    finally:
+        cursor.close()
+
+    if not columns:
+        raise ValueError(f"未找到表或表无列: {table_name}")
+    return columns
+
+
 def connect_db(connection_string: str):
     """
     获取数据库连接（文档接口）。
@@ -84,7 +141,7 @@ def load_nodes_in_chunks(
             cluster_size,
             label
         FROM {table}
-    """).format(table=sql.Identifier(table_name))
+    """).format(table=_sql_table_identifier(table_name))
 
     cursor_name = f"node_features_cursor_{uuid.uuid4().hex[:8]}"
     cursor = conn.cursor(name=cursor_name)
@@ -92,7 +149,6 @@ def load_nodes_in_chunks(
 
     try:
         cursor.execute(query)
-        print(cursor.statusmessage)
         first_batch = cursor.fetchmany(chunk_size)
         if not first_batch:
             return
@@ -176,7 +232,7 @@ def get_neighbors(
         SELECT DISTINCT e.b::text AS neighbor
         FROM {table} e
         WHERE e.a::text = ANY(%s)
-    """).format(table=sql.Identifier(table_name))
+    """).format(table=_sql_table_identifier(table_name))
 
     neighbors: Set[str] = set()
     cursor = conn.cursor()
@@ -199,7 +255,7 @@ def load_edges_filtered(
     chunk_size: int = 50000,
     insert_batch_size: int = 10000,
     temp_table: str = 'tmp_selected_nodes'
-) -> np.ndarray:
+) -> pd.DataFrame:
     """
     读取子图边，仅保留 source/target 都在 selected_nodes 中的边。
 
@@ -212,25 +268,28 @@ def load_edges_filtered(
         temp_table: 临时表名称
 
     Returns:
-        边数组，形状 [E, 2]，每行 [source, target]
+        边DataFrame（保留 transaction_edges 全部列）
     """
     from psycopg2 import sql
 
+    edge_columns = get_table_columns(conn, table_name)
+    if 'a' not in edge_columns or 'b' not in edge_columns:
+        raise KeyError(f"{table_name} 缺少必要字段 a/b")
+
     node_list = [str(node_id) for node_id in selected_nodes if node_id is not None]
     if not node_list:
-        return np.empty((0, 2), dtype=object)
+        return pd.DataFrame(columns=edge_columns)
 
     _materialize_aliases(conn, node_list, temp_table=temp_table, insert_batch_size=insert_batch_size)
 
     query = sql.SQL("""
         SELECT
-            e.a::text AS source,
-            e.b::text AS target
+            e.*
         FROM {edge_table} e
         INNER JOIN {tmp_table} s1 ON e.a::text = s1.alias
         INNER JOIN {tmp_table} s2 ON e.b::text = s2.alias
     """).format(
-        edge_table=sql.Identifier(table_name),
+        edge_table=_sql_table_identifier(table_name),
         tmp_table=sql.Identifier(temp_table)
     )
 
@@ -238,22 +297,28 @@ def load_edges_filtered(
     cursor = conn.cursor(name=cursor_name)
     cursor.itersize = chunk_size
 
-    edges: List[Tuple[str, str]] = []
+    chunks: List[pd.DataFrame] = []
     try:
         cursor.execute(query)
+        first_batch = cursor.fetchmany(chunk_size)
+        if not first_batch:
+            return pd.DataFrame(columns=edge_columns)
+
+        columns = [desc[0] for desc in cursor.description]
+        chunks.append(pd.DataFrame(first_batch, columns=columns))
+
         while True:
             rows = cursor.fetchmany(chunk_size)
             if not rows:
                 break
-            edges.extend((str(src), str(dst)) for src, dst in rows)
+            chunks.append(pd.DataFrame(rows, columns=columns))
     finally:
         cursor.close()
 
-    if not edges:
-        return np.empty((0, 2), dtype=object)
-
-    return np.asarray(edges, dtype=object)
-
+    edge_df = pd.concat(chunks, ignore_index=True)
+    edge_df['a'] = edge_df['a'].astype(str)
+    edge_df['b'] = edge_df['b'].astype(str)
+    return edge_df
 
 def load_nodes_by_aliases(
     conn,
@@ -275,36 +340,24 @@ def load_nodes_by_aliases(
         temp_table: 临时表名称
 
     Returns:
-        节点特征DataFrame
+        节点DataFrame（保留 node_features 全部列）
     """
     from psycopg2 import sql
 
     node_list = [str(node_id) for node_id in node_ids if node_id is not None]
-    columns = [
-        'alias',
-        'degree',
-        'total_transactions_in',
-        'total_transactions_out',
-        'cluster_size',
-        'label'
-    ]
+    node_columns = get_table_columns(conn, table_name)
     if not node_list:
-        return pd.DataFrame(columns=columns)
+        return pd.DataFrame(columns=node_columns)
 
     _materialize_aliases(conn, node_list, temp_table=temp_table, insert_batch_size=insert_batch_size)
 
     query = sql.SQL("""
         SELECT
-            n.alias::text AS alias,
-            n.degree,
-            n.total_transactions_in,
-            n.total_transactions_out,
-            n.cluster_size,
-            n.label
+            n.*
         FROM {node_table} n
         INNER JOIN {tmp_table} s ON n.alias::text = s.alias
     """).format(
-        node_table=sql.Identifier(table_name),
+        node_table=_sql_table_identifier(table_name),
         tmp_table=sql.Identifier(temp_table)
     )
 
@@ -315,6 +368,13 @@ def load_nodes_by_aliases(
     chunks: List[pd.DataFrame] = []
     try:
         cursor.execute(query)
+        first_batch = cursor.fetchmany(chunk_size)
+        if not first_batch:
+            return pd.DataFrame(columns=node_columns)
+
+        columns = [desc[0] for desc in cursor.description]
+        chunks.append(pd.DataFrame(first_batch, columns=columns))
+
         while True:
             rows = cursor.fetchmany(chunk_size)
             if not rows:
@@ -324,9 +384,11 @@ def load_nodes_by_aliases(
         cursor.close()
 
     if not chunks:
-        return pd.DataFrame(columns=columns)
-
-    return pd.concat(chunks, ignore_index=True)
+        return pd.DataFrame(columns=node_columns)
+    node_df = pd.concat(chunks, ignore_index=True)
+    if 'alias' in node_df.columns:
+        node_df['alias'] = node_df['alias'].astype(str)
+    return node_df
 
 
 def filter_nodes(

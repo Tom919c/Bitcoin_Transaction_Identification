@@ -15,6 +15,9 @@
 ### preprocessing 预处理配置
 - `target_labels`: 目标标签列表
 - `chunk_size`: 数据库分块读取大小
+- `resume_enabled`: 是否启用断点续跑（默认 `true`，优先复用缓存）
+- `checkpoint_dir`: 预处理阶段缓存目录（保存各阶段中间结果）
+- `force_recompute`: 是否强制全量重算（`true` 时忽略缓存）
 - `zscore_params`: Z-score标准化参数
 - `max_nodes`: 最大节点数量
 - `val_ratio`: 从有标签节点中抽取验证集比例

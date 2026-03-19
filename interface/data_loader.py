@@ -18,7 +18,66 @@ def load_data(data_path: str) -> Data:
     Returns:
         PyG Data对象
     """
-    data = torch.load(data_path, map_location='cpu')
+    loaded = torch.load(data_path, map_location='cpu')
+    if isinstance(loaded, Data):
+        return loaded
+
+    if not isinstance(loaded, dict):
+        raise TypeError(f"不支持的数据格式: {type(loaded)}")
+
+    required = {'x', 'edge_index'}
+    missing = required - set(loaded.keys())
+    if missing:
+        raise KeyError(f"data.pt 缺少必要字段: {sorted(missing)}")
+
+    x = loaded['x'] if torch.is_tensor(loaded['x']) else torch.tensor(loaded['x'], dtype=torch.float32)
+    edge_index = loaded['edge_index'] if torch.is_tensor(loaded['edge_index']) else torch.tensor(loaded['edge_index'], dtype=torch.long)
+
+    y = loaded.get('y')
+    if y is None:
+        y = torch.zeros(x.shape[0], dtype=torch.long)
+    elif not torch.is_tensor(y):
+        y = torch.tensor(y, dtype=torch.long)
+
+    train_mask = loaded.get('train_mask')
+    if train_mask is None:
+        train_mask = torch.zeros(x.shape[0], dtype=torch.bool)
+    elif not torch.is_tensor(train_mask):
+        train_mask = torch.tensor(train_mask, dtype=torch.bool)
+
+    val_mask = loaded.get('val_mask')
+    if val_mask is None:
+        val_mask = torch.zeros(x.shape[0], dtype=torch.bool)
+    elif not torch.is_tensor(val_mask):
+        val_mask = torch.tensor(val_mask, dtype=torch.bool)
+
+    test_mask = loaded.get('test_mask')
+    if test_mask is None:
+        test_mask = torch.zeros(x.shape[0], dtype=torch.bool)
+    elif not torch.is_tensor(test_mask):
+        test_mask = torch.tensor(test_mask, dtype=torch.bool)
+
+    edge_attr = loaded.get('edge_attr')
+    if edge_attr is None:
+        edge_attr = torch.empty((edge_index.shape[1], 0), dtype=torch.float32)
+    elif not torch.is_tensor(edge_attr):
+        edge_attr = torch.tensor(edge_attr, dtype=torch.float32)
+
+    data = Data(
+        x=x,
+        edge_index=edge_index,
+        edge_attr=edge_attr,
+        y=y,
+        train_mask=train_mask,
+        val_mask=val_mask,
+        test_mask=test_mask
+    )
+
+    if 'feature_columns' in loaded:
+        data.feature_columns = list(loaded['feature_columns'])
+    if 'edge_attr_columns' in loaded:
+        data.edge_attr_columns = list(loaded['edge_attr_columns'])
+
     return data
 
 
