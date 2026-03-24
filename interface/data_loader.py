@@ -19,6 +19,10 @@ def load_data(data_path: str) -> Data:
         PyG Data对象
     """
     data = torch.load(data_path, map_location='cpu')
+    if isinstance(data, dict):
+        data = Data(**data)
+    if not isinstance(data, Data):
+        raise TypeError(f"不支持的数据格式: {type(data)}，期望 PyG Data 或可转换的 dict")
     return data
 
 

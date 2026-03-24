@@ -120,5 +120,9 @@ def load_data(data_path: str) -> Data:
     if not os.path.exists(data_path):
         raise FileNotFoundError(f"数据文件不存在: {data_path}")
 
-    data = torch.load(data_path)
+    data = torch.load(data_path, map_location='cpu')
+    if isinstance(data, dict):
+        data = Data(**data)
+    if not isinstance(data, Data):
+        raise TypeError(f"不支持的数据格式: {type(data)}，期望 PyG Data 或可转换的 dict")
     return data

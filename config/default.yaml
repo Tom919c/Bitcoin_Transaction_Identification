@@ -1,6 +1,6 @@
 data:
   raw_db: "postgresql://user:pass@localhost/bitcoin_db" # 预处理阶段使用
-  processed_data_path: "./data/processed/data.pt" # 供训练使用
+  processed_data_path: "./data/data.pt" # 供训练使用
   num_classes: 6
   label_map: "config/label_map.json" # 标签映射文件
 
@@ -15,14 +15,14 @@ preprocessing:
   max_nodes: 350000 # 目标子图规模
 
 model:
-  name: "ResGraphSAGE" # 可选 mlp, gcn, gat, sage, res_sage, appnp
+  name: "appnp" # 可选 mlp, gcn, gat, sage, res_sage, appnp
   params:
     hidden_channels: 256
     num_layers: 3
     dropout: 0.5
     # APPNP专用参数（仅当 model.name: "appnp" 时生效）
-    # K: 10
-    # alpha: 0.1
+    K: 10
+    alpha: 0.1
 
 train:
   seed: 42
