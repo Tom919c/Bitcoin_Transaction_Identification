@@ -1,25 +1,28 @@
 data:
-  raw_db: "postgresql://user:pass@localhost/bitcoin_db"  # 预处理阶段使用
-  processed_data_path: "./data/processed/data.pt"        # 供训练使用
+  raw_db: "postgresql://user:pass@localhost/bitcoin_db" # 预处理阶段使用
+  processed_data_path: "./data/processed/data.pt" # 供训练使用
   num_classes: 6
-  label_map: "config/label_map.json"                      # 标签映射文件
+  label_map: "config/label_map.json" # 标签映射文件
 
 preprocessing:
   target_labels: ["INDIVIDUAL", "BET", "GAMBLING", "EXCHANGE", "BRIDGE"]
-  zscore_params:  # 论文公式11-13
+  zscore_params: # 论文公式11-13
     c: 6
     alpha: 0.3
     beta: 0.2
     gamma: 0.2
     theta: 0.3
-  max_nodes: 350000  # 目标子图规模
+  max_nodes: 350000 # 目标子图规模
 
 model:
-  name: "ResGraphSAGE"  # 可选 mlp, gcn, gat, sage, res_sage, appnp
+  name: "ResGraphSAGE" # 可选 mlp, gcn, gat, sage, res_sage, appnp
   params:
     hidden_channels: 256
     num_layers: 3
     dropout: 0.5
+    # APPNP专用参数（仅当 model.name: "appnp" 时生效）
+    # K: 10
+    # alpha: 0.1
 
 train:
   seed: 42
@@ -27,8 +30,8 @@ train:
   epochs: 200
   lr: 0.01
   weight_decay: 5e-4
-  batch_size: 1024   # 仅用于mini-batch训练
-  neighbor_sizes: [25, 10]  # GraphSAGE采样邻居数
+  batch_size: 1024 # 仅用于mini-batch训练
+  neighbor_sizes: [25, 10] # GraphSAGE采样邻居数
   early_stopping_patience: 50
   checkpoint_dir: "./experiments/checkpoints"
   log_dir: "./experiments/logs"

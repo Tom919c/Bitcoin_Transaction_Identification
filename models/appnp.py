@@ -43,6 +43,8 @@ class APPNP(BaseModel):
     def reset_parameters(self):
         for lin in self.lins:
             lin.reset_parameters()
+        if hasattr(self.prop, 'reset_parameters'):
+            self.prop.reset_parameters()
 
     def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
         # MLP变换
