@@ -37,12 +37,12 @@ class Trainer:
         # 训练配置
         train_config = config.get('train', {})
         self.device = torch.device(train_config.get('device', 'cuda' if torch.cuda.is_available() else 'cpu'))
-        self.epochs = train_config.get('epochs', 200)
-        self.lr = train_config.get('lr', 0.01)
-        self.weight_decay = train_config.get('weight_decay', 5e-4)
-        self.batch_size = train_config.get('batch_size', 1024)
-        self.neighbor_sizes = train_config.get('neighbor_sizes', [25, 10])
-        self.patience = train_config.get('early_stopping_patience', 50)
+        self.epochs = int(train_config.get('epochs', 200))
+        self.lr = float(train_config.get('lr', 0.01))
+        self.weight_decay = float(train_config.get('weight_decay', 5e-4))
+        self.batch_size = int(train_config.get('batch_size', 1024))
+        self.neighbor_sizes = [int(n) for n in train_config.get('neighbor_sizes', [25, 10])]
+        self.patience = int(train_config.get('early_stopping_patience', 50))
         self.checkpoint_dir = train_config.get('checkpoint_dir', './experiments/checkpoints')
 
         # 移动到设备
