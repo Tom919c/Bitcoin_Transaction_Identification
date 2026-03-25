@@ -18,36 +18,6 @@ from training.evaluator import compute_metrics, print_metrics
 from training.utils import set_seed
 
 
-FULL_LABEL_NAMES = ['NONE', 'INDIVIDUAL', 'BET', 'GAMBLING', 'EXCHANGE', 'BRIDGE']
-
-
-def _prepare_data_for_exclude_none(data: Data, config: Dict[str, Any]) -> tuple[Data, list[str], int]:
-    """可选地移除 NONE 类并重映射标签，保持与训练流程一致。"""
-    data_cfg = config.setdefault('data', {})
-    exclude_none = bool(data_cfg.get('exclude_none', False))
-    num_classes = int(data_cfg.get('num_classes', 6))
-
-    if not exclude_none:
-        return data, FULL_LABEL_NAMES[:num_classes], num_classes
-
-    none_label = int(data_cfg.get('none_label_id', 0))
-    keep_mask = data.y != none_label
-
-    for mask_name in ('train_mask', 'val_mask', 'test_mask'):
-        if hasattr(data, mask_name):
-            setattr(data, mask_name, getattr(data, mask_name) & keep_mask)
-
-    y = data.y.clone()
-    y[y > none_label] = y[y > none_label] - 1
-    data.y = y
-
-    num_classes = max(num_classes - 1, 1)
-    data_cfg['num_classes'] = num_classes
-    label_names = [name for i, name in enumerate(FULL_LABEL_NAMES) if i != none_label][:num_classes]
-    print(f"已排除 NONE 类（label={none_label}），当前类别数: {num_classes}")
-    return data, label_names, num_classes
-
-
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="测试模型前向推理")
     parser.add_argument(
@@ -103,8 +73,8 @@ def main() -> None:
         data = Data(**raw_data)
     else:
         data = raw_data
-    data, label_names, num_classes = _prepare_data_for_exclude_none(data, config)
     data = data.to(device)
+    num_classes = config.get("data", {}).get("num_classes", 6)
 
     model_cfg = config.get("model", {})
     model_name = args.model or model_cfg.get("name", "mlp")
@@ -147,9 +117,9 @@ def main() -> None:
         train_metrics = compute_metrics(logits, data.y, data.train_mask, num_classes)
         test_metrics = compute_metrics(logits, data.y, data.test_mask, num_classes)
         print("\n训练集指标:")
-        print_metrics(train_metrics, label_names=label_names)
+        print_metrics(train_metrics)
         print("\n测试集指标:")
-        print_metrics(test_metrics, label_names=label_names)
+        print_metrics(test_metrics)
     else:
         print("未检测到 train/test 掩码，跳过指标计算。")
 

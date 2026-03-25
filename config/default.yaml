@@ -2,8 +2,6 @@ data:
   raw_db: "postgresql://user:pass@localhost/bitcoin_db"  # 预处理阶段使用
   processed_data_path: "./data/processed/data.pt"        # 供训练使用
   num_classes: 6
-  exclude_none: true
-  none_label_id: 0
   label_map: "config/label_map.json"                      # 标签映射文件
 
 preprocessing:
@@ -29,13 +27,13 @@ train:
   auto_mini_batch: true
   full_batch_max_edges: 2000000
   class_weight:
-    enabled: false
+    enabled: true
     smoothing: 1.0
-    power: 1.0
-    min_weight: 0.1
-    max_weight: 10.0
+    power: 0.5
+    min_weight: 0.3
+    max_weight: 3.0
   epochs: 200
-  lr: 0.01
+  lr: 0.005
   weight_decay: 5e-4
   batch_size: 1024   # 仅用于mini-batch训练
   neighbor_sizes: [25, 10]  # GraphSAGE采样邻居数
