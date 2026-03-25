@@ -30,6 +30,15 @@ train:
   epochs: 200
   lr: 0.01
   weight_decay: 5e-4
+  use_class_weights: true
+  class_weight_strategy: "inverse" # 可选: inverse, effective_num
+  class_weight_beta: 0.999
+  class_weight_power: 1.0
+  class_weight_overrides:
+    GAMBLING: 1.35
+  loss_type: "cross_entropy" # 可选: cross_entropy, focal
+  focal_gamma: 2.0
+  appnp_full_batch_only: true
   batch_size: 1024 # 仅用于mini-batch训练
   neighbor_sizes: [25, 10] # GraphSAGE采样邻居数
   early_stopping_patience: 50
@@ -37,4 +46,5 @@ train:
   log_dir: "./experiments/logs"
 
 eval:
+  metric_labels: ["INDIVIDUAL", "BET", "GAMBLING", "EXCHANGE", "BRIDGE"]
   macro_f1_average: "macro"

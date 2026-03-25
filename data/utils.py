@@ -5,6 +5,7 @@
 import numpy as np
 import torch
 from typing import Dict, List, Tuple, Optional
+from sklearn.model_selection import train_test_split
 
 # 标签映射
 LABEL_MAP = {
@@ -71,35 +72,73 @@ def filter_nodes(
 
 def create_masks(
     num_nodes: int,
+    labels: Optional[torch.LongTensor] = None,
     train_ratio: float = 0.6,
     val_ratio: float = 0.2,
-    seed: int = 42
+    seed: int = 42,
+    stratified: bool = True
 ) -> Tuple[torch.BoolTensor, torch.BoolTensor, torch.BoolTensor]:
     """
     创建训练/验证/测试集掩码
 
     Args:
         num_nodes: 节点数量
+        labels: 节点标签，用于分层划分
         train_ratio: 训练集比例
         val_ratio: 验证集比例
         seed: 随机种子
+        stratified: 是否启用分层划分
 
     Returns:
         train_mask, val_mask, test_mask
     """
     np.random.seed(seed)
-    indices = np.random.permutation(num_nodes)
 
-    train_size = int(num_nodes * train_ratio)
-    val_size = int(num_nodes * val_ratio)
+    if labels is not None and stratified:
+        label_array = labels.cpu().numpy() if torch.is_tensor(labels) else np.asarray(labels)
+        indices = np.arange(num_nodes)
+
+        try:
+            train_idx, temp_idx, _, temp_y = train_test_split(
+                indices,
+                label_array,
+                train_size=train_ratio,
+                random_state=seed,
+                stratify=label_array
+            )
+
+            remain_ratio = 1.0 - train_ratio
+            val_ratio_in_remain = val_ratio / remain_ratio
+            unique_temp_labels = np.unique(temp_y)
+            temp_stratify = temp_y if len(unique_temp_labels) > 1 else None
+
+            val_idx, test_idx = train_test_split(
+                temp_idx,
+                train_size=val_ratio_in_remain,
+                random_state=seed,
+                stratify=temp_stratify
+            )
+        except ValueError as exc:
+            print(f"警告: 分层划分失败，回退到随机划分，原因: {exc}")
+            stratified = False
+
+    if labels is None or not stratified:
+        indices = np.random.permutation(num_nodes)
+
+        train_size = int(num_nodes * train_ratio)
+        val_size = int(num_nodes * val_ratio)
+
+        train_idx = indices[:train_size]
+        val_idx = indices[train_size:train_size + val_size]
+        test_idx = indices[train_size + val_size:]
 
     train_mask = torch.zeros(num_nodes, dtype=torch.bool)
     val_mask = torch.zeros(num_nodes, dtype=torch.bool)
     test_mask = torch.zeros(num_nodes, dtype=torch.bool)
 
-    train_mask[indices[:train_size]] = True
-    val_mask[indices[train_size:train_size + val_size]] = True
-    test_mask[indices[train_size + val_size:]] = True
+    train_mask[torch.from_numpy(train_idx)] = True
+    val_mask[torch.from_numpy(val_idx)] = True
+    test_mask[torch.from_numpy(test_idx)] = True
 
     return train_mask, val_mask, test_mask
 

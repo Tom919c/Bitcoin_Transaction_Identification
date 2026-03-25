@@ -50,7 +50,9 @@ def build_and_save_data(output_path: str, config: Dict) -> Data:
     # 创建掩码
     train_mask, val_mask, test_mask = create_masks(
         num_nodes=x.shape[0],
-        seed=config.get('train', {}).get('seed', 42)
+        labels=y,
+        seed=config.get('train', {}).get('seed', 42),
+        stratified=True
     )
 
     # 构建PyG Data对象
@@ -67,6 +69,15 @@ def build_and_save_data(output_path: str, config: Dict) -> Data:
     torch.save(data, output_path)
     print(f"数据已保存到: {output_path}")
     print(f"节点数: {data.num_nodes}, 边数: {data.num_edges}, 特征维度: {data.num_features}")
+
+    for split_name, split_mask in [
+        ('train', train_mask),
+        ('val', val_mask),
+        ('test', test_mask)
+    ]:
+        split_labels = y[split_mask]
+        split_counts = torch.bincount(split_labels, minlength=len(LABEL_MAP)).tolist()
+        print(f"{split_name}类别计数: {split_counts}")
 
     return data
 
