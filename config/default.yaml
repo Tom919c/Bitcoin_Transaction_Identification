@@ -2,6 +2,8 @@ data:
   raw_db: "postgresql://user:pass@localhost/bitcoin_db"  # 预处理阶段使用
   processed_data_path: "./data/processed/data.pt"        # 供训练使用
   num_classes: 6
+  exclude_none: true
+  none_label_id: 0
   label_map: "config/label_map.json"                      # 标签映射文件
 
 preprocessing:
@@ -24,6 +26,14 @@ model:
 train:
   seed: 42
   device: "cuda"
+  auto_mini_batch: true
+  full_batch_max_edges: 2000000
+  class_weight:
+    enabled: false
+    smoothing: 1.0
+    power: 1.0
+    min_weight: 0.1
+    max_weight: 10.0
   epochs: 200
   lr: 0.01
   weight_decay: 5e-4

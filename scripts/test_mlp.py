@@ -1,4 +1,4 @@
-"""快速验证 MLP 模型可在当前配置和数据上运行的脚本"""
+"""快速验证配置模型可在当前数据和检查点上运行的脚本"""
 
 import argparse
 import os
@@ -18,8 +18,38 @@ from training.evaluator import compute_metrics, print_metrics
 from training.utils import set_seed
 
 
+FULL_LABEL_NAMES = ['NONE', 'INDIVIDUAL', 'BET', 'GAMBLING', 'EXCHANGE', 'BRIDGE']
+
+
+def _prepare_data_for_exclude_none(data: Data, config: Dict[str, Any]) -> tuple[Data, list[str], int]:
+    """可选地移除 NONE 类并重映射标签，保持与训练流程一致。"""
+    data_cfg = config.setdefault('data', {})
+    exclude_none = bool(data_cfg.get('exclude_none', False))
+    num_classes = int(data_cfg.get('num_classes', 6))
+
+    if not exclude_none:
+        return data, FULL_LABEL_NAMES[:num_classes], num_classes
+
+    none_label = int(data_cfg.get('none_label_id', 0))
+    keep_mask = data.y != none_label
+
+    for mask_name in ('train_mask', 'val_mask', 'test_mask'):
+        if hasattr(data, mask_name):
+            setattr(data, mask_name, getattr(data, mask_name) & keep_mask)
+
+    y = data.y.clone()
+    y[y > none_label] = y[y > none_label] - 1
+    data.y = y
+
+    num_classes = max(num_classes - 1, 1)
+    data_cfg['num_classes'] = num_classes
+    label_names = [name for i, name in enumerate(FULL_LABEL_NAMES) if i != none_label][:num_classes]
+    print(f"已排除 NONE 类（label={none_label}），当前类别数: {num_classes}")
+    return data, label_names, num_classes
+
+
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="测试 MLP 前向推理")
+    parser = argparse.ArgumentParser(description="测试模型前向推理")
     parser.add_argument(
         "--config",
         type=str,
@@ -31,6 +61,18 @@ def parse_args() -> argparse.Namespace:
         type=str,
         default=None,
         help="运行设备，默认自动检测"
+    )
+    parser.add_argument(
+        "--checkpoint",
+        type=str,
+        default=None,
+        help="可选：模型检查点路径（.pt）"
+    )
+    parser.add_argument(
+        "--model",
+        type=str,
+        default=None,
+        help="可选：覆盖配置文件中的模型名（如 mlp/gcn/gat/sage/res_sage/appnp）"
     )
     return parser.parse_args()
 
@@ -61,20 +103,36 @@ def main() -> None:
         data = Data(**raw_data)
     else:
         data = raw_data
+    data, label_names, num_classes = _prepare_data_for_exclude_none(data, config)
     data = data.to(device)
-    num_classes = config.get("data", {}).get("num_classes", 6)
 
-    model_params = dict(config.get("model", {}).get("params", {}))
+    model_cfg = config.get("model", {})
+    model_name = args.model or model_cfg.get("name", "mlp")
+    model_params = dict(model_cfg.get("params", {}))
     model_params.setdefault("hidden_channels", data.num_features)
     model_params.setdefault("num_layers", 2)
     model_params.setdefault("dropout", 0.5)
 
     model = get_model(
-        name="mlp",
+        name=model_name,
         in_channels=data.num_features,
         out_channels=num_classes,
         **model_params
     ).to(device)
+    print(f"模型: {model_name}")
+
+    if args.checkpoint:
+        print(f"加载检查点: {args.checkpoint}")
+        checkpoint = torch.load(args.checkpoint, map_location=device)
+        state_dict = checkpoint.get("model_state_dict", checkpoint) if isinstance(checkpoint, dict) else checkpoint
+        try:
+            model.load_state_dict(state_dict)
+        except RuntimeError as e:
+            raise RuntimeError(
+                f"检查点与当前模型结构不匹配（当前模型: {model_name}）。"
+                "请确认 checkpoint 与配置/--model 指定的模型一致。"
+            ) from e
+        print("检查点加载完成。")
 
     model.eval()
     with torch.no_grad():
@@ -89,9 +147,9 @@ def main() -> None:
         train_metrics = compute_metrics(logits, data.y, data.train_mask, num_classes)
         test_metrics = compute_metrics(logits, data.y, data.test_mask, num_classes)
         print("\n训练集指标:")
-        print_metrics(train_metrics)
+        print_metrics(train_metrics, label_names=label_names)
         print("\n测试集指标:")
-        print_metrics(test_metrics)
+        print_metrics(test_metrics, label_names=label_names)
     else:
         print("未检测到 train/test 掩码，跳过指标计算。")
 

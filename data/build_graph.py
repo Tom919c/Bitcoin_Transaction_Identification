@@ -121,4 +121,29 @@ def load_data(data_path: str) -> Data:
         raise FileNotFoundError(f"数据文件不存在: {data_path}")
 
     data = torch.load(data_path)
-    return data
+
+    # 兼容不同历史版本的保存格式，统一返回 PyG Data 对象
+    if isinstance(data, Data):
+        return data
+
+    if isinstance(data, dict):
+        nested_data = data.get('data')
+        if isinstance(nested_data, Data):
+            return nested_data
+
+        for key in ('graph', 'pyg_data'):
+            if isinstance(data.get(key), Data):
+                return data[key]
+
+        if 'x' in data and 'edge_index' in data:
+            return Data(**data)
+
+        raise TypeError(
+            f"无法从字典中解析图数据，检测到键: {sorted(data.keys())}。"
+            "请确保 data.pt 直接保存为 PyG Data，或包含 'data'/'graph'/'pyg_data' 字段。"
+        )
+
+    raise TypeError(
+        f"不支持的数据类型: {type(data).__name__}。"
+        "请确保 data.pt 为 PyG Data 对象或可转换的字典格式。"
+    )

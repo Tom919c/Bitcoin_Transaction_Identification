@@ -5,7 +5,6 @@
 import os
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from torch.optim import Adam
 from torch_geometric.data import Data
 from torch_geometric.loader import NeighborLoader
@@ -14,6 +13,22 @@ from tqdm import tqdm
 
 from .evaluator import compute_metrics
 from .utils import EarlyStopping, get_scheduler
+
+
+def _to_float(value, name: str) -> float:
+    """将配置值安全转换为 float，避免 YAML 字符串导致类型错误。"""
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        raise ValueError(f"配置项 {name} 必须是数值，当前值: {value!r}")
+
+
+def _to_int(value, name: str) -> int:
+    """将配置值安全转换为 int，允许传入如 '1024' 的字符串。"""
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        raise ValueError(f"配置项 {name} 必须是整数，当前值: {value!r}")
 
 
 class Trainer:
@@ -37,13 +52,21 @@ class Trainer:
         # 训练配置
         train_config = config.get('train', {})
         self.device = torch.device(train_config.get('device', 'cuda' if torch.cuda.is_available() else 'cpu'))
-        self.epochs = train_config.get('epochs', 200)
-        self.lr = train_config.get('lr', 0.01)
-        self.weight_decay = train_config.get('weight_decay', 5e-4)
-        self.batch_size = train_config.get('batch_size', 1024)
+        self.epochs = _to_int(train_config.get('epochs', 200), 'train.epochs')
+        self.lr = _to_float(train_config.get('lr', 0.01), 'train.lr')
+        self.weight_decay = _to_float(train_config.get('weight_decay', 5e-4), 'train.weight_decay')
+        self.batch_size = _to_int(train_config.get('batch_size', 1024), 'train.batch_size')
         self.neighbor_sizes = train_config.get('neighbor_sizes', [25, 10])
-        self.patience = train_config.get('early_stopping_patience', 50)
+        self.patience = _to_int(train_config.get('early_stopping_patience', 50), 'train.early_stopping_patience')
         self.checkpoint_dir = train_config.get('checkpoint_dir', './experiments/checkpoints')
+        self.num_classes = _to_int(config.get('data', {}).get('num_classes', 6), 'data.num_classes')
+
+        class_weight_cfg = train_config.get('class_weight', {})
+        self.class_weight_enabled = bool(class_weight_cfg.get('enabled', True))
+        self.class_weight_smoothing = _to_float(class_weight_cfg.get('smoothing', 1.0), 'train.class_weight.smoothing')
+        self.class_weight_power = _to_float(class_weight_cfg.get('power', 1.0), 'train.class_weight.power')
+        self.class_weight_min = _to_float(class_weight_cfg.get('min_weight', 0.1), 'train.class_weight.min_weight')
+        self.class_weight_max = _to_float(class_weight_cfg.get('max_weight', 10.0), 'train.class_weight.max_weight')
 
         # 移动到设备
         self.model = self.model.to(self.device)
@@ -63,10 +86,37 @@ class Trainer:
         self.early_stopping = EarlyStopping(patience=self.patience)
 
         # 损失函数
-        self.criterion = nn.CrossEntropyLoss()
+        class_weight = self._build_class_weight() if self.class_weight_enabled else None
+        self.criterion = nn.CrossEntropyLoss(weight=class_weight)
+
+        if class_weight is not None:
+            print(f"启用类别加权损失，权重: {[round(w, 4) for w in class_weight.detach().cpu().tolist()]}")
 
         # 训练日志
         self.train_log = []
+
+    def _build_class_weight(self) -> Optional[torch.Tensor]:
+        """根据训练集标签频次构建类别权重，缓解类别不平衡。"""
+        if not hasattr(self.data, 'train_mask'):
+            print("未检测到 train_mask，跳过类别加权。")
+            return None
+
+        train_labels = self.data.y[self.data.train_mask].long()
+        if train_labels.numel() == 0:
+            print("训练集为空，跳过类别加权。")
+            return None
+
+        class_counts = torch.bincount(train_labels, minlength=self.num_classes).float()
+        smoothed_counts = class_counts + self.class_weight_smoothing
+        class_weight = 1.0 / torch.pow(smoothed_counts, self.class_weight_power)
+
+        # 归一化到均值约为 1，避免整体 loss 尺度大幅偏移。
+        class_weight = class_weight / class_weight.mean().clamp_min(1e-12)
+        class_weight = torch.clamp(class_weight, min=self.class_weight_min, max=self.class_weight_max)
+        class_weight = class_weight / class_weight.mean().clamp_min(1e-12)
+
+        print(f"训练集类别计数: {class_counts.long().tolist()}")
+        return class_weight.to(self.device)
 
     def train(self, use_mini_batch: bool = False) -> List[Dict]:
         """
@@ -202,8 +252,7 @@ class Trainer:
         """
         self.model.eval()
         out = self.model(self.data.x, self.data.edge_index)
-        num_classes = self.config.get('data', {}).get('num_classes', 6)
-        return compute_metrics(out, self.data.y, mask, num_classes)
+        return compute_metrics(out, self.data.y, mask, self.num_classes)
 
     def save_checkpoint(self, path: str):
         """保存检查点"""
