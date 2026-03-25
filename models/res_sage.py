@@ -20,51 +20,50 @@ class ResGraphSAGE(BaseModel):
         hidden_channels: int,
         out_channels: int,
         num_layers: int = 3,
-        dropout: float = 0.5
+        dropout: float = 0.3
     ):
         super().__init__(in_channels, hidden_channels, out_channels)
+        if num_layers != 3:
+            raise ValueError("ResGraphSAGE按规范固定为3层SAGEConv")
+
         self.num_layers = num_layers
         self.dropout = dropout
 
-        self.convs = nn.ModuleList()
-        self.norms = nn.ModuleList()
-
-        # 输入投影层
+        # 共享残差路径: X -> X_res
         self.input_proj = nn.Linear(in_channels, hidden_channels)
-
-        # 隐藏层（带残差）
-        for _ in range(num_layers - 1):
-            self.convs.append(SAGEConv(hidden_channels, hidden_channels))
-            self.norms.append(nn.LayerNorm(hidden_channels))
-
-        # 输出层
-        self.output_proj = nn.Linear(hidden_channels, out_channels)
+        self.conv1 = SAGEConv(in_channels, hidden_channels)
+        self.conv2 = SAGEConv(hidden_channels, hidden_channels)
+        self.conv3 = SAGEConv(hidden_channels, out_channels)
+        self.norm1 = nn.LayerNorm(hidden_channels)
+        self.norm2 = nn.LayerNorm(hidden_channels)
 
         self.reset_parameters()
 
     def reset_parameters(self):
         self.input_proj.reset_parameters()
-        self.output_proj.reset_parameters()
-        for conv in self.convs:
-            conv.reset_parameters()
-        for norm in self.norms:
-            norm.reset_parameters()
+        self.conv1.reset_parameters()
+        self.conv2.reset_parameters()
+        self.conv3.reset_parameters()
+        self.norm1.reset_parameters()
+        self.norm2.reset_parameters()
 
     def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
-        # 输入投影
-        x = self.input_proj(x)
-        x = F.relu(x)
-        x = F.dropout(x, p=self.dropout, training=self.training)
+        x_res = self.input_proj(x)
 
-        # 残差层
-        for conv, norm in zip(self.convs, self.norms):
-            residual = x
-            x = conv(x, edge_index)
-            x = norm(x)
-            x = F.relu(x)
-            x = F.dropout(x, p=self.dropout, training=self.training)
-            x = x + residual  # 残差连接
+        # 第1层：SAGEConv -> LN -> ReLU -> +X_res -> Dropout
+        h = self.conv1(x, edge_index)
+        h = self.norm1(h)
+        h = F.relu(h)
+        h = h + x_res
+        h = F.dropout(h, p=self.dropout, training=self.training)
 
-        # 输出投影
-        x = self.output_proj(x)
-        return x
+        # 第2层：SAGEConv -> LN -> ReLU -> +X_res -> Dropout
+        h = self.conv2(h, edge_index)
+        h = self.norm2(h)
+        h = F.relu(h)
+        h = h + x_res
+        h = F.dropout(h, p=self.dropout, training=self.training)
+
+        # 第3层：仅输出logits，不加残差
+        out = self.conv3(h, edge_index)
+        return out

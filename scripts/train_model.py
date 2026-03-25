@@ -24,6 +24,8 @@ def main():
                         help='配置文件路径')
     parser.add_argument('--mini-batch', action='store_true',
                         help='使用mini-batch训练')
+    parser.add_argument('--resume-checkpoint', type=str, default=None,
+                        help='断点续训的checkpoint路径，未指定则从配置读取 train.resume_from_checkpoint')
     args = parser.parse_args()
 
     # 加载配置
@@ -35,7 +37,12 @@ def main():
     set_seed(seed)
 
     # 加载数据
-    data_path = config.get('data', {}).get('processed_data_path', './data/processed/data.pt')
+    data_path = config.get(
+        'data', {}
+    ).get(
+        'processed_data_path',
+        'D:\\Code\\VSCode\\Bitcoin_Transaction_Identification\\data\\processed\\data.pt'
+    )
     print(f"加载数据: {data_path}")
     data = load_data(data_path)
     print(f"节点数: {data.num_nodes}, 边数: {data.num_edges}, 特征维度: {data.num_features}")
@@ -55,6 +62,18 @@ def main():
 
     # 创建训练器
     trainer = Trainer(model, data, config)
+
+    # 断点续训（可由CLI参数覆盖配置）
+    resume_checkpoint = args.resume_checkpoint
+    if not resume_checkpoint:
+        resume_checkpoint = config.get('train', {}).get('resume_from_checkpoint')
+
+    if resume_checkpoint:
+        if not os.path.exists(resume_checkpoint):
+            raise FileNotFoundError(f"断点续训文件不存在: {resume_checkpoint}")
+        trainer.load_checkpoint(resume_checkpoint)
+        print(f"已加载checkpoint: {resume_checkpoint}")
+        print(f"将从第 {trainer.start_epoch + 1} 轮继续训练，目标总轮数: {trainer.epochs}")
 
     # 训练
     print(f"\n开始训练...")

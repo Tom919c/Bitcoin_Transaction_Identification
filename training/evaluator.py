@@ -3,7 +3,6 @@
 """
 
 import torch
-import numpy as np
 from typing import Dict
 from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score
 
@@ -26,20 +25,38 @@ def compute_metrics(
     Returns:
         字典，包含 accuracy, macro_f1, 各类别f1等
     """
-    # 获取预测结果
-    pred = out[mask].argmax(dim=1).cpu().numpy()
-    true = y[mask].cpu().numpy()
+    if mask.dtype != torch.bool:
+        mask = mask.bool()
+    valid_mask = mask & (y != 0)
+
+    if int(valid_mask.sum().item()) == 0:
+        zero_metrics = [0.0 for _ in range(num_classes)]
+        return {
+            'accuracy': 0.0,
+            'macro_f1': 0.0,
+            'micro_f1': 0.0,
+            'weighted_f1': 0.0,
+            'per_class_f1': zero_metrics,
+            'per_class_precision': zero_metrics,
+            'per_class_recall': zero_metrics
+        }
+
+    # 仅在有标签节点上评估（忽略 NONE=0）
+    pred = out[valid_mask].argmax(dim=1).cpu().numpy()
+    true = y[valid_mask].cpu().numpy()
+    class_labels = list(range(num_classes))
+    macro_labels = list(range(1, num_classes)) if num_classes > 1 else class_labels
 
     # 计算指标
     accuracy = accuracy_score(true, pred)
-    macro_f1 = f1_score(true, pred, average='macro', zero_division=0)
+    macro_f1 = f1_score(true, pred, average='macro', labels=macro_labels, zero_division=0)
     micro_f1 = f1_score(true, pred, average='micro', zero_division=0)
     weighted_f1 = f1_score(true, pred, average='weighted', zero_division=0)
 
     # 各类别F1
-    per_class_f1 = f1_score(true, pred, average=None, labels=range(num_classes), zero_division=0)
-    per_class_precision = precision_score(true, pred, average=None, labels=range(num_classes), zero_division=0)
-    per_class_recall = recall_score(true, pred, average=None, labels=range(num_classes), zero_division=0)
+    per_class_f1 = f1_score(true, pred, average=None, labels=class_labels, zero_division=0)
+    per_class_precision = precision_score(true, pred, average=None, labels=class_labels, zero_division=0)
+    per_class_recall = recall_score(true, pred, average=None, labels=class_labels, zero_division=0)
 
     return {
         'accuracy': accuracy,

@@ -2,7 +2,7 @@ data:
   raw_db: "postgresql://postgres:cq20050919;@localhost/bitcoin_db"  # 预处理阶段使用
   node_table: "node_features"                             # 节点表名
   edge_table: "transaction_edges"                         # 边表名
-  processed_data_path: "./data/processed/data.pt"        # 供训练使用
+  processed_data_path: "D:\\Code\\VSCode\\Bitcoin_Transaction_Identification\\data\\processed\\data.pt"  # 供训练使用
   num_classes: 6
   label_map: "config/label_map.json"                      # 标签映射文件
 
@@ -23,21 +23,22 @@ preprocessing:
   test_ratio: 0.2    # 从有标签节点中随机抽取测试集比例
 
 model:
-  name: "ResGraphSAGE"  # 可选 mlp, gcn, gat, sage, res_sage, appnp
+  name: "res_sage"  # 可选 mlp, gcn, gat, sage, res_sage, appnp
   params:
-    hidden_channels: 256
+    hidden_channels: 128
     num_layers: 3
-    dropout: 0.5
+    dropout: 0.3
 
 train:
   seed: 42
-  device: "cuda"
-  epochs: 200
-  lr: 0.01
+  device: "cpu"
+  epochs: 300
+  lr: 0.001
   weight_decay: 5e-4
   batch_size: 1024   # 仅用于mini-batch训练
-  neighbor_sizes: [25, 10]  # GraphSAGE采样邻居数
+  neighbor_sizes: [25, 10, 5]  # GraphSAGE采样邻居数
   early_stopping_patience: 50
+  resume_from_checkpoint: null  # 断点续训路径，如 "./experiments/checkpoints/final_model.pt"
   checkpoint_dir: "./experiments/checkpoints"
   log_dir: "./experiments/logs"
 

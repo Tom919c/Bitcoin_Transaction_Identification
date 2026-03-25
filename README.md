@@ -39,6 +39,9 @@ python scripts/train_model.py --config config/default.yaml
 
 # Mini-batch训练
 python scripts/train_model.py --config config/default.yaml --mini-batch
+
+# 从已有checkpoint继续训练（断点续训）
+python scripts/train_model.py --config config/default.yaml --resume-checkpoint experiments/checkpoints/final_model.pt
 ```
 
 ### 3. 启动界面
