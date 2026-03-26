@@ -42,5 +42,14 @@ train:
   checkpoint_dir: "./experiments/checkpoints"
   log_dir: "./experiments/logs"
 
+wandb:
+  enabled: true
+  project: "bitcoin-transaction-identification"
+  entity: chenquan
+  run_name: "res_sage_experiment"
+  mode: "online"  # online / offline / disabled
+  log_model: false
+  watch_model: false
+
 eval:
   macro_f1_average: "macro"

@@ -44,6 +44,28 @@ python scripts/train_model.py --config config/default.yaml --mini-batch
 python scripts/train_model.py --config config/default.yaml --resume-checkpoint experiments/checkpoints/final_model.pt
 ```
 
+### 2.1 使用 W&B 记录训练过程
+
+1) 安装依赖：
+
+```bash
+pip install -r requirements.txt
+```
+
+2) 在 `config/default.yaml` 中开启：
+
+```yaml
+wandb:
+  enabled: true
+  project: "bitcoin-transaction-identification"
+  entity: null
+  run_name: null
+  mode: "online"   # 无网环境可改为 offline
+  watch_model: false
+```
+
+3) 直接运行训练命令（全图或 mini-batch 均可），训练过程中会按 epoch 上报 loss/F1/lr。
+
 ### 3. 启动界面
 
 ```bash

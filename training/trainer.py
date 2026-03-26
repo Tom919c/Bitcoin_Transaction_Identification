@@ -59,7 +59,7 @@ class Trainer:
     通用训练器类
     """
 
-    def __init__(self, model: nn.Module, data: Data, config: Dict):
+    def __init__(self, model: nn.Module, data: Data, config: Dict, wandb_run=None):
         """
         初始化训练器
 
@@ -71,6 +71,7 @@ class Trainer:
         self.model = model
         self.data = data
         self.config = config
+        self.wandb_run = wandb_run
 
         # 训练配置
         train_config = config.get('train', {})
@@ -139,6 +140,16 @@ class Trainer:
         else:
             self.scheduler.step()
 
+    def _current_lr(self) -> float:
+        if not self.optimizer.param_groups:
+            return self.lr
+        return float(self.optimizer.param_groups[0].get('lr', self.lr))
+
+    def _log_wandb(self, payload: Dict):
+        if self.wandb_run is None:
+            return
+        self.wandb_run.log(payload)
+
     def _train_full_batch(self) -> List[Dict]:
         """全图训练"""
         best_val_f1 = self._get_best_logged_val_f1()
@@ -172,6 +183,15 @@ class Trainer:
             }
             self.train_log.append(log_entry)
             self.start_epoch = epoch + 1
+            self._log_wandb({
+                'epoch': epoch + 1,
+                'train/loss': loss.item(),
+                'train/acc': train_metrics['accuracy'],
+                'train/macro_f1': train_metrics['macro_f1'],
+                'val/acc': val_metrics['accuracy'],
+                'val/macro_f1': val_metrics['macro_f1'],
+                'train/lr': self._current_lr()
+            })
 
             # 打印进度
             if (epoch + 1) % 10 == 0:
@@ -247,6 +267,13 @@ class Trainer:
             }
             self.train_log.append(log_entry)
             self.start_epoch = epoch + 1
+            self._log_wandb({
+                'epoch': epoch + 1,
+                'train/loss': avg_loss,
+                'val/acc': val_metrics['accuracy'],
+                'val/macro_f1': val_metrics['macro_f1'],
+                'train/lr': self._current_lr()
+            })
 
             if skipped_batches > 0:
                 print(f"Epoch {epoch+1}: 跳过 {skipped_batches} 个仅含 NONE 标签的 batch")

@@ -75,3 +75,15 @@ BET          1.0000     1.0000     1.0000
 GAMBLING     0.6780     0.8696     0.5556
 EXCHANGE     0.7792     0.9375     0.6667
 BRIDGE       0.9630     0.9286     1.0000
+
+
+
+● 根因基本在代码里能对上（training/trainer.py、data/utils.py）：
+
+   - BET 召回为 0：你用的是无权重 CrossEntropyLoss(ignore_index=0)，类别不平衡时模型会偏向大类（INDIVIDUAL），常见结果就是几乎不预测
+  BET。
+   - Loss 波动大：固定 lr=0.001、默认无 scheduler/梯度裁剪，再叠加 dropout，出现明显震荡是常见现象。
+   - 还有个关键点：train_mask = labels != 0，而 val/test 从同一批有标签节点抽样，导致 train 与 val/test
+  重叠（数据泄漏），指标会偏乐观且不稳定。
+
+  如果你愿意，我可以直接帮你改成“互斥划分 + 分层抽样 + 类别权重/焦点损失 + LR 调度”。
