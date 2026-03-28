@@ -49,7 +49,7 @@ class Trainer:
     通用训练器类
     """
 
-    def __init__(self, model: nn.Module, data: Data, config: Dict):
+    def __init__(self, model: nn.Module, data: Data, config: Dict, wandb_run=None):
         """
         初始化训练器
 
@@ -57,10 +57,12 @@ class Trainer:
             model: PyTorch模型
             data: PyG Data对象
             config: 配置字典
+            wandb_run: 可选的 wandb run 对象
         """
         self.model = model
         self.data = data
         self.config = config
+        self.wandb_run = wandb_run
 
         # 训练配置
         train_config = config.get('train', {})
@@ -82,6 +84,8 @@ class Trainer:
         self.class_weight_overrides = train_config.get('class_weight_overrides', {})
         self.model_name = str(config.get('model', {}).get('name', '')).lower()
         self.num_classes = int(config.get('data', {}).get('num_classes', 6))
+        self.load_best_at_end = bool(train_config.get('load_best_at_end', True))
+        self.logit_bias_by_class_idx = {}
 
         # 评估标签口径（默认使用配置中的5个业务类）
         eval_config = config.get('eval', {})
@@ -101,6 +105,9 @@ class Trainer:
 
         self.metric_label_indices = metric_label_indices
         self.metric_label_names = resolved_label_names
+
+        # APPNP 训练前可选自动重建掩码，并打印划分统计
+        self._prepare_appnp_masks_if_needed()
 
         # 移动到设备
         self.model = self.model.to(self.device)
@@ -124,6 +131,48 @@ class Trainer:
 
         # 训练日志
         self.train_log = []
+
+    def _prepare_appnp_masks_if_needed(self):
+        if self.model_name != 'appnp':
+            return
+
+        try:
+            from models.appnp import maybe_rebuild_masks, print_split_stats
+            self.data = maybe_rebuild_masks(
+                self.data,
+                self.config,
+                self.metric_label_indices,
+                self.metric_label_names
+            )
+            print_split_stats(
+                self.data,
+                self.metric_label_indices,
+                self.metric_label_names,
+                self.num_classes
+            )
+        except Exception as exc:
+            print(f"警告: APPNP 掩码准备阶段失败，继续使用原始掩码。原因: {exc}")
+
+    def _finalize_training(self, best_path: str):
+        if self.load_best_at_end and os.path.exists(best_path):
+            self.load_checkpoint(best_path)
+            print(f"训练结束后已自动加载最佳模型: {best_path}")
+
+        if self.model_name != 'appnp':
+            return
+
+        try:
+            from models.appnp import tune_minority_logit_bias
+            self.logit_bias_by_class_idx = tune_minority_logit_bias(
+                self,
+                self.data,
+                self.config,
+                self.metric_label_indices,
+                self.metric_label_names
+            )
+        except Exception as exc:
+            print(f"警告: APPNP 验证集偏置调优失败，将使用原始logits评估。原因: {exc}")
+            self.logit_bias_by_class_idx = {}
 
     def _build_criterion(self) -> nn.Module:
         """根据配置构建损失函数，默认启用训练集类别权重。"""
@@ -209,6 +258,7 @@ class Trainer:
     def _train_full_batch(self) -> List[Dict]:
         """全图训练"""
         best_val_f1 = -1
+        best_path = os.path.join(self.checkpoint_dir, 'best_model.pt')
 
         for epoch in range(self.epochs):
             # 训练
@@ -240,6 +290,15 @@ class Trainer:
                 'val_f1': val_metrics['macro_f1']
             }
             self.train_log.append(log_entry)
+            if self.wandb_run is not None:
+                self.wandb_run.log({
+                    'epoch': epoch + 1,
+                    'train/loss': loss.item(),
+                    'train/accuracy': train_metrics['accuracy'],
+                    'train/macro_f1': train_metrics['macro_f1'],
+                    'val/accuracy': val_metrics['accuracy'],
+                    'val/macro_f1': val_metrics['macro_f1']
+                })
 
             # 打印进度
             if (epoch + 1) % 10 == 0:
@@ -250,12 +309,14 @@ class Trainer:
             # 保存最佳模型
             if val_metrics['macro_f1'] > best_val_f1:
                 best_val_f1 = val_metrics['macro_f1']
-                self.save_checkpoint(os.path.join(self.checkpoint_dir, 'best_model.pt'))
+                self.save_checkpoint(best_path)
 
             # 早停检查
             if self.early_stopping(val_metrics['macro_f1']):
                 print(f"早停于 epoch {epoch + 1}")
                 break
+
+        self._finalize_training(best_path)
 
         return self.train_log
 
@@ -270,6 +331,7 @@ class Trainer:
         )
 
         best_val_f1 = -1
+        best_path = os.path.join(self.checkpoint_dir, 'best_model.pt')
 
         for epoch in range(self.epochs):
             self.model.train()
@@ -302,6 +364,13 @@ class Trainer:
                 'val_f1': val_metrics['macro_f1']
             }
             self.train_log.append(log_entry)
+            if self.wandb_run is not None:
+                self.wandb_run.log({
+                    'epoch': epoch + 1,
+                    'train/loss': avg_loss,
+                    'val/accuracy': val_metrics['accuracy'],
+                    'val/macro_f1': val_metrics['macro_f1']
+                })
 
             if (epoch + 1) % 10 == 0:
                 print(f"Epoch {epoch+1}/{self.epochs} | "
@@ -310,11 +379,13 @@ class Trainer:
 
             if val_metrics['macro_f1'] > best_val_f1:
                 best_val_f1 = val_metrics['macro_f1']
-                self.save_checkpoint(os.path.join(self.checkpoint_dir, 'best_model.pt'))
+                self.save_checkpoint(best_path)
 
             if self.early_stopping(val_metrics['macro_f1']):
                 print(f"早停于 epoch {epoch + 1}")
                 break
+
+        self._finalize_training(best_path)
 
         return self.train_log
 
@@ -331,6 +402,12 @@ class Trainer:
         """
         self.model.eval()
         out = self.model(self.data.x, self.data.edge_index)
+
+        # 可选后处理：在验证集网格搜索到的类别logit偏置用于最终评估
+        if self.logit_bias_by_class_idx:
+            for class_idx, bias in self.logit_bias_by_class_idx.items():
+                out[:, int(class_idx)] = out[:, int(class_idx)] + float(bias)
+
         return compute_metrics(
             out,
             self.data.y,
