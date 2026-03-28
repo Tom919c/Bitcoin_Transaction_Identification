@@ -87,3 +87,70 @@ BRIDGE       0.9630     0.9286     1.0000
   重叠（数据泄漏），指标会偏乐观且不稳定。
 
   如果你愿意，我可以直接帮你改成“互斥划分 + 分层抽样 + 类别权重/焦点损失 + LR 调度”。
+
+
+  ● 已改完了：我已经落地了“互斥分层划分 + 类别不平衡损失 + 梯度裁剪 + 掩码自动修复”。
+
+  你不一定要重新数据筛选。旧 data.pt 也能直接训练，因为 Trainer 现在会检测并自动修复 train/val/test 重叠掩码。
+
+  如果你想把新划分持久化写回 data.pt，跑一次预处理即可（会复用现有阶段缓存）：
+
+   python scripts/run_preprocessing.py --config config/default.yaml
+
+  确保 preprocessing.resume_enabled: true、force_recompute: false。
+
+  如果要“从某阶段开始重算”，删除该阶段及后续缓存文件（data\processed\checkpoints\stage_*.pt）再跑。仅改掩码时通常无需删 1~5
+  阶段缓存。
+
+
+开始数据预处理...
+配置文件: config/default.yaml
+输出路径: D:\Code\VSCode\Bitcoin_Transaction_Identification\data\processed\data.pt
+阶段1/5: 统计全图特征分布并收集 BRIDGE 节点...
+阶段1命中缓存: BRIDGE节点 70
+阶段2/5: 计算 FinalScore 并筛选 TopK 节点...
+阶段2命中缓存: TopK节点 350000
+阶段3/5: 执行 BRIDGE 邻居增强...
+阶段3命中缓存: 选中节点 350258
+阶段4/5: 读取选中节点特征与标签（保留全部节点特征）...
+阶段4命中缓存: 节点行数 350258
+阶段5/5: 读取选中子图边（保留全部边特征）并构建 edge_index...
+阶段5命中缓存: 边行数 17173503
+数据已保存到: D:\Code\VSCode\Bitcoin_Transaction_Identification\data\processed\data.pt
+节点数: 350258, 边数: 17173503, 节点特征维度: 19, 边特征维度: 6
+有标签节点数: 2961, train/val/test: 1779/591/591
+数据预处理完成!
+
+
+GraphSAGE:
+开始训练...
+Epoch 10/300 | Loss: 1.0420 | Val F1: 0.4484
+Epoch 20/300 | Loss: 0.8396 | Val F1: 0.5179
+Epoch 30/300 | Loss: 0.7181 | Val F1: 0.5404
+Epoch 40/300 | Loss: 0.6139 | Val F1: 0.5816
+Epoch 50/300 | Loss: 0.5641 | Val F1: 0.5979
+Epoch 60/300 | Loss: 0.5102 | Val F1: 0.6144
+Epoch 70/300 | Loss: 0.4701 | Val F1: 0.6479
+Epoch 80/300 | Loss: 0.4418 | Val F1: 0.6519
+Epoch 90/300 | Loss: 0.4199 | Val F1: 0.6491
+Epoch 100/300 | Loss: 0.4198 | Val F1: 0.6705
+Epoch 110/300 | Loss: 0.4106 | Val F1: 0.6702
+Epoch 120/300 | Loss: 0.3837 | Val F1: 0.6836
+Epoch 130/300 | Loss: 0.3871 | Val F1: 0.6814
+早停于 epoch 137
+
+训练完成! 最终评估:
+Accuracy: 0.7648
+Macro F1: 0.6725
+Micro F1: 0.7648
+Weighted F1: 0.8020
+
+各类别指标:
+类别           F1         Precision  Recall
+------------------------------------------
+NONE         0.0000     0.0000     0.0000
+INDIVIDUAL   0.8545     0.9787     0.7583
+BET          0.7059     0.5625     0.9474
+GAMBLING     0.3497     0.2315     0.7143
+EXCHANGE     0.5773     0.4828     0.7179
+BRIDGE       0.8750     0.7778     1.0000

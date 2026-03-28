@@ -5,13 +5,15 @@
 import os
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch.optim import Adam
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch_geometric.data import Data
 from torch_geometric.loader import NeighborLoader
-from typing import Dict, List, Sequence
+from typing import Dict, List, Optional, Sequence
 from tqdm import tqdm
 
+from data.utils import create_semi_supervised_masks
 from .evaluator import compute_metrics
 from .utils import EarlyStopping, get_scheduler
 
@@ -54,6 +56,48 @@ def _as_int_list(value, field_name: str, default: Sequence[int]) -> List[int]:
     return result
 
 
+class FocalLoss(nn.Module):
+    """多分类 Focal Loss（支持 ignore_index 与类别权重）。"""
+
+    def __init__(
+        self,
+        gamma: float = 2.0,
+        weight: Optional[torch.Tensor] = None,
+        ignore_index: int = 0
+    ):
+        super().__init__()
+        self.gamma = float(gamma)
+        self.ignore_index = int(ignore_index)
+        if weight is not None:
+            self.register_buffer('weight', weight.float())
+        else:
+            self.weight = None
+
+    def forward(self, logits: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+        valid_mask = target != self.ignore_index
+        if int(valid_mask.sum().item()) == 0:
+            raise ValueError("FocalLoss 输入不包含有效标签（全部为 ignore_index）")
+
+        logits = logits[valid_mask]
+        target = target[valid_mask]
+
+        log_probs = F.log_softmax(logits, dim=1)
+        probs = torch.exp(log_probs)
+        sample_indices = torch.arange(target.shape[0], device=target.device)
+
+        log_p_t = log_probs[sample_indices, target]
+        p_t = probs[sample_indices, target]
+
+        focal_factor = torch.pow(1.0 - p_t, self.gamma)
+        loss = -focal_factor * log_p_t
+
+        if self.weight is not None:
+            class_weight = self.weight[target]
+            loss = loss * class_weight
+
+        return loss.mean()
+
+
 class Trainer:
     """
     通用训练器类
@@ -76,17 +120,30 @@ class Trainer:
         # 训练配置
         train_config = config.get('train', {})
         self.device = torch.device(train_config.get('device', 'cuda' if torch.cuda.is_available() else 'cpu'))
+        self.seed = _as_int(train_config.get('seed'), 'seed', 42)
         self.epochs = _as_int(train_config.get('epochs'), 'epochs', 200)
         self.lr = _as_float(train_config.get('lr'), 'lr', 0.001)
         self.weight_decay = _as_float(train_config.get('weight_decay'), 'weight_decay', 5e-4)
         self.batch_size = _as_int(train_config.get('batch_size'), 'batch_size', 1024)
         self.neighbor_sizes = _as_int_list(train_config.get('neighbor_sizes'), 'neighbor_sizes', [25, 10, 5])
         self.patience = _as_int(train_config.get('early_stopping_patience'), 'early_stopping_patience', 50)
+        self.grad_clip_norm = _as_float(train_config.get('grad_clip_norm'), 'grad_clip_norm', 1.0)
         self.checkpoint_dir = train_config.get('checkpoint_dir', './experiments/checkpoints')
+        self.loss_type = str(train_config.get('loss', 'weighted_ce')).strip().lower()
+        self.focal_gamma = _as_float(train_config.get('focal_gamma'), 'focal_gamma', 2.0)
+        self.class_weight_power = _as_float(train_config.get('class_weight_power'), 'class_weight_power', 1.0)
+        self.class_weight_cap = _as_float(train_config.get('class_weight_cap'), 'class_weight_cap', 10.0)
+        if self.grad_clip_norm < 0:
+            raise ValueError("配置项 train.grad_clip_norm 不能小于 0")
+        if self.focal_gamma < 0:
+            raise ValueError("配置项 train.focal_gamma 不能小于 0")
+        if self.class_weight_power < 0:
+            raise ValueError("配置项 train.class_weight_power 不能小于 0")
 
         # 移动到设备
         self.model = self.model.to(self.device)
         self.data = self.data.to(self.device)
+        self._repair_overlapped_masks_if_needed()
 
         # 优化器
         self.optimizer = Adam(
@@ -102,7 +159,9 @@ class Trainer:
         self.early_stopping = EarlyStopping(patience=self.patience)
 
         # 损失函数
-        self.criterion = nn.CrossEntropyLoss(ignore_index=0)
+        self.class_weights = self._compute_class_weights() if self.loss_type in {'weighted_ce', 'focal'} else None
+        self.criterion = self._build_criterion()
+        print(f"损失函数: {self.loss_type}")
 
         # 训练日志
         self.train_log = []
@@ -131,6 +190,81 @@ class Trainer:
     def _labeled_mask(self, mask: torch.BoolTensor) -> torch.BoolTensor:
         """仅保留有标签节点（NONE=0 会被排除）。"""
         return mask & (self.data.y != 0)
+
+    def _repair_overlapped_masks_if_needed(self):
+        """兼容旧版 data.pt：若 train/val/test 重叠，则按当前配置重建互斥掩码。"""
+        train_mask = self.data.train_mask.bool()
+        val_mask = self.data.val_mask.bool()
+        test_mask = self.data.test_mask.bool()
+        overlap = (train_mask & val_mask) | (train_mask & test_mask) | (val_mask & test_mask)
+        overlap_count = int(overlap.sum().item())
+        if overlap_count == 0:
+            return
+
+        preprocess_config = self.config.get('preprocessing', {})
+        val_ratio = float(preprocess_config.get('val_ratio', 0.2))
+        test_ratio = float(preprocess_config.get('test_ratio', 0.2))
+        new_train_mask, new_val_mask, new_test_mask = create_semi_supervised_masks(
+            labels=self.data.y.detach().cpu(),
+            val_ratio=val_ratio,
+            test_ratio=test_ratio,
+            seed=self.seed
+        )
+        self.data.train_mask = new_train_mask.to(self.device)
+        self.data.val_mask = new_val_mask.to(self.device)
+        self.data.test_mask = new_test_mask.to(self.device)
+        print(f"检测到掩码重叠节点 {overlap_count} 个，已在训练前自动修复为互斥划分。")
+
+    def _compute_class_weights(self) -> torch.Tensor:
+        """基于训练集有标签样本计算类别权重（忽略 NONE=0）。"""
+        num_classes = int(self.config.get('data', {}).get('num_classes', 6))
+        train_mask = self._labeled_mask(self.data.train_mask)
+        train_labels = self.data.y[train_mask]
+        if int(train_labels.numel()) == 0:
+            raise ValueError("训练集中没有有标签节点，无法计算类别权重")
+
+        counts = torch.bincount(train_labels, minlength=num_classes).float()
+        weights = torch.zeros(num_classes, dtype=torch.float32, device=self.device)
+        valid = counts > 0
+        if valid.shape[0] > 0:
+            valid[0] = False
+
+        if int(valid.sum().item()) == 0:
+            return weights
+
+        mean_count = counts[valid].mean()
+        weights[valid] = torch.pow(mean_count / counts[valid], self.class_weight_power)
+        if self.class_weight_cap > 0:
+            weights[valid] = torch.clamp(weights[valid], max=self.class_weight_cap)
+
+        weight_mean = weights[valid].mean()
+        if float(weight_mean.item()) > 0:
+            weights[valid] = weights[valid] / weight_mean
+
+        readable = [f"{idx}:{weights[idx].item():.3f}" for idx in range(1, num_classes) if counts[idx] > 0]
+        if readable:
+            print("训练集类别权重(忽略NONE): " + ", ".join(readable))
+        return weights
+
+    def _build_criterion(self) -> nn.Module:
+        if self.loss_type == 'cross_entropy':
+            return nn.CrossEntropyLoss(ignore_index=0)
+        if self.loss_type == 'weighted_ce':
+            if self.class_weights is None:
+                raise ValueError("loss=weighted_ce 但未生成类别权重")
+            return nn.CrossEntropyLoss(ignore_index=0, weight=self.class_weights)
+        if self.loss_type == 'focal':
+            return FocalLoss(
+                gamma=self.focal_gamma,
+                weight=self.class_weights,
+                ignore_index=0
+            )
+        raise ValueError("配置项 train.loss 仅支持: cross_entropy / weighted_ce / focal")
+
+    def _clip_gradients(self):
+        if self.grad_clip_norm <= 0:
+            return
+        torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=self.grad_clip_norm)
 
     def _step_scheduler(self, val_f1: float):
         if not self.scheduler:
@@ -166,6 +300,7 @@ class Trainer:
             loss = self.criterion(out[train_mask], self.data.y[train_mask])
 
             loss.backward()
+            self._clip_gradients()
             self.optimizer.step()
 
             # 评估
@@ -248,6 +383,7 @@ class Trainer:
                 loss = self.criterion(seed_out[valid_seed_mask], seed_y[valid_seed_mask])
 
                 loss.backward()
+                self._clip_gradients()
                 self.optimizer.step()
                 total_loss += loss.item()
                 effective_batches += 1

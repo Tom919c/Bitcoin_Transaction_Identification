@@ -53,3 +53,5 @@ Thumbs.db
 bitcoin-dataset/
 Jupyter/
 docs/
+wandb/
+experiments/   

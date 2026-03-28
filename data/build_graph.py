@@ -419,11 +419,11 @@ def load_raw_data(
         os.makedirs(checkpoint_dir, exist_ok=True)
 
     stage_paths = {
-        'stage1': os.path.join(checkpoint_dir, 'stage_1_stats.pt'),
-        'stage2': os.path.join(checkpoint_dir, 'stage_2_topk.pt'),
-        'stage3': os.path.join(checkpoint_dir, 'stage_3_selected_nodes.pt'),
-        'stage4': os.path.join(checkpoint_dir, 'stage_4_selected_df.pt'),
-        'stage5': os.path.join(checkpoint_dir, 'stage_5_edges_df.pt')
+        'stage1': os.path.join(checkpoint_dir, 'stage_1_stats.pt'),  # 包含全图特征统计和 BRIDGE 节点列表
+        'stage2': os.path.join(checkpoint_dir, 'stage_2_topk.pt'),   # 包含 TopK 节点列表
+        'stage3': os.path.join(checkpoint_dir, 'stage_3_selected_nodes.pt'),  # 包含最终选中节点列表（TopK + BRIDGE + 邻居）
+        'stage4': os.path.join(checkpoint_dir, 'stage_4_selected_df.pt'),  # 包含选中节点的完整 DataFrame（特征和标签）
+        'stage5': os.path.join(checkpoint_dir, 'stage_5_edges_df.pt')      # 包含选中子图的边表 DataFrame
     }
 
     conn = connect_db(db_connection_string)

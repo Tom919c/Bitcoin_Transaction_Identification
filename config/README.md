@@ -20,8 +20,8 @@
 - `force_recompute`: 是否强制全量重算（`true` 时忽略缓存）
 - `zscore_params`: Z-score标准化参数
 - `max_nodes`: 最大节点数量
-- `val_ratio`: 从有标签节点中抽取验证集比例
-- `test_ratio`: 从有标签节点中抽取测试集比例
+- `val_ratio`: 从有标签节点中抽取验证集比例（分层抽样，且与 train/test 互斥）
+- `test_ratio`: 从有标签节点中抽取测试集比例（分层抽样，且与 train/val 互斥）
 
 ### model 模型配置
 - `name`: 模型名称（mlp/gcn/gat/sage/res_sage/appnp）
@@ -35,6 +35,14 @@
 - `weight_decay`: 权重衰减
 - `batch_size`: 批次大小
 - `neighbor_sizes`: 邻居采样数量
+- `loss`: 损失函数类型（`cross_entropy` / `weighted_ce` / `focal`）
+- `focal_gamma`: Focal Loss 的 gamma 参数（仅 `focal` 生效）
+- `class_weight_power`: 类别权重指数，按 `((mean_count / class_count) ** power)` 计算
+- `class_weight_cap`: 类别权重上限，抑制极端小类权重过大
+- `grad_clip_norm`: 梯度裁剪阈值，`0` 表示关闭
+- `scheduler`: 学习率调度器类型（`null` / `step` / `cosine` / `plateau`）
+- `scheduler_factor`: `plateau` 学习率衰减系数
+- `scheduler_patience`: `plateau` 等待轮数
 - `early_stopping_patience`: 早停耐心值
 - `checkpoint_dir`: 检查点保存目录
 - `log_dir`: 日志保存目录

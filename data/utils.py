@@ -472,37 +472,75 @@ def create_semi_supervised_masks(
     创建半监督场景掩码。
 
     规则：
-    - train_mask = (y != 0)
-    - val/test 从有标签节点中随机采样
+    - 仅在有标签节点（y != 0）中划分 train/val/test；
+    - 采用按类别分层抽样，尽量保持类别分布；
+    - 三个掩码两两互斥，避免数据泄漏。
     """
+    if not (0 <= val_ratio < 1 and 0 <= test_ratio < 1 and val_ratio + test_ratio < 1):
+        raise ValueError("val_ratio/test_ratio 非法，需满足 0<=ratio<1 且 val_ratio+test_ratio<1")
+
     num_nodes = labels.shape[0]
-    train_mask = labels != 0
+    labels = labels.long()
+    labeled_mask = labels != LABEL_MAP['NONE']
+
+    train_mask = torch.zeros(num_nodes, dtype=torch.bool)
     val_mask = torch.zeros(num_nodes, dtype=torch.bool)
     test_mask = torch.zeros(num_nodes, dtype=torch.bool)
 
-    labeled_indices = torch.where(train_mask)[0].cpu().numpy()
+    labeled_indices = torch.where(labeled_mask)[0].cpu().numpy()
     labeled_count = labeled_indices.size
     if labeled_count == 0:
         return train_mask, val_mask, test_mask
 
+    labels_np = labels.cpu().numpy()
     rng = np.random.default_rng(seed)
-    rng.shuffle(labeled_indices)
+    labeled_classes = np.unique(labels_np[labeled_indices])
 
-    val_size = int(labeled_count * val_ratio)
-    test_size = int(labeled_count * test_ratio)
+    for class_id in labeled_classes.tolist():
+        class_indices = np.where(labels_np == class_id)[0]
+        if class_indices.size == 0:
+            continue
 
-    if labeled_count >= 3:
-        val_size = max(1, val_size)
-        test_size = max(1, test_size)
-    if val_size + test_size > labeled_count:
-        overflow = val_size + test_size - labeled_count
-        test_size = max(0, test_size - overflow)
+        rng.shuffle(class_indices)
+        class_count = int(class_indices.size)
 
-    val_indices = labeled_indices[:val_size]
-    test_indices = labeled_indices[val_size:val_size + test_size]
+        desired_val = int(np.floor(class_count * val_ratio))
+        desired_test = int(np.floor(class_count * test_ratio))
 
-    val_mask[val_indices] = True
-    test_mask[test_indices] = True
+        if class_count >= 5:
+            if val_ratio > 0 and desired_val == 0:
+                desired_val = 1
+            if test_ratio > 0 and desired_test == 0:
+                desired_test = 1
+
+        # 每个类别至少保留 1 个训练样本，防止该类在训练集中消失。
+        max_holdout = max(0, class_count - 1)
+        holdout = min(desired_val + desired_test, max_holdout)
+
+        val_count = min(desired_val, holdout)
+        test_count = min(desired_test, holdout - val_count)
+        remaining = holdout - val_count - test_count
+        if remaining > 0:
+            if test_ratio >= val_ratio:
+                test_count += remaining
+            else:
+                val_count += remaining
+
+        val_indices = class_indices[:val_count]
+        test_indices = class_indices[val_count:val_count + test_count]
+        train_indices = class_indices[val_count + test_count:]
+
+        val_mask[val_indices] = True
+        test_mask[test_indices] = True
+        train_mask[train_indices] = True
+
+    overlap = (train_mask & val_mask) | (train_mask & test_mask) | (val_mask & test_mask)
+    if int(overlap.sum().item()) > 0:
+        raise RuntimeError("内部错误：create_semi_supervised_masks 生成了重叠掩码")
+
+    assigned = train_mask | val_mask | test_mask
+    if int(assigned.sum().item()) != int(labeled_count):
+        raise RuntimeError("内部错误：有标签节点未被完整分配到 train/val/test")
 
     return train_mask, val_mask, test_mask
 

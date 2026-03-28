@@ -37,6 +37,14 @@ train:
   weight_decay: 5e-4
   batch_size: 1024   # 仅用于mini-batch训练
   neighbor_sizes: [25, 10, 5]  # GraphSAGE采样邻居数
+  loss: "weighted_ce"  # cross_entropy / weighted_ce / focal
+  focal_gamma: 2.0 
+  class_weight_power: 1.0
+  class_weight_cap: 10.0
+  grad_clip_norm: 1.0  # 0表示关闭梯度裁剪
+  scheduler: "plateau"  # null / step / cosine / plateau
+  scheduler_factor: 0.5
+  scheduler_patience: 10
   early_stopping_patience: 50
   resume_from_checkpoint: null  # 断点续训路径，如 "./experiments/checkpoints/final_model.pt"
   checkpoint_dir: "./experiments/checkpoints"
@@ -45,11 +53,11 @@ train:
 wandb:
   enabled: true
   project: "bitcoin-transaction-identification"
-  entity: chenquan
-  run_name: "res_sage_experiment"
+  entity: 3538753476-uestc
+  run_name: "sage_experiment"
   mode: "online"  # online / offline / disabled
   log_model: false
-  watch_model: false
+  watch_model: falsewand
 
 eval:
   macro_f1_average: "macro"
