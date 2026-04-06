@@ -1,0 +1,18 @@
+﻿data:
+  processed_data_path: "./data/processed/data_pyg.pt"
+  num_classes: 6
+model:
+  name: "gcn"
+  params:
+    hidden_channels: 96
+    num_layers: 2
+    dropout: 0.35
+    class_logit_bias: [0.0, 0.0, 0.22, 0.18, 0.0, 0.0]
+train:
+  seed: 42
+  device: "cpu"
+  epochs: 150
+  lr: 0.005
+  weight_decay: 0.0001
+  early_stopping_patience: 60
+  checkpoint_dir: "./experiments/checkpoints"

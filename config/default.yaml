@@ -2,7 +2,7 @@ data:
   raw_db: "postgresql://postgres:cq20050919;@localhost/bitcoin_db"  # 预处理阶段使用
   node_table: "node_features"                             # 节点表名
   edge_table: "transaction_edges"                         # 边表名
-  processed_data_path: "D:\\Code\\VSCode\\Bitcoin_Transaction_Identification\\data\\processed\\data.pt"  # 供训练使用
+  processed_data_path: "./data/processed/data_pyg.pt"    # 供训练使用
   num_classes: 6
   label_map: "config/label_map.json"                      # 标签映射文件
 
@@ -23,22 +23,23 @@ preprocessing:
   test_ratio: 0.2    # 从有标签节点中随机抽取测试集比例
 
 model:
-  name: "res_sage"  # 可选 mlp, gcn, gat, sage, res_sage, appnp
+  name: "gcn"  # 可选 mlp, gcn, gat, sage, res_sage, appnp
   params:
-    hidden_channels: 128
-    num_layers: 3
-    dropout: 0.3
+    hidden_channels: 96
+    num_layers: 2
+    dropout: 0.22
+    class_logit_bias: [0.0, 0.0, 0.15, 0.35, 0.0, 0.0]
 
 train:
   seed: 42
-  device: "cpu"
-  epochs: 300
-  lr: 0.001
+  device: "cuda"
+  epochs: 150
+  lr: 0.002
   weight_decay: 5e-4
-  batch_size: 1024   # 仅用于mini-batch训练
-  neighbor_sizes: [25, 10, 5]  # GraphSAGE采样邻居数
-  loss: "weighted_ce"  # cross_entropy / weighted_ce / focal
-  focal_gamma: 2.0 
+  batch_size: 512   # 仅用于mini-batch训练
+  neighbor_sizes: [60, 30]  # GraphSAGE采样邻居数
+  loss: "focal"  # cross_entropy / weighted_ce / focal
+  focal_gamma: 1.25 
   class_weight_power: 1.0
   class_weight_cap: 10.0
   grad_clip_norm: 1.0  # 0表示关闭梯度裁剪
@@ -57,7 +58,7 @@ wandb:
   run_name: "sage_experiment"
   mode: "online"  # online / offline / disabled
   log_model: false
-  watch_model: falsewand
+  watch_model: false
 
 eval:
   macro_f1_average: "macro"
