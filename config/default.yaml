@@ -33,7 +33,7 @@ model:
 train:
   seed: 42
   device: "cuda"
-  epochs: 150
+  epochs: 120
   lr: 0.002
   weight_decay: 5e-4
   batch_size: 512   # 仅用于mini-batch训练
@@ -45,8 +45,8 @@ train:
   grad_clip_norm: 1.0  # 0表示关闭梯度裁剪
   scheduler: "plateau"  # null / step / cosine / plateau
   scheduler_factor: 0.5
-  scheduler_patience: 10
-  early_stopping_patience: 50
+  scheduler_patience: 12
+  early_stopping_patience: 35
   resume_from_checkpoint: null  # 断点续训路径，如 "./experiments/checkpoints/final_model.pt"
   checkpoint_dir: "./experiments/checkpoints"
   log_dir: "./experiments/logs"
