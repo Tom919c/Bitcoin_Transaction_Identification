@@ -34,7 +34,7 @@ train:
   seed: 42
   device: "cuda"
   epochs: 120
-  lr: 0.002
+  lr: 0.0018
   weight_decay: 5e-4
   batch_size: 512   # 仅用于mini-batch训练
   neighbor_sizes: [60, 30]  # GraphSAGE采样邻居数
