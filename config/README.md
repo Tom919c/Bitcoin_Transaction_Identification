@@ -49,3 +49,16 @@
 
 ### eval 评估配置
 - `macro_f1_average`: F1计算方式
+
+### tuning 调参配置
+- `strategy`: 搜索策略（`random` / `grid`）
+- `max_trials`: 最大候选组合数量
+- `use_mini_batch`: 调参是否使用 mini-batch（若环境无 `pyg-lib/torch-sparse`，会自动回退 full-batch）
+- `resume`: 是否启用调参断点续跑
+- `progress_file`: 调参进度文件路径（为空则默认 `output_dir/sage_tuning_progress.json`）
+- `start_trial`: 本次执行起始 trial 序号（1-based，可用于分段跑）
+- `end_trial`: 本次执行结束 trial 序号（1-based）
+- `seeds`: 本次执行使用的随机种子列表（可临时改为单种子提速）
+- `seed`: 随机采样候选配置的随机种子
+- `output_dir`: 调参结果输出目录
+- `space`: 超参数搜索空间（支持离散列表，如 `lr`, `dropout`, `hidden_channels`, `neighbor_sizes`, `loss` 等）

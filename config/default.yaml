@@ -23,7 +23,7 @@ preprocessing:
   test_ratio: 0.2    # 从有标签节点中随机抽取测试集比例
 
 model:
-  name: "res_sage"  # 可选 mlp, gcn, gat, sage, res_sage, appnp
+  name: "sage"  # 可选 mlp, gcn, gat, sage, res_sage, appnp
   params:
     hidden_channels: 128
     num_layers: 3
@@ -57,7 +57,33 @@ wandb:
   run_name: "sage_experiment"
   mode: "online"  # online / offline / disabled
   log_model: false
-  watch_model: falsewand
+  watch_model: false
+
+tuning:
+  strategy: "random"  # random / grid
+  max_trials: 30
+  use_mini_batch: false  # 无 pyg-lib/torch-sparse 时建议关闭；脚本也会自动回退
+  resume: true  # 中断后是否自动续跑（读取 progress_file）
+  progress_file: null  # 默认自动使用 output_dir/sage_tuning_progress.json
+  seed: 42            # 采样候选配置时使用
+  seeds: [42, 3407]   # 每个候选配置的复现实验种子
+  output_dir: "./experiments/tuning"
+  space:
+    hidden_channels: [64, 128, 256]
+    dropout: [0.2, 0.3, 0.4]
+    lr: [0.0005, 0.001, 0.002]
+    weight_decay: [0.0001, 0.0005, 0.001]
+    batch_size: [512, 1024, 2048]
+    neighbor_sizes:
+      - [15, 10, 5]
+      - [25, 10, 5]
+      - [30, 15, 10]
+    loss: ["cross_entropy", "weighted_ce", "focal"]
+    class_weight_power: [0.5, 1.0, 1.5]
+    focal_gamma: [1.5, 2.0, 2.5]
+    grad_clip_norm: [0.0, 1.0, 2.0]
+    scheduler: ["plateau", "cosine"]
+    early_stopping_patience: [30, 50, 80]
 
 eval:
   macro_f1_average: "macro"
