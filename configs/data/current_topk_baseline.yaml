@@ -1,0 +1,15 @@
+data:
+  raw_db: "${BITCOIN_DB_URL}"
+  node_table: "node_features"
+  edge_table: "transaction_edges"
+  label_space: "5"
+  processed_data_path: "data/processed/data.pt"
+
+protocol:
+  name: "current_topk_baseline"
+
+split:
+  type: "random_stratified"
+  val_ratio: 0.2
+  test_ratio: 0.2
+  seed: 42

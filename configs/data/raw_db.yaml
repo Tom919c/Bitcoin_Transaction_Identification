@@ -1,0 +1,5 @@
+data:
+  raw_db: "${BITCOIN_DB_URL}"
+  node_table: "node_features"
+  edge_table: "transaction_edges"
+  label_space: "11"

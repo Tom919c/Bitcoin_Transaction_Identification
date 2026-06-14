@@ -1,0 +1,7 @@
+model:
+  name: "etd_sage"
+  params:
+    hidden_channels: 128
+    num_layers: 3
+    dropout: 0.3
+    edge_hidden: 64

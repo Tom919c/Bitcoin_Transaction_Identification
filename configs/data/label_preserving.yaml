@@ -1,0 +1,42 @@
+data:
+  raw_db: "${BITCOIN_DB_URL}"
+  node_table: "node_features"
+  edge_table: "transaction_edges"
+  label_space: "11"
+  edge_chunk_size: 200000
+  processed_data_path: "data/processed/protocols/label_preserving.pt"
+
+protocol:
+  name: "label_preserving"
+  target_labels:
+    - INDIVIDUAL
+    - BET
+    - GAMBLING
+    - EXCHANGE
+    - MINING
+    - PONZI
+    - RANSOMWARE
+    - FAUCET
+    - MARKETPLACE
+    - MIXER
+    - BRIDGE
+  sampling:
+    max_nodes: 500000
+    max_neighbors_per_class: 0
+    background_nodes: 150000
+    degree_cap: 100000
+    seed: 42
+
+task:
+  risk_group: "conservative_sensitive"
+
+transform:
+  clip_quantile: 0.995
+  robust: false
+
+split:
+  type: "random_stratified"
+  time_column: "last_transaction_in"
+  val_ratio: 0.2
+  test_ratio: 0.2
+  seed: 42

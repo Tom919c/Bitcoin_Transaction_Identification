@@ -1,0 +1,25 @@
+data:
+  processed_data_path: "data/processed/protocols/temporal_balanced.pt"
+  label_space: "11"
+model:
+  name: "etd_sage"
+  params:
+    hidden_channels: 128
+    num_layers: 3
+    dropout: 0.3
+    edge_hidden: 64
+train:
+  seed: 42
+  device: "cpu"
+  epochs: 300
+  lr: 0.001
+  weight_decay: 0.0005
+  loss: "weighted_ce"
+  class_weight_power: 1.0
+  class_weight_cap: 10.0
+  focal_gamma: 2.0
+  grad_clip_norm: 1.0
+  early_stopping_patience: 50
+  checkpoint_dir: "experiments/checkpoints/paper_main_etd"
+experiment:
+  output_csv: "experiments/results/paper_main_etd.csv"

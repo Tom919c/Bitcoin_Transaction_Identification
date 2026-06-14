@@ -1,0 +1,7 @@
+model:
+  name: "edge_transformer"
+  params:
+    hidden_channels: 128
+    num_layers: 3
+    heads: 2
+    dropout: 0.3

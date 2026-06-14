@@ -66,40 +66,6 @@ wandb:
 
 3) 直接运行训练命令（全图或 mini-batch 均可），训练过程中会按 epoch 上报 loss/F1/lr。
 
-### 2.2 GraphSAGE 参数调优
-
-可使用批量调参脚本自动搜索较优超参数（主指标：验证集 macro-F1）：
-
-```bash
-# 使用 config/default.yaml 中的 tuning 配置
-python scripts/tune_sage.py --config config/default.yaml
-
-# 指定策略和试验数（示例）
-python scripts/tune_sage.py --config config/default.yaml --strategy random --max-trials 30
-
-# 从中断处恢复调参（默认行为，使用 progress 文件）
-python scripts/tune_sage.py --config config/default.yaml --resume
-
-# 强制从头重跑（忽略已有进度）
-python scripts/tune_sage.py --config config/default.yaml --no-resume
-
-# 仅继续跑后半段 trial（例如从第 11 组到第 30 组）
-python scripts/tune_sage.py --config config/default.yaml --resume --start-trial 11 --end-trial 30
-
-# 为了提速，先只用单种子快速筛选（后续再对 top 配置复核第二个种子）
-python scripts/tune_sage.py --config config/default.yaml --resume --seeds 42
-```
-
-说明：
-- 若 `tuning.use_mini_batch=true`，需要安装 `pyg-lib` 或 `torch-sparse`。
-- 当前环境缺失上述依赖时，脚本会自动回退到 full-batch 并给出提示，不会中断整次调参。
-- 脚本会持续写入进度文件（默认 `./experiments/tuning/sage_tuning_progress.json`），电脑休眠/进程中断后可继续。
-
-调参完成后会在 `tuning.output_dir` 下生成：
-- `sage_tuning_summary_*.json`：最优结果摘要
-- `sage_tuning_ranked_*.json`：所有候选排序
-- `sage_best_config_*.yaml`：可直接复用的最佳配置
-
 ### 3. 启动界面
 
 ```bash

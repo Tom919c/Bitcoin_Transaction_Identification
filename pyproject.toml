@@ -1,0 +1,16 @@
+[project]
+name = "btcaml-research"
+version = "0.2.1"
+description = "Sampling-aware edge-temporal directional graph learning for Bitcoin entity risk identification."
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "scripts", "tests"]
+
+[tool.black]
+line-length = 100

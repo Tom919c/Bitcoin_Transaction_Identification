@@ -1,0 +1,13 @@
+train:
+  seed: 42
+  device: "cpu"
+  epochs: 300
+  lr: 0.001
+  weight_decay: 0.0005
+  loss: "weighted_ce"
+  class_weight_power: 1.0
+  class_weight_cap: 10.0
+  focal_gamma: 2.0
+  grad_clip_norm: 1.0
+  early_stopping_patience: 50
+  checkpoint_dir: "experiments/checkpoints/default"
