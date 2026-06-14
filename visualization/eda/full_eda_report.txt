@@ -1,0 +1,617 @@
+EDA: 2026-06-14 04:05:40
+Data: D:\Code\VSCode\Bitcoin_Transaction_Identification\data\processed\data.pt
+
+========================================================================
+  1. Dataset Overview
+========================================================================
+
+Nodes: 350.3K (350,258)  Edges: 17.17M (17,173,503)  Avg deg: 49.03
+Node feats: 19  Edge feats: 6
+Labeled (y!=0): 2,961  Unlabeled: 347,297
+Train/Val/Test: 1,779/591/591
+Feat cols: ['degree', 'degree_in', 'degree_out', 'total_transactions_in', 'total_transactions_out', 'min_sent', 'max_sent', 'total_sent', 'min_received', 'max_received', 'total_received', 'cluster_size', 'first_transaction_in', 'last_transaction_in', 'first_transaction_out', 'last_transaction_out', 'cluster_num_edges', 'cluster_num_cc', 'cluster_num_nodes_in_cc']
+Edge cols: ['reveal', 'last_seen', 'total', 'min_sent', 'max_sent', 'total_sent']
+
+--- 1.1 DB Info ---
+
+  node_features: ~252,148,848 rows (full DB)
+  transaction_edges: ~785,934,144 rows (full DB)
+
+========================================================================
+  2. Node Feature Analysis
+========================================================================
+
+
+--- 2.1 NaN ---
+
+  degree                         NaN=       0 (0.00%)
+  degree_in                      NaN=       0 (0.00%)
+  degree_out                     NaN=       0 (0.00%)
+  total_transactions_in          NaN=       0 (0.00%)
+  total_transactions_out         NaN=       0 (0.00%)
+  min_sent                       NaN=       0 (0.00%)
+  max_sent                       NaN=       0 (0.00%)
+  total_sent                     NaN=       0 (0.00%)
+  min_received                   NaN=       0 (0.00%)
+  max_received                   NaN=       0 (0.00%)
+  total_received                 NaN=       0 (0.00%)
+  cluster_size                   NaN=       0 (0.00%)
+  first_transaction_in           NaN=       0 (0.00%)
+  last_transaction_in            NaN=       0 (0.00%)
+  first_transaction_out          NaN=       0 (0.00%)
+  last_transaction_out           NaN=       0 (0.00%)
+  cluster_num_edges              NaN=       0 (0.00%)
+  cluster_num_cc                 NaN=       0 (0.00%)
+  cluster_num_nodes_in_cc        NaN=       0 (0.00%)
+
+--- 2.2 Stats ---
+
+[degree] n=350258 mu=-0.0000 sd=1.0000 min=-0.0240 p1=-0.0238 p5=-0.0224 p25=-0.0207 med=-0.0193 p75=-0.0159 p95=0.0029 p99=0.1084 max=478.3018 sk=336.12 ku=151556.64 z%=0.0
+[degree_in] n=350258 mu=0.0000 sd=1.0000 min=-0.0239 p1=-0.0239 p5=-0.0239 p25=-0.0217 med=-0.0195 p75=-0.0163 p95=0.0015 p99=0.1030 max=466.0773 sk=317.63 ku=137775.95 z%=0.0
+[degree_out] n=350258 mu=0.0000 sd=1.0000 min=-0.0184 p1=-0.0184 p5=-0.0183 p25=-0.0180 med=-0.0162 p75=-0.0117 p95=0.0129 p99=0.0891 max=443.2613 sk=311.61 ku=122752.59 z%=0.0
+[total_transactions_in] n=350258 mu=-0.0000 sd=1.0000 min=-0.0247 p1=-0.0247 p5=-0.0247 p25=-0.0225 med=-0.0210 p75=-0.0175 p95=0.0001 p99=0.1041 max=420.4779 sk=253.31 ku=93700.84 z%=0.0
+[total_transactions_out] n=350258 mu=-0.0000 sd=1.0000 min=-0.0177 p1=-0.0176 p5=-0.0176 p25=-0.0174 med=-0.0162 p75=-0.0136 p95=0.0001 p99=0.0831 max=370.3246 sk=235.20 ku=71473.26 z%=0.0
+[min_sent] n=350258 mu=-0.0000 sd=1.0000 min=-0.0065 p1=-0.0065 p5=-0.0065 p25=-0.0065 med=-0.0065 p75=-0.0065 p95=-0.0055 p99=0.0255 max=381.0906 sk=316.66 ku=106957.21 z%=0.0
+[max_sent] n=350258 mu=-0.0000 sd=1.0000 min=-0.0292 p1=-0.0292 p5=-0.0292 p25=-0.0290 med=-0.0282 p75=-0.0246 p95=0.0164 p99=0.2716 max=300.3270 sk=192.27 ku=48055.21 z%=0.0
+[total_sent] n=350258 mu=0.0000 sd=1.0000 min=-0.0147 p1=-0.0147 p5=-0.0147 p25=-0.0147 med=-0.0146 p75=-0.0143 p95=-0.0081 p99=0.0550 max=446.0491 sk=300.49 ku=120194.08 z%=0.0
+[min_received] n=350258 mu=-0.0000 sd=1.0000 min=-0.0176 p1=-0.0176 p5=-0.0176 p25=-0.0176 med=-0.0176 p75=-0.0176 p95=-0.0111 p99=0.1288 max=421.6325 sk=256.57 ku=94869.63 z%=0.0
+[max_received] n=350258 mu=0.0000 sd=1.0000 min=-0.0294 p1=-0.0294 p5=-0.0294 p25=-0.0293 med=-0.0287 p75=-0.0259 p95=0.0110 p99=0.2609 max=362.8889 sk=198.69 ku=58200.06 z%=0.0
+[total_received] n=350258 mu=0.0000 sd=1.0000 min=-0.0147 p1=-0.0147 p5=-0.0147 p25=-0.0147 med=-0.0146 p75=-0.0143 p95=-0.0080 p99=0.0544 max=441.1002 sk=294.26 ku=115701.55 z%=0.0
+[cluster_size] n=350258 mu=0.0000 sd=1.0000 min=-0.0126 p1=-0.0126 p5=-0.0126 p25=-0.0126 med=-0.0112 p75=-0.0092 p95=-0.0011 p99=0.0440 max=513.2288 sk=418.70 ku=203735.05 z%=0.0
+[first_transaction_in] n=350258 mu=0.0000 sd=1.0000 min=-3.4823 p1=-2.4324 p5=-1.7689 p25=-0.6777 med=0.0111 p75=0.8649 p95=1.4421 p99=1.6083 max=1.6857 sk=-0.33 ku=-0.61 z%=0.0
+[last_transaction_in] n=350258 mu=0.0000 sd=1.0000 min=-4.2765 p1=-2.5977 p5=-1.7875 p25=-0.6732 med=0.0119 p75=0.9238 p95=1.3189 p99=1.3305 max=1.3308 sk=-0.55 ku=-0.22 z%=0.0
+[first_transaction_out] n=350258 mu=-0.0000 sd=1.0000 min=-3.3632 p1=-2.6448 p5=-1.7251 p25=-0.6373 med=0.0308 p75=0.8543 p95=1.3937 p99=1.5491 max=1.6108 sk=-0.55 ku=0.07 z%=0.0
+[last_transaction_out] n=350258 mu=-0.0000 sd=1.0000 min=-3.9749 p1=-3.0107 p5=-1.8374 p25=-0.5956 med=0.0722 p75=0.8837 p95=1.2211 p99=1.2360 max=1.2366 sk=-0.98 ku=1.32 z%=0.0
+[cluster_num_edges] n=350258 mu=-0.0000 sd=1.0000 min=-0.0049 p1=-0.0049 p5=-0.0049 p25=-0.0049 med=-0.0049 p75=-0.0046 p95=-0.0033 p99=0.0044 max=573.6131 sk=542.77 ku=309427.06 z%=0.0
+[cluster_num_cc] n=350258 mu=-0.0000 sd=1.0000 min=-0.0052 p1=-0.0052 p5=-0.0052 p25=-0.0052 med=-0.0049 p75=-0.0039 p95=0.0073 p99=0.0288 max=589.9396 sk=586.26 ku=345816.53 z%=0.0
+[cluster_num_nodes_in_cc] n=350258 mu=-0.0000 sd=1.0000 min=-0.0110 p1=-0.0110 p5=-0.0110 p25=-0.0110 med=-0.0108 p75=-0.0089 p95=-0.0025 p99=0.0340 max=479.3403 sk=376.61 ku=164952.36 z%=0.0
+
+--- 2.3 High Corr |r|>0.5 ---
+
+  total_sent <-> total_received: r=0.9996
+  cluster_size <-> cluster_num_nodes_in_cc: r=0.9867
+  degree_in <-> total_transactions_in: r=0.9785
+  degree <-> degree_in: r=0.9783
+  degree <-> total_transactions_in: r=0.9564
+  first_transaction_in <-> first_transaction_out: r=0.9464
+  degree_out <-> total_transactions_out: r=0.9380
+  degree_in <-> cluster_size: r=0.9253
+  degree <-> cluster_size: r=0.9251
+  degree <-> cluster_num_nodes_in_cc: r=0.9041
+  degree_in <-> cluster_num_nodes_in_cc: r=0.9040
+  last_transaction_in <-> last_transaction_out: r=0.8950
+  degree <-> degree_out: r=0.8940
+  cluster_size <-> cluster_num_cc: r=0.8870
+  total_transactions_in <-> cluster_size: r=0.8756
+  max_sent <-> max_received: r=0.8677
+  total_transactions_in <-> cluster_num_nodes_in_cc: r=0.8638
+  degree <-> total_transactions_out: r=0.8340
+  cluster_num_cc <-> cluster_num_nodes_in_cc: r=0.8323
+  degree <-> cluster_num_cc: r=0.8254
+  degree_out <-> cluster_size: r=0.8059
+  degree_in <-> cluster_num_cc: r=0.8055
+  first_transaction_out <-> last_transaction_out: r=0.8044
+  total_sent <-> cluster_num_edges: r=0.7982
+  degree_out <-> cluster_num_nodes_in_cc: r=0.7930
+  total_received <-> cluster_num_edges: r=0.7912
+  total_transactions_out <-> cluster_num_nodes_in_cc: r=0.7839
+  degree_in <-> degree_out: r=0.7835
+  first_transaction_in <-> last_transaction_in: r=0.7820
+  total_transactions_out <-> cluster_size: r=0.7698
+  degree_out <-> total_transactions_in: r=0.7659
+  degree_out <-> cluster_num_cc: r=0.7633
+  last_transaction_in <-> first_transaction_out: r=0.7613
+  total_transactions_in <-> total_transactions_out: r=0.7526
+  degree_in <-> total_transactions_out: r=0.7348
+  total_transactions_in <-> cluster_num_cc: r=0.7293
+  first_transaction_in <-> last_transaction_out: r=0.7219
+  total_transactions_out <-> cluster_num_cc: r=0.6461
+  total_transactions_out <-> total_received: r=0.6430
+  total_transactions_out <-> total_sent: r=0.6423
+  max_received <-> cluster_num_edges: r=0.6224
+  cluster_num_edges <-> cluster_num_nodes_in_cc: r=0.6160
+  total_sent <-> max_received: r=0.5966
+  max_received <-> total_received: r=0.5941
+  total_transactions_out <-> cluster_num_edges: r=0.5600
+  total_sent <-> cluster_num_nodes_in_cc: r=0.5236
+  total_received <-> cluster_num_nodes_in_cc: r=0.5230
+  cluster_size <-> cluster_num_edges: r=0.5197
+  max_sent <-> cluster_num_edges: r=0.5152
+  degree_out <-> total_received: r=0.5110
+  degree_out <-> total_sent: r=0.5078
+  max_sent <-> total_sent: r=0.5034
+  max_sent <-> total_received: r=0.5008
+
+========================================================================
+  3. Label Distribution
+========================================================================
+
+
+--- 3.1 Counts ---
+
+  NONE         id=0:    347,297    99.155%
+  INDIVIDUAL   id=1:      2,421     0.691%  (81.76% of labeled)
+  BET          id=2:         96     0.027%  (3.24% of labeled)
+  GAMBLING     id=3:        179     0.051%  (6.05% of labeled)
+  EXCHANGE     id=4:        195     0.056%  (6.59% of labeled)
+  BRIDGE       id=5:         70     0.020%  (2.36% of labeled)
+
+  Total: 350,258  Labeled: 2,961 (0.845%)
+  Imbalance: INDIVIDUAL(2421) vs BRIDGE(70) = 35x
+
+--- 3.2 Split ---
+
+  train: 1,779 nodes (1779 labeled)
+    INDIVIDUAL  : 1453
+    BET         : 58
+    GAMBLING    : 109
+    EXCHANGE    : 117
+    BRIDGE      : 42
+  val: 591 nodes (591 labeled)
+    INDIVIDUAL  : 484
+    BET         : 19
+    GAMBLING    : 35
+    EXCHANGE    : 39
+    BRIDGE      : 14
+  test: 591 nodes (591 labeled)
+    INDIVIDUAL  : 484
+    BET         : 19
+    GAMBLING    : 35
+    EXCHANGE    : 39
+    BRIDGE      : 14
+
+========================================================================
+  4. Edge Feature Analysis
+========================================================================
+
+Sampled 500,000/17,173,503
+
+--- 4.1 Stats ---
+
+[reveal] mu=473230.94 med=460601.50 p95=669710.25 max=700000.00 sk=0.00 z%=0.0
+[last_seen] mu=478317.25 med=463165.50 p95=676292.05 max=700000.00 sk=0.02 z%=0.0
+[total] mu=14.54 med=1.00 p95=20.00 max=303724.00 sk=272.94 z%=0.0
+[min_sent] mu=85552848.00 med=336147.50 p95=47800000.00 max=15833629720576.00 sk=inf z%=0.0
+[max_sent] mu=196656112.00 med=702369.50 p95=150043357.60 max=15833629720576.00 sk=inf z%=0.0
+[total_sent] mu=2246210560.00 med=929322.50 p95=367652484.80 max=84028896051200.00 sk=inf z%=0.0
+
+--- 4.2 Corr ---
+
+  reveal<->last_seen: r=0.9873
+  reveal<->total: r=-0.0023
+  reveal<->min_sent: r=-0.0045
+  reveal<->max_sent: r=-0.0072
+  reveal<->total_sent: r=-0.0045
+  last_seen<->total: r=0.0148
+  last_seen<->min_sent: r=-0.0045
+  last_seen<->max_sent: r=-0.0054
+  last_seen<->total_sent: r=0.0045
+  total<->min_sent: r=-0.0001
+  total<->max_sent: r=0.0091
+  total<->total_sent: r=0.1403
+  min_sent<->max_sent: r=0.9637
+  min_sent<->total_sent: r=0.1108
+  max_sent<->total_sent: r=0.2102
+
+--- 4.3 Derived ---
+
+[avg_sent] mu=109820024.00 med=578527.84 p95=91428650.80 sk=inf
+[range] mu=111103224.00 med=0.00 p95=73450500.00
+[dur] mu=5086.25 med=0.00 p95=30424.00
+[freq] mu=0.73 med=1.00 p95=1.00
+
+========================================================================
+  5. Graph Topology
+========================================================================
+
+
+--- 5.1 Degree ---
+
+[degree] mu=98.06 med=36.00 max=280525 p99=899.00 z%=0.9
+[in] mu=49.03 med=12.00 max=133784 p99=431.00 z%=5.2
+[out] mu=49.03 med=10.00 max=146741 p99=728.00 z%=6.7
+
+  Self-loops: 0
+
+--- 5.2 Direction ---
+
+  Edges: 17,173,503  Unique pairs: 17,173,503  Bidirectional: 921,038
+
+========================================================================
+  6. Per-Class Feature Differences
+========================================================================
+
+
+--- 6.1 Stats ---
+
+[degree]
+  INDIVIDUAL   mu=      0.3348 med=     -0.0179 sd=      2.0551 n=2421
+  BET          mu=      0.0162 med=     -0.0183 sd=      0.0930 n=96
+  GAMBLING     mu=      0.4803 med=     -0.0039 sd=      2.3496 n=179
+  EXCHANGE     mu=      0.8065 med=     -0.0086 sd=      6.6358 n=195
+  BRIDGE       mu=     -0.0238 med=     -0.0238 sd=      0.0003 n=70
+
+[degree_in]
+  INDIVIDUAL   mu=      0.3630 med=     -0.0178 sd=      1.9725 n=2421
+  BET          mu=      0.0223 med=     -0.0177 sd=      0.1140 n=96
+  GAMBLING     mu=      0.2903 med=     -0.0113 sd=      0.9784 n=179
+  EXCHANGE     mu=      0.1930 med=     -0.0118 sd=      1.1734 n=195
+  BRIDGE       mu=     -0.0237 med=     -0.0237 sd=      0.0003 n=70
+
+[degree_out]
+  INDIVIDUAL   mu=      0.1962 med=     -0.0140 sd=      2.3746 n=2421
+  BET          mu=      0.0072 med=     -0.0126 sd=      0.0424 n=96
+  GAMBLING     mu=      0.7770 med=     -0.0048 sd=      6.0643 n=179
+  EXCHANGE     mu=      1.8586 med=     -0.0124 sd=     18.2202 n=195
+  BRIDGE       mu=     -0.0183 med=     -0.0184 sd=      0.0004 n=70
+
+[total_transactions_in]
+  INDIVIDUAL   mu=      0.4208 med=     -0.0177 sd=      2.2294 n=2421
+  BET          mu=      0.0397 med=     -0.0177 sd=      0.1775 n=96
+  GAMBLING     mu=      0.4316 med=      0.0000 sd=      1.5402 n=179
+  EXCHANGE     mu=      0.3467 med=     -0.0122 sd=      1.7608 n=195
+  BRIDGE       mu=     -0.0245 med=     -0.0246 sd=      0.0005 n=70
+
+[total_transactions_out]
+  INDIVIDUAL   mu=      0.2048 med=     -0.0147 sd=      2.4452 n=2421
+  BET          mu=      0.0079 med=     -0.0140 sd=      0.0564 n=96
+  GAMBLING     mu=      1.0202 med=     -0.0019 sd=      8.0800 n=179
+  EXCHANGE     mu=      1.6275 med=     -0.0142 sd=     15.3059 n=195
+  BRIDGE       mu=     -0.0176 med=     -0.0177 sd=      0.0002 n=70
+
+[min_sent]
+  INDIVIDUAL   mu=     -0.0065 med=     -0.0065 sd=      0.0002 n=2421
+  BET          mu=     -0.0065 med=     -0.0065 sd=      0.0000 n=96
+  GAMBLING     mu=      0.0143 med=     -0.0065 sd=      0.2782 n=179
+  EXCHANGE     mu=      0.1187 med=     -0.0065 sd=      1.1616 n=195
+  BRIDGE       mu=      1.1406 med=     -0.0065 sd=      4.1199 n=70
+
+[max_sent]
+  INDIVIDUAL   mu=      0.1289 med=     -0.0254 sd=      1.5941 n=2421
+  BET          mu=     -0.0115 med=     -0.0199 sd=      0.0202 n=96
+  GAMBLING     mu=      0.1836 med=     -0.0148 sd=      1.7160 n=179
+  EXCHANGE     mu=      4.3125 med=      0.1813 sd=     14.2970 n=195
+  BRIDGE       mu=      1.1672 med=     -0.0292 sd=      1.9501 n=70
+
+[total_sent]
+  INDIVIDUAL   mu=      0.1901 med=     -0.0141 sd=      1.5313 n=2421
+  BET          mu=     -0.0092 med=     -0.0139 sd=      0.0127 n=96
+  GAMBLING     mu=      0.1232 med=     -0.0116 sd=      0.6385 n=179
+  EXCHANGE     mu=      2.5616 med=      0.0022 sd=     11.0516 n=195
+  BRIDGE       mu=      0.0326 med=     -0.0147 sd=      0.1152 n=70
+
+[min_received]
+  INDIVIDUAL   mu=     -0.0176 med=     -0.0176 sd=      0.0011 n=2421
+  BET          mu=     -0.0176 med=     -0.0176 sd=      0.0000 n=96
+  GAMBLING     mu=     -0.0174 med=     -0.0176 sd=      0.0029 n=179
+  EXCHANGE     mu=     -0.0176 med=     -0.0176 sd=      0.0001 n=195
+  BRIDGE       mu=      0.1079 med=     -0.0176 sd=      1.0428 n=70
+
+[max_received]
+  INDIVIDUAL   mu=      0.1032 med=     -0.0250 sd=      0.9319 n=2421
+  BET          mu=     -0.0169 med=     -0.0235 sd=      0.0152 n=96
+  GAMBLING     mu=      0.1644 med=     -0.0151 sd=      1.1305 n=179
+  EXCHANGE     mu=      5.6394 med=      0.0396 sd=     18.0735 n=195
+  BRIDGE       mu=      2.5578 med=      2.1412 sd=      1.9308 n=70
+
+[total_received]
+  INDIVIDUAL   mu=      0.1923 med=     -0.0141 sd=      1.5486 n=2421
+  BET          mu=     -0.0092 med=     -0.0139 sd=      0.0129 n=96
+  GAMBLING     mu=      0.1242 med=     -0.0115 sd=      0.6372 n=179
+  EXCHANGE     mu=      2.6235 med=      0.0026 sd=     11.2237 n=195
+  BRIDGE       mu=      0.0531 med=      0.0122 sd=      0.1213 n=70
+
+[cluster_size]
+  INDIVIDUAL   mu=      0.1706 med=     -0.0124 sd=      1.2334 n=2421
+  BET          mu=      0.0469 med=     -0.0067 sd=      0.1843 n=96
+  GAMBLING     mu=      0.1502 med=     -0.0078 sd=      0.5950 n=179
+  EXCHANGE     mu=      0.1278 med=     -0.0122 sd=      0.5936 n=195
+  BRIDGE       mu=     -0.0126 med=     -0.0126 sd=      0.0001 n=70
+
+[first_transaction_in]
+  INDIVIDUAL   mu=     -1.1188 med=     -1.0494 sd=      0.7488 n=2421
+  BET          mu=     -0.6615 med=     -0.6177 sd=      0.2552 n=96
+  GAMBLING     mu=     -0.9864 med=     -1.1424 sd=      0.7691 n=179
+  EXCHANGE     mu=     -0.3293 med=     -0.0868 sd=      1.2883 n=195
+  BRIDGE       mu=      1.4470 med=      1.4286 sd=      0.1825 n=70
+
+[last_transaction_in]
+  INDIVIDUAL   mu=     -0.1290 med=     -0.3603 sd=      0.9595 n=2421
+  BET          mu=     -1.1394 med=     -1.1261 sd=      0.2616 n=96
+  GAMBLING     mu=     -0.2772 med=     -0.4704 sd=      1.0998 n=179
+  EXCHANGE     mu=      0.2202 med=      0.9176 sd=      1.1122 n=195
+  BRIDGE       mu=      1.2476 med=      1.2660 sd=      0.1141 n=70
+
+[first_transaction_out]
+  INDIVIDUAL   mu=     -1.0415 med=     -0.9652 sd=      0.7355 n=2421
+  BET          mu=     -0.6367 med=     -0.5821 sd=      0.2520 n=96
+  GAMBLING     mu=     -0.9236 med=     -1.0797 sd=      0.7600 n=179
+  EXCHANGE     mu=     -0.2895 med=     -0.0194 sd=      1.2354 n=195
+  BRIDGE       mu=     -1.3882 med=     -3.3632 sd=      2.3522 n=70
+
+[last_transaction_out]
+  INDIVIDUAL   mu=     -0.1288 med=     -0.2425 sd=      0.9443 n=2421
+  BET          mu=     -1.0534 med=     -1.0270 sd=      0.2429 n=96
+  GAMBLING     mu=     -0.4133 med=     -0.4730 sd=      1.0924 n=179
+  EXCHANGE     mu=      0.0689 med=      0.8036 sd=      1.1588 n=195
+  BRIDGE       mu=     -1.8666 med=     -3.9749 sd=      2.5081 n=70
+
+[cluster_num_edges]
+  INDIVIDUAL   mu=      0.0622 med=     -0.0049 sd=      0.3946 n=2421
+  BET          mu=      0.0006 med=     -0.0043 sd=      0.0131 n=96
+  GAMBLING     mu=      0.0395 med=     -0.0041 sd=      0.1490 n=179
+  EXCHANGE     mu=      0.0515 med=     -0.0049 sd=      0.2761 n=195
+  BRIDGE       mu=     -0.0049 med=     -0.0049 sd=      0.0000 n=70
+
+[cluster_num_cc]
+  INDIVIDUAL   mu=      0.0329 med=     -0.0049 sd=      0.3328 n=2421
+  BET          mu=      0.1002 med=      0.0015 sd=      0.4949 n=96
+  GAMBLING     mu=      0.0408 med=     -0.0039 sd=      0.3041 n=179
+  EXCHANGE     mu=      0.0129 med=     -0.0049 sd=      0.0673 n=195
+  BRIDGE       mu=     -0.0052 med=     -0.0052 sd=      0.0001 n=70
+
+[cluster_num_nodes_in_cc]
+  INDIVIDUAL   mu=      0.1637 med=     -0.0109 sd=      1.1353 n=2421
+  BET          mu=      0.0290 med=     -0.0070 sd=      0.1100 n=96
+  GAMBLING     mu=      0.1276 med=     -0.0061 sd=      0.3916 n=179
+  EXCHANGE     mu=      0.1204 med=     -0.0109 sd=      0.5150 n=195
+  BRIDGE       mu=     -0.0110 med=     -0.0110 sd=      0.0001 n=70
+
+
+--- 6.2 Kruskal-Wallis ---
+
+  degree                         H=      285.25 p=1.64e-60 ***
+  degree_in                      H=      239.06 p=1.48e-50 ***
+  degree_out                     H=      290.58 p=1.17e-61 ***
+  total_transactions_in          H=      275.28 p=2.32e-58 ***
+  total_transactions_out         H=      307.42 p=2.72e-65 ***
+  min_sent                       H=       82.07 p=6.33e-17 ***
+  max_sent                       H=      241.86 p=3.69e-51 ***
+  total_sent                     H=      210.54 p=2.03e-44 ***
+  min_received                   H=       51.59 p=1.68e-10 ***
+  max_received                   H=      287.01 p=6.87e-61 ***
+  total_received                 H=      284.56 p=2.32e-60 ***
+  cluster_size                   H=      257.62 p=1.49e-54 ***
+  first_transaction_in           H=      321.80 p=2.15e-68 ***
+  last_transaction_in            H=      278.65 p=4.36e-59 ***
+  first_transaction_out          H=      120.38 p=4.42e-25 ***
+  last_transaction_out           H=      152.63 p=5.56e-32 ***
+  cluster_num_edges              H=      202.37 p=1.16e-42 ***
+  cluster_num_cc                 H=      332.52 p=1.04e-70 ***
+  cluster_num_nodes_in_cc        H=      225.56 p=1.19e-47 ***
+
+--- 6.3 PCA + t-SNE ---
+
+
+========================================================================
+  7. Inter-Class Edge Patterns
+========================================================================
+
+Both-endpoint labeled edges: 52,105/17,173,503
+
+--- 7.1 Matrix ---
+
+src\dst          NONE    INDIVIDUAL           BET      GAMBLING      EXCHANGE        BRIDGE
+      NONE            0             0             0             0             0             0
+INDIVIDUAL            0         32856           640          3604          1638             2
+       BET            0           576            93           112             8             0
+  GAMBLING            0          5208           213          1384           187             0
+  EXCHANGE            0          4702            31           345           395             6
+    BRIDGE            0             1             0             0             0           104
+
+--- 7.2 Homophily ---
+
+  INDIVIDUAL  : 32856/38740 (84.8%) same-class edges
+  BET         : 93/789 (11.8%) same-class edges
+  GAMBLING    : 1384/6992 (19.8%) same-class edges
+  EXCHANGE    : 395/5479 (7.2%) same-class edges
+  BRIDGE      : 104/105 (99.0%) same-class edges
+
+========================================================================
+  8. Temporal Analysis
+========================================================================
+
+
+--- 8.1 Ranges ---
+
+  first_transaction_in: -3 ~ 2
+  last_transaction_in: -4 ~ 1
+  first_transaction_out: -3 ~ 2
+  last_transaction_out: -4 ~ 1
+
+--- 8.2 Per-Class ---
+
+  INDIVIDUAL  : first_transaction_in=-1, last_transaction_in=-0, first_transaction_out=-1, last_transaction_out=-0
+  BET         : first_transaction_in=-1, last_transaction_in=-1, first_transaction_out=-1, last_transaction_out=-1
+  GAMBLING    : first_transaction_in=-1, last_transaction_in=-0, first_transaction_out=-1, last_transaction_out=-0
+  EXCHANGE    : first_transaction_in=-0, last_transaction_in=0, first_transaction_out=-0, last_transaction_out=0
+  BRIDGE      : first_transaction_in=1, last_transaction_in=1, first_transaction_out=-1, last_transaction_out=-2
+
+--- 8.3 Duration ---
+
+[in_duration]
+  INDIVIDUAL  : mu=1 med=1
+  BET         : mu=-0 med=-1
+  GAMBLING    : mu=1 med=1
+  EXCHANGE    : mu=1 med=0
+  BRIDGE      : mu=-0 med=-0
+[out_duration]
+  INDIVIDUAL  : mu=1 med=1
+  BET         : mu=-0 med=-0
+  GAMBLING    : mu=1 med=0
+  EXCHANGE    : mu=0 med=0
+  BRIDGE      : mu=-0 med=-1
+
+--- 8.4 Edge Temporal ---
+
+[edge_dur] mu=5072.87 med=0.00 p95=30315.00
+[edge_ls] mu=478140.34 med=463181.00 range=51729~700000
+
+========================================================================
+  9. Neighborhood Composition
+========================================================================
+
+
+--- 9.1 Distribution ---
+
+class             NONE    INDIVIDUAL           BET      GAMBLING      EXCHANGE        BRIDGE
+INDIVIDUAL 1923717(95.9%)  65712(3.3%)   1216(0.1%)   8812(0.4%)   6340(0.3%)      3(0.0%)
+       BET 14989(89.5%)   1216(7.3%)    186(1.1%)    325(1.9%)     39(0.2%)      0(0.0%)
+  GAMBLING 166209(93.0%)   8812(4.9%)    325(0.2%)   2768(1.5%)    532(0.3%)      0(0.0%)
+  EXCHANGE 201859(96.3%)   6340(3.0%)     39(0.0%)    532(0.3%)    790(0.4%)      6(0.0%)
+    BRIDGE   578(72.7%)      3(0.4%)      0(0.0%)      0(0.0%)      6(0.8%)    208(26.2%)
+
+--- 9.2 Homophily ---
+
+  INDIVIDUAL  : 3.3% same (65712/2005800)
+  BET         : 1.1% same (186/16755)
+  GAMBLING    : 1.5% same (2768/178646)
+  EXCHANGE    : 0.4% same (790/209566)
+  BRIDGE      : 26.2% same (208/795)
+
+========================================================================
+  10. Key Findings
+========================================================================
+
+
+=== DATASET ===
+  Subgraph: 350,258 nodes, 17,173,503 edges
+  Node feats: 19d, Edge feats: 6d
+  Full DB: ~252M nodes, ~786M edges
+
+=== FINDING 1: EXTREME IMBALANCE ===
+  INDIVIDUAL=2421, BET=96, GAMBLING=179, EXCHANGE=195, BRIDGE=70
+  Ratio: 35x
+  => focal loss / class weighting / balanced sampling
+
+=== FINDING 2: LABEL SPARSITY ===
+  2,961/350,258 = 0.845%
+  => semi-supervised / pseudo-label / contrastive learning
+
+=== FINDING 3: RICH EDGE FEATURES (UNUSED) ===
+  6-dim + derivable: avg_sent, range, duration, freq, recency
+  => edge-aware message passing
+
+=== FINDING 4: TEMPORAL INFO ===
+  Nodes: first/last_transaction_in/out (block height)
+  Edges: reveal, last_seen
+  => recency encoding + temporal split
+
+=== FINDING 5: DIRECTED ===
+  a->b = fund flow direction
+  => direction-aware aggregation
+
+=== FINDING 6: GNN < MLP ===
+  GraphSAGE F1~0.67 < MLP~0.70
+  => research opportunity
+
+Total: 0:01:15.655730
+####################################################################
+  ADDENDUM: Raw Database Exploration (252M nodes, 786M edges)
+  This section explores the ORIGINAL database, not the data.pt subgraph.
+####################################################################
+Raw DB EDA Supplement: 2026-06-14 12:55:48
+
+========================================================================
+  1. Schema & Scale
+========================================================================
+  node_features             ~    252,148,848 rows  disk=37 GB
+  transaction_edges         ~    785,934,144 rows  disk=80 GB
+
+node_features (21 cols):
+  alias                          bigint
+  degree                         integer
+  degree_in                      integer
+  degree_out                     integer
+  total_transactions_in          integer
+  total_transactions_out         integer
+  min_sent                       bigint
+  max_sent                       bigint
+  total_sent                     bigint
+  min_received                   bigint
+  max_received                   bigint
+  total_received                 bigint
+  cluster_size                   integer
+  first_transaction_in           integer
+  last_transaction_in            integer
+  first_transaction_out          integer
+  last_transaction_out           integer
+  cluster_num_edges              integer
+  cluster_num_cc                 integer
+  cluster_num_nodes_in_cc        integer
+  label                          character varying
+
+transaction_edges (8 cols):
+  a                              integer
+  b                              integer
+  reveal                         integer
+  last_seen                      integer
+  total                          integer
+  min_sent                       bigint
+  max_sent                       bigint
+  total_sent                     bigint
+
+Time so far: 0s
+
+========================================================================
+  6. Topology
+========================================================================
+  degree          min=1 max=23804263 avg=6.21 med=3.0 p95=12.0 p99=38.0
+  degree_in       min=1 max=17591957 avg=3.18 med=1.0 p95=5.0 p99=17.0
+  degree_out      min=1 max=7934034 avg=3.59 med=2.0 p95=8.0 p99=25.0
+
+--- Self-loops ---
+  Self-loops: 0 / 785,954,737 (0.0000%)
+
+Time so far: 932s
+
+========================================================================
+  7. Temporal
+========================================================================
+  first_transaction_in           min=170 max=700000 avg=535199 med=551606.0
+  last_transaction_in            min=181 max=700000 avg=537178 med=553544.0
+  first_transaction_out          min=170 max=700000 avg=533562 med=549723.0
+  last_transaction_out           min=187 max=700000 avg=535562 med=551710.0
+
+--- Edge Temporal ---
+  reveal:    min=170 max=700000 avg=529393
+  last_seen: min=170 max=700000 avg=529837
+
+Time so far: 1817s
+
+--- Per-Class Block Heights ---
+  label             avg_fi   avg_li   avg_fo   avg_lo   dur_in  dur_out        n
+  INDIVIDUAL        377599   435011   384395   447574    57413    63179   23,236
+  BET               390967   391207   391085   391257      240      172    6,723
+  GAMBLING          332995   361184   333496   358478    28189    24982    1,410
+  EXCHANGE          425556   498389   434501   486108    72833    51607      794
+  MINING            318069   481350   335530   493841   163281   158311      724
+  PONZI             356689   386862   358729   393304    30173    34576      587
+  RANSOMWARE        469705   493150   479164   495614    23445    16450      234
+  FAUCET            436424   472396   439021   468597    35972    29577      125
+  MARKETPLACE       520467   579876   528103   579426    59408    51323      115
+  MIXER             524200   558745   522655   551475    34545    28820       80
+  BRIDGE            667628   689617   670896   683549    21989    12652       70
+
+========================================================================
+  8. Summary
+========================================================================
+DATASET: Bitcoin Research with a Transaction Graph Dataset (Schnoering & Vazirgiannis, 2024)
+  arXiv:2411.10325
+  DB: ~252M nodes, ~786M edges
+  data.pt subgraph: 350K nodes, 17M edges (TopK 0.14%)
+
+KEY FINDINGS:
+  1. Raw dataset 700x larger than subgraph - TopK selection introduces bias
+  2. Amount features extreme long-tail (skew >> 100)
+  3. Block heights span multi-year activity
+  4. Edge temporal info enables time-aware modeling
+  5. Directed edges carry fund-flow semantics
+  6. Self-loops exist but are rare
+
+RESEARCH IMPLICATIONS:
+  - Class-balanced sampling over TopK
+  - Temporal split via block heights
+  - log1p + robust scaling for features
+  - Edge-aware message passing
+  - Direction-aware aggregation
