@@ -188,8 +188,8 @@ class Trainer:
         return max(float(entry.get('val_f1', 0.0)) for entry in self.train_log)
 
     def _labeled_mask(self, mask: torch.BoolTensor) -> torch.BoolTensor:
-        """仅保留有标签节点（NONE=0 会被排除）。"""
-        return mask & (self.data.y != 0)
+        """仅保留有标签节点；ignore_index 由 config.data.ignore_index 控制。"""
+        return mask & (self.data.y != self.ignore_index)
 
     def _repair_overlapped_masks_if_needed(self):
         """兼容旧版 data.pt：若 train/val/test 重叠，则按当前配置重建互斥掩码。"""
@@ -216,7 +216,7 @@ class Trainer:
         print(f"检测到掩码重叠节点 {overlap_count} 个，已在训练前自动修复为互斥划分。")
 
     def _compute_class_weights(self) -> torch.Tensor:
-        """基于训练集有标签样本计算类别权重（忽略 NONE=0）。"""
+        """基于训练集有标签样本计算类别权重（忽略 ignore_index）。"""
         num_classes = int(self.config.get('data', {}).get('num_classes', 6))
         train_mask = self._labeled_mask(self.data.train_mask)
         train_labels = self.data.y[train_mask]
@@ -226,8 +226,8 @@ class Trainer:
         counts = torch.bincount(train_labels, minlength=num_classes).float()
         weights = torch.zeros(num_classes, dtype=torch.float32, device=self.device)
         valid = counts > 0
-        if valid.shape[0] > 0:
-            valid[0] = False
+        if 0 <= self.ignore_index < valid.shape[0]:
+            valid[self.ignore_index] = False
 
         if int(valid.sum().item()) == 0:
             return weights
@@ -241,23 +241,23 @@ class Trainer:
         if float(weight_mean.item()) > 0:
             weights[valid] = weights[valid] / weight_mean
 
-        readable = [f"{idx}:{weights[idx].item():.3f}" for idx in range(1, num_classes) if counts[idx] > 0]
+        readable = [f"{idx}:{weights[idx].item():.3f}" for idx in range(num_classes) if counts[idx] > 0]
         if readable:
-            print("训练集类别权重(忽略NONE): " + ", ".join(readable))
+            print("训练集类别权重: " + ", ".join(readable))
         return weights
 
     def _build_criterion(self) -> nn.Module:
         if self.loss_type == 'cross_entropy':
-            return nn.CrossEntropyLoss(ignore_index=0)
+            return nn.CrossEntropyLoss(ignore_index=self.ignore_index)
         if self.loss_type == 'weighted_ce':
             if self.class_weights is None:
                 raise ValueError("loss=weighted_ce 但未生成类别权重")
-            return nn.CrossEntropyLoss(ignore_index=0, weight=self.class_weights)
+            return nn.CrossEntropyLoss(ignore_index=self.ignore_index, weight=self.class_weights)
         if self.loss_type == 'focal':
             return FocalLoss(
                 gamma=self.focal_gamma,
                 weight=self.class_weights,
-                ignore_index=0
+                ignore_index=self.ignore_index
             )
         raise ValueError("配置项 train.loss 仅支持: cross_entropy / weighted_ce / focal")
 
@@ -289,7 +289,7 @@ class Trainer:
         best_val_f1 = self._get_best_logged_val_f1()
         train_mask = self._labeled_mask(self.data.train_mask)
         if int(train_mask.sum().item()) == 0:
-            raise ValueError("train_mask 中没有有标签节点（y != 0），无法训练")
+            raise ValueError("train_mask 中没有有标签节点（y != ignore_index），无法训练")
 
         for epoch in range(self.start_epoch, self.epochs):
             # 训练
@@ -350,7 +350,7 @@ class Trainer:
         """Mini-batch训练"""
         labeled_train_mask = self._labeled_mask(self.data.train_mask)
         if int(labeled_train_mask.sum().item()) == 0:
-            raise ValueError("train_mask 中没有有标签节点（y != 0），无法执行 mini-batch 训练")
+            raise ValueError("train_mask 中没有有标签节点（y != ignore_index），无法执行 mini-batch 训练")
 
         train_loader = NeighborLoader(
             self.data,
@@ -375,7 +375,7 @@ class Trainer:
                 out = self.model(batch.x, batch.edge_index)
                 seed_out = out[:batch.batch_size]
                 seed_y = batch.y[:batch.batch_size]
-                valid_seed_mask = seed_y != 0
+                valid_seed_mask = seed_y != ignore_index
                 if int(valid_seed_mask.sum().item()) == 0:
                     skipped_batches += 1
                     continue
@@ -443,7 +443,7 @@ class Trainer:
         self.model.eval()
         out = self.model(self.data.x, self.data.edge_index)
         num_classes = self.config.get('data', {}).get('num_classes', 6)
-        return compute_metrics(out, self.data.y, mask, num_classes)
+        return compute_metrics(out, self.data.y, mask, num_classes, ignore_index=self.ignore_index)
 
     def save_checkpoint(self, path: str):
         """保存检查点"""

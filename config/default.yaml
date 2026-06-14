@@ -1,15 +1,16 @@
 data:
-  raw_db: "postgresql://postgres:cq20050919;@localhost/bitcoin_db"  # 预处理阶段使用
+  raw_db: "${BITCOIN_DB_URL}"  # 预处理阶段使用；真实密码写入 .env，不要提交
   node_table: "node_features"                             # 节点表名
   edge_table: "transaction_edges"                         # 边表名
   processed_data_path: "D:\\Code\\VSCode\\Bitcoin_Transaction_Identification\\data\\processed\\data.pt"  # 供训练使用
   num_classes: 6
+  ignore_index: 0  # 旧 data.pt: NONE=0；新协议数据若用旧训练入口，应改为 -1
   label_map: "config/label_map.json"                      # 标签映射文件
 
 preprocessing:
   target_labels: ["INDIVIDUAL", "BET", "GAMBLING", "EXCHANGE", "BRIDGE"]
   chunk_size: 50000    # 分块读取大小（节点/边）
-  resume_enabled: true  # 默认启用断点续跑（有缓存即复用）
+  resume_enabled: false  # 默认启用断点续跑（有缓存即复用）
   checkpoint_dir: "./data/processed/checkpoints"  # 预处理阶段缓存目录
   force_recompute: false  # true 时忽略缓存并全量重算
   zscore_params:  # 论文公式11-13
@@ -51,13 +52,13 @@ train:
   log_dir: "./experiments/logs"
 
 wandb:
-  enabled: true
+  enabled: false
   project: "bitcoin-transaction-identification"
   entity: 3538753476-uestc
   run_name: "sage_experiment"
   mode: "online"  # online / offline / disabled
   log_model: false
-  watch_model: falsewand
+  watch_model: false
 
 eval:
   macro_f1_average: "macro"

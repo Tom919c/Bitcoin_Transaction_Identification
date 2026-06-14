@@ -11,7 +11,8 @@ def compute_metrics(
     out: torch.Tensor,
     y: torch.Tensor,
     mask: torch.BoolTensor,
-    num_classes: int = 6
+    num_classes: int = 6,
+    ignore_index: int = 0
 ) -> Dict:
     """
     计算评估指标
@@ -27,7 +28,7 @@ def compute_metrics(
     """
     if mask.dtype != torch.bool:
         mask = mask.bool()
-    valid_mask = mask & (y != 0)
+    valid_mask = mask & (y != ignore_index)
 
     if int(valid_mask.sum().item()) == 0:
         zero_metrics = [0.0 for _ in range(num_classes)]
@@ -41,11 +42,11 @@ def compute_metrics(
             'per_class_recall': zero_metrics
         }
 
-    # 仅在有标签节点上评估（忽略 NONE=0）
+    # 仅在有标签节点上评估（旧数据默认忽略 NONE=0；新协议可设 ignore_index=-1）
     pred = out[valid_mask].argmax(dim=1).cpu().numpy()
     true = y[valid_mask].cpu().numpy()
     class_labels = list(range(num_classes))
-    macro_labels = list(range(1, num_classes)) if num_classes > 1 else class_labels
+    macro_labels = [i for i in class_labels if i != ignore_index]
 
     # 计算指标
     accuracy = accuracy_score(true, pred)

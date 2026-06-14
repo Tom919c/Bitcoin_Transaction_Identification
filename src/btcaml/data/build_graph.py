@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import pandas as pd
 import torch
 from tqdm import tqdm
@@ -39,7 +40,13 @@ def load_nodes_by_aliases(conn, node_table: str, aliases: list[int]) -> pd.DataF
     """)
 
 
-def stream_edges_between_selected(conn, edge_table: str, aliases: list[int], chunk_size: int = 200000):
+def stream_edges_between_selected(
+    conn,
+    edge_table: str,
+    aliases: list[int],
+    chunk_size: int = 200000,
+    statement_timeout_ms: int | None = None,
+):
     create_temp_alias_table(conn, aliases, temp_name='tmp_selected_aliases')
     query = f"""
         SELECT e.*
@@ -47,7 +54,9 @@ def stream_edges_between_selected(conn, edge_table: str, aliases: list[int], chu
         JOIN {edge_table} e ON e.a = sa.alias
         JOIN tmp_selected_aliases sb ON e.b = sb.alias
     """
-    yield from stream_dataframe_regular(conn, query, chunk_size=chunk_size)
+    yield from stream_dataframe_regular(
+        conn, query, chunk_size=chunk_size, statement_timeout_ms=statement_timeout_ms
+    )
 
 
 def build_protocol_dataset(cfg: dict, output_path: str | Path | None = None) -> dict[str, Any]:
@@ -106,7 +115,7 @@ def build_protocol_dataset(cfg: dict, output_path: str | Path | None = None) -> 
         tqdm.write("       -> done")
 
         # Step 5: Stream edges (slowest step)
-        tqdm.write("[5/7] Streaming edges from DB (this is the slowest step) ...")
+        tqdm.write("[5/7] Streaming edges from DB (slowest step; first chunk can take several minutes) ...")
         edge_indices = []
         edge_attrs = []
         edge_feature_cols = None
@@ -115,7 +124,14 @@ def build_protocol_dataset(cfg: dict, output_path: str | Path | None = None) -> 
         edge_transformer = None
         total_edges = 0
         pbar = tqdm(unit=" chunks", desc="       edges")
-        for chunk in stream_edges_between_selected(conn, edge_table, selection.aliases, chunk_size=chunk_size):
+        protocol_sampling = cfg.get('protocol', {}).get('sampling', {})
+        statement_timeout_ms = int(
+            data_cfg.get('edge_query_timeout_ms', data_cfg.get('query_timeout_ms', protocol_sampling.get('query_timeout_ms', 0))) or 0
+        )
+        for chunk in stream_edges_between_selected(
+            conn, edge_table, selection.aliases, chunk_size=chunk_size,
+            statement_timeout_ms=statement_timeout_ms or None,
+        ):
             chunk['a'] = chunk['a'].astype(int)
             chunk['b'] = chunk['b'].astype(int)
             chunk = derive_edge_features(chunk, global_max_block=edge_global_max)
@@ -136,9 +152,11 @@ def build_protocol_dataset(cfg: dict, output_path: str | Path | None = None) -> 
                 pbar.update(1)
                 continue
             total_edges += n_valid
-            edge_indices.append(torch.tensor([src[valid].astype(int).to_numpy(), dst[valid].astype(int).to_numpy()], dtype=torch.long))
+            src_np = src[valid].astype('int64').to_numpy(copy=False)
+            dst_np = dst[valid].astype('int64').to_numpy(copy=False)
+            edge_indices.append(torch.from_numpy(np.vstack((src_np, dst_np))).long())
             chunk_t = edge_transformer.transform(chunk.loc[valid, edge_feature_cols])
-            edge_attrs.append(torch.tensor(chunk_t[edge_feature_cols].to_numpy(dtype='float32'), dtype=torch.float32))
+            edge_attrs.append(torch.from_numpy(chunk_t[edge_feature_cols].to_numpy(dtype='float32', copy=False)))
             pbar.update(1)
             pbar.set_postfix(edges=f"{total_edges:,}")
         pbar.close()

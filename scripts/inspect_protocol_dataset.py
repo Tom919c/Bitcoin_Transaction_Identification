@@ -11,10 +11,15 @@ Usage:
 from __future__ import annotations
 
 import argparse
+from contextlib import redirect_stdout
+from io import StringIO
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 import torch
+
+import _bootstrap  # noqa: F401
+from btcaml.utils.run_artifacts import RunArtifacts
 
 
 DEFAULT_LABEL_NAMES_11 = {
@@ -419,6 +424,8 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--path", type=str, default=None, help="Path to one .pt file.")
     parser.add_argument("--data-dir", type=str, default=None, help="Directory containing protocol .pt files.")
+    parser.add_argument("--out-root", type=str, default="experiments/runs", help="Timestamped archive root.")
+    parser.add_argument("--no-save", action="store_true", help="Only print; do not save an archived report.")
     args = parser.parse_args()
 
     paths: List[Path] = []
@@ -430,11 +437,25 @@ def main() -> None:
     if not paths:
         raise SystemExit("Please provide --path FILE.pt or --data-dir DIR.")
 
+    run = None if args.no_save else RunArtifacts.create("inspect_protocols", root=args.out_root)
+    combined: List[str] = []
     for path in paths:
         if not path.exists():
-            print(f"[WARN] not found: {path}")
+            msg = f"[WARN] not found: {path}"
+            print(msg)
+            combined.append(msg)
             continue
-        inspect_one(path)
+        buf = StringIO()
+        with redirect_stdout(buf):
+            inspect_one(path)
+        text = buf.getvalue()
+        print(text, end="")
+        combined.append(text)
+        if run is not None:
+            run.write_text(f"{path.stem}.md", text)
+    if run is not None:
+        run.write_text("inspect_protocols.md", "\n".join(combined))
+        print(f"saved_log: {run.run_dir}")
 
 
 if __name__ == "__main__":

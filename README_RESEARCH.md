@@ -45,3 +45,13 @@ python scripts/run_benchmark.py --config configs/experiment/baseline_current_top
 - Main paper protocol should be `temporal_balanced.pt` after raw DB rebuilding succeeds.
 
 See `docs/research/` for the full research roadmap and Codex refactor specification.
+
+## Current stable pipeline
+
+See `docs/OPERATION_RUNBOOK.md` for the exact command order. Important points:
+
+- New protocol labels use `-1` for unlabeled nodes and `0..10` for the 11 supervised classes.
+- `class_balanced_khop.pt` is the first main training dataset.
+- `temporal_balanced.pt` is the classwise temporal generalization dataset.
+- Scripts now save timestamped archives under `experiments/runs/` and latest copies under `experiments/latest/`.
+

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import re
 import uuid
 from contextlib import contextmanager
 from typing import Iterable, Iterator, Sequence
@@ -8,10 +9,21 @@ from typing import Iterable, Iterator, Sequence
 import pandas as pd
 
 
+def _resolve_dsn(connection_string: str | None = None) -> str | None:
+    """Resolve a PostgreSQL DSN from direct string or ${ENV_NAME} placeholder."""
+    if connection_string:
+        dsn = str(connection_string).strip()
+        m = re.fullmatch(r'\$\{([A-Za-z_][A-Za-z0-9_]*)\}', dsn)
+        if m:
+            return os.environ.get(m.group(1))
+        return os.path.expandvars(dsn)
+    return os.environ.get('BITCOIN_DB_URL')
+
+
 def connect_db(connection_string: str | None = None):
-    dsn = connection_string or os.environ.get('BITCOIN_DB_URL')
-    if not dsn:
-        raise ValueError('Database connection string missing. Set BITCOIN_DB_URL or pass raw_db.')
+    dsn = _resolve_dsn(connection_string)
+    if not dsn or dsn == '${BITCOIN_DB_URL}':
+        raise ValueError('Database connection string missing. Set BITCOIN_DB_URL in .env or pass data.raw_db.')
     try:
         import psycopg2
         return psycopg2.connect(dsn)
@@ -67,14 +79,22 @@ def stream_dataframe(conn, query, params: Sequence | None = None, chunk_size: in
             yield pd.DataFrame(rows, columns=cols)
 
 
-def stream_dataframe_regular(conn, query, params: Sequence | None = None, chunk_size: int = 100000) -> Iterator[pd.DataFrame]:
-    """Stream query results using a regular client-side cursor.
+def stream_dataframe_regular(
+    conn,
+    query,
+    params: Sequence | None = None,
+    chunk_size: int = 100000,
+    statement_timeout_ms: int | None = None,
+) -> Iterator[pd.DataFrame]:
+    """Stream query results with a regular cursor.
 
-    Use this when the query depends on temp tables that would be dropped
-    if a named (server-side) cursor opened a separate autocommit transaction.
+    This is used for temp-table joins. It keeps the query in the same session and lets
+    PostgreSQL use the indexes on transaction_edges(a) / transaction_edges(b) when present.
     """
     cur = conn.cursor()
     try:
+        if statement_timeout_ms and statement_timeout_ms > 0:
+            cur.execute('SET statement_timeout = %s', (int(statement_timeout_ms),))
         cur.execute(query, params or ())
         cols = [d[0] for d in cur.description]
         while True:
@@ -83,6 +103,11 @@ def stream_dataframe_regular(conn, query, params: Sequence | None = None, chunk_
                 break
             yield pd.DataFrame(rows, columns=cols)
     finally:
+        if statement_timeout_ms and statement_timeout_ms > 0:
+            try:
+                cur.execute('RESET statement_timeout')
+            except Exception:
+                conn.rollback()
         cur.close()
 
 
