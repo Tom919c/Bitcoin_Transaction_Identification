@@ -37,16 +37,6 @@ DEFAULT_LABEL_NAMES_11 = {
     10: "BRIDGE",
 }
 
-LEGACY_LABEL_NAMES_5 = {
-    0: "NONE",
-    1: "INDIVIDUAL",
-    2: "BET",
-    3: "GAMBLING",
-    4: "EXCHANGE",
-    5: "BRIDGE",
-}
-
-
 def load_pt(path: Path) -> Any:
     try:
         return torch.load(path, map_location="cpu", weights_only=False)
@@ -139,11 +129,8 @@ def time_stats_row(name: str, values: torch.Tensor) -> List[Any]:
 
 
 def supervised_mask(y: torch.Tensor) -> torch.Tensor:
-    # New protocol datasets use -1 for unlabeled and 0..10 for classes.
-    # Legacy current_topk datasets use 0 for NONE and 1..5 for classes.
-    if bool((y < 0).any().item()):
-        return y >= 0
-    return y != 0
+    # Current protocol datasets use -1 for unlabeled and 0..10 for supervised classes.
+    return y >= 0
 
 
 def safe_num_nodes(data: Any) -> int:
@@ -197,13 +184,8 @@ def infer_label_names(obj: Any, data: Any) -> Dict[int, str]:
             label_space = str(cand.get("label_space", ""))
             if label_space == "11":
                 return DEFAULT_LABEL_NAMES_11.copy()
-            if label_space == "5":
-                return {-1: "UNLABELED", **{i: name for i, name in enumerate(["INDIVIDUAL", "BET", "GAMBLING", "EXCHANGE", "BRIDGE"])}}
 
-    y = get_attr(data, "y", None)
-    if torch.is_tensor(y) and bool((y < 0).any().item()):
-        return DEFAULT_LABEL_NAMES_11.copy()
-    return LEGACY_LABEL_NAMES_5.copy()
+    return DEFAULT_LABEL_NAMES_11.copy()
 
 
 def print_table(rows: List[List[Any]], headers: List[str]) -> None:

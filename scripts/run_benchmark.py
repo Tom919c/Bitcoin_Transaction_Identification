@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import gc
+import json
 from pathlib import Path
 from typing import Any
 
@@ -10,13 +11,8 @@ import torch
 
 import _bootstrap  # noqa: F401
 from btcaml.data.label_maps import LABEL_TO_ID_11, RISK_GROUPS, get_label_space
-from btcaml.evaluation.metrics import (
-    classification_metrics,
-    classification_report_table,
-    confusion_matrix_table,
-    per_class_metrics_table,
-    ranking_metrics,
-)
+from btcaml.evaluation.export import export_detailed_evaluation
+from btcaml.evaluation.metrics import classification_metrics, ranking_metrics
 from btcaml.evaluation.ranking import sensitive_score_from_logits
 from btcaml.models.registry import build_model
 from btcaml.training.trainer import Trainer
@@ -109,60 +105,12 @@ def evaluate_splits(trainer: Trainer, logits: torch.Tensor, labels: list[str], r
     return rows
 
 
-def _write_table(df: pd.DataFrame, csv_path: Path, md_path: Path | None = None) -> None:
-    csv_path.parent.mkdir(parents=True, exist_ok=True)
-    df.to_csv(csv_path)
-    if md_path is not None:
-        md_path.parent.mkdir(parents=True, exist_ok=True)
-        md_path.write_text(df.to_markdown(), encoding='utf-8')
-
-
-def export_detailed_evaluation(model_dir: Path, trainer: Trainer, logits: torch.Tensor, labels: list[str]) -> dict[str, Path]:
-    eval_dir = model_dir / 'evaluation'
-    eval_dir.mkdir(parents=True, exist_ok=True)
-
-    y = trainer._get('y')
-    split_masks = {split: trainer._get(f'{split}_mask') for split in ('train', 'val', 'test')}
-    saved: dict[str, Path] = {}
-
-    for split, mask in split_masks.items():
-        per_class = per_class_metrics_table(logits, y, mask, labels)
-        report = classification_report_table(logits, y, mask, labels)
-        cm = confusion_matrix_table(logits, y, mask, labels)
-        cm_norm = confusion_matrix_table(logits, y, mask, labels, normalize='true')
-
-        per_class_csv = eval_dir / f'{split}_per_class.csv'
-        per_class_md = eval_dir / f'{split}_per_class.md'
-        report_csv = eval_dir / f'{split}_classification_report.csv'
-        report_md = eval_dir / f'{split}_classification_report.md'
-        cm_csv = eval_dir / f'{split}_confusion_matrix.csv'
-        cm_norm_csv = eval_dir / f'{split}_confusion_matrix_norm_true.csv'
-
-        _write_table(per_class, per_class_csv, per_class_md)
-        _write_table(report, report_csv, report_md)
-        _write_table(cm, cm_csv)
-        _write_table(cm_norm, cm_norm_csv)
-
-        saved.update(
-            {
-                f'{split}_per_class_csv': per_class_csv,
-                f'{split}_per_class_md': per_class_md,
-                f'{split}_classification_report_csv': report_csv,
-                f'{split}_classification_report_md': report_md,
-                f'{split}_confusion_matrix_csv': cm_csv,
-                f'{split}_confusion_matrix_norm_true_csv': cm_norm_csv,
-            }
-        )
-
-    return saved
-
-
 def main():
     ap = argparse.ArgumentParser(description='Run concise MLP/GNN benchmarks on a protocol dataset.')
     ap.add_argument('--config', default=None, help='Optional experiment YAML. CLI args override it.')
     ap.add_argument('--data', default=None, help='Protocol dataset .pt path. Required if --config has no data path.')
     ap.add_argument('--models', nargs='+', default=None, help='Models: mlp sage edge_transformer etd_sage')
-    ap.add_argument('--label-space', default=None, choices=['5', '11'])
+    ap.add_argument('--label-space', default=None, choices=['11'])
     ap.add_argument('--epochs', type=int, default=None)
     ap.add_argument('--smoke', action='store_true', help='Run <=3 epochs only to verify pipeline.')
     ap.add_argument('--device', default=None)
@@ -216,6 +164,7 @@ def main():
         'data_size_mb': round(file_size_mb(data_path), 2),
         'label_space': label_space,
         'models': models,
+        'labels': labels,
         'num_nodes': int(_get(data, 'x').shape[0]),
         'num_edges': int(_get(data, 'edge_index').shape[1]) if _has(data, 'edge_index') else 0,
         'num_features': int(_get(data, 'x').shape[1]),
@@ -233,6 +182,22 @@ def main():
         model = build_model(model_name, in_channels, len(labels), edge_dim=edge_dim, params=params)
         model_dir = run.run_dir / safe_name(model_name)
         train_cfg = {**train_cfg_base, 'checkpoint_dir': str(model_dir / 'checkpoints'), 'history_path': str(model_dir / 'train_history.json')}
+        model_manifest = {
+            'model': model_name,
+            'params': params,
+            'in_channels': in_channels,
+            'out_channels': len(labels),
+            'edge_dim': edge_dim,
+            'label_space': label_space,
+            'labels': labels,
+            'data_path': str(data_path),
+            'train': train_cfg,
+        }
+        model_dir.mkdir(parents=True, exist_ok=True)
+        (model_dir / 'model_config.json').write_text(
+            json.dumps(model_manifest, ensure_ascii=False, indent=2),
+            encoding='utf-8',
+        )
         print(f"\n[{model_name}] params={sum(p.numel() for p in model.parameters()):,} epochs={train_cfg['epochs']} device={train_cfg['device']}")
         trainer = Trainer(model, data, train_cfg, labels=labels)
         trainer.train_full_batch()
@@ -242,7 +207,7 @@ def main():
         model.eval()
         with torch.no_grad():
             logits = trainer._model_forward()
-        export_detailed_evaluation(model_dir, trainer, logits, labels)
+        export_detailed_evaluation(model_dir, trainer.data, logits, labels)
         rows = evaluate_splits(trainer, logits, labels, cfg.get('task', {}).get('risk_group', 'conservative_sensitive'))
         for row in rows:
             row['model'] = model_name

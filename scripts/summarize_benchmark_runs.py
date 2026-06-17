@@ -70,15 +70,15 @@ def build_summary(runs_dir: Path) -> pd.DataFrame:
 def main() -> None:
     ap = argparse.ArgumentParser(description='Summarize benchmark run results.')
     ap.add_argument('--runs-dir', default='experiments/runs')
-    ap.add_argument('--output-csv', default='experiments/summary/baseline_protocol_comparison.csv')
-    ap.add_argument('--output-md', default='experiments/summary/baseline_protocol_comparison.md')
+    ap.add_argument('--output-csv', '--out', dest='output_csv', default='experiments/summary/baseline_protocol_comparison.csv')
+    ap.add_argument('--output-md', default=None)
     args = ap.parse_args()
 
     runs_dir = Path(args.runs_dir)
     summary = build_summary(runs_dir)
 
     output_csv = Path(args.output_csv)
-    output_md = Path(args.output_md)
+    output_md = Path(args.output_md) if args.output_md else output_csv.with_suffix('.md')
     output_csv.parent.mkdir(parents=True, exist_ok=True)
     output_md.parent.mkdir(parents=True, exist_ok=True)
 

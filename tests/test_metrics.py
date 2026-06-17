@@ -75,3 +75,15 @@ def test_confusion_matrix_shape_correct():
     assert cm.index.tolist() == labels
     assert cm.columns.tolist() == labels
     assert cm.loc['INDIVIDUAL', 'INDIVIDUAL'] == 1
+
+
+def test_prediction_table_exports_only_supervised_nodes():
+    from btcaml.evaluation.export import prediction_table
+
+    logits, y, mask, labels = _sample_inputs()
+    table = prediction_table(logits, y, mask, labels)
+
+    assert table['node_index'].tolist() == [0, 1, 2]
+    assert table['y_true_name'].tolist() == ['INDIVIDUAL', 'BET', 'GAMBLING']
+    assert table['y_pred_name'].tolist() == ['INDIVIDUAL', 'BET', 'GAMBLING']
+    assert table['correct'].tolist() == [True, True, True]

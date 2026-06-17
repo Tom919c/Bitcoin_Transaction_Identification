@@ -1,93 +1,99 @@
-# 比特币交易节点分类系统
+# BTC-AML Research Code
 
-基于图神经网络的比特币交易节点分类项目。
+Research code for **sampling-aware Bitcoin entity identification**.
 
-## 项目结构
+Current main task:
 
-```
-project/
-├── config/                 # 配置文件
-├── data/                   # 数据处理模块
-├── models/                 # 模型定义模块
-├── training/               # 训练与评估模块
-├── interface/              # 可视化界面模块
-├── experiments/            # 实验记录
-├── scripts/                # 便捷脚本
-├── requirements.txt        # 依赖库
-└── README.md               # 项目说明
+```text
+11-class long-tailed Bitcoin entity classification
+-1 = UNLABELED / context node, ignored by loss and metrics
+0..10 = supervised entity classes
 ```
 
-## 安装依赖
+Current stable datasets expected locally:
 
-```bash
-pip install -r requirements.txt
+```text
+data/processed/protocols/label_preserving.pt
+data/processed/protocols/class_balanced_khop.pt
+data/processed/protocols/temporal_balanced.pt
 ```
 
-## 使用方法
+## Clean project layout
 
-### 1. 数据预处理
+```text
+src/btcaml/                  Core package
+  data/                      Raw DB audit, protocol dataset building, label maps
+  models/                    MLP, GraphSAGE, EdgeTransformer, ETD-SAGE
+  training/                  Full-batch trainer and losses
+  evaluation/                Metrics, detailed eval export, ranking metrics
+  analysis/                  Drift / homophily / supernode analysis utilities
 
-```bash
-python scripts/run_preprocessing.py --config config/default.yaml
+scripts/                     Runnable experiment commands
+configs/                     Data, model and training configs
+docs/                        Operation notes and current project status
+tests/                       Unit tests
+data/                        Local data mount point; large .pt files are not shipped
+experiments/                 Local run outputs; not shipped
 ```
 
-### 2. 模型训练
+Old top-level modules (`models/`, `training/`, `interface/`, legacy `data/*.py`) have been removed. Use only `src/btcaml` and the scripts in `scripts/`.
 
-```bash
-# 全图训练
-python scripts/train_model.py --config config/default.yaml
+## First check after unpacking
 
-# Mini-batch训练
-python scripts/train_model.py --config config/default.yaml --mini-batch
-
-# 从已有checkpoint继续训练（断点续训）
-python scripts/train_model.py --config config/default.yaml --resume-checkpoint experiments/checkpoints/final_model.pt
+```powershell
+conda activate MCM
+python -m pytest -q
 ```
 
-### 2.1 使用 W&B 记录训练过程
+## First-round baseline commands
 
-1) 安装依赖：
-
-```bash
-pip install -r requirements.txt
+```powershell
+python scripts/run_benchmark.py --data data/processed/protocols/label_preserving.pt --models mlp sage --device cpu
+python scripts/run_benchmark.py --data data/processed/protocols/class_balanced_khop.pt --models mlp sage --device cpu
+python scripts/run_benchmark.py --data data/processed/protocols/temporal_balanced.pt --models mlp sage --device cpu
 ```
 
-2) 在 `config/default.yaml` 中开启：
+Each benchmark now exports:
 
-```yaml
-wandb:
-  enabled: true
-  project: "bitcoin-transaction-identification"
-  entity: null
-  run_name: null
-  mode: "online"   # 无网环境可改为 offline
-  watch_model: false
+```text
+results.csv
+results.md
+<model>/model_config.json
+<model>/checkpoints/best.pt
+<model>/train_history.json
+<model>/evaluation/{train,val,test}_per_class.csv
+<model>/evaluation/{train,val,test}_classification_report.csv
+<model>/evaluation/{train,val,test}_confusion_matrix.csv
+<model>/evaluation/{train,val,test}_confusion_matrix_norm_true.csv
+<model>/evaluation/{train,val,test}_predictions.csv
 ```
 
-3) 直接运行训练命令（全图或 mini-batch 均可），训练过程中会按 epoch 上报 loss/F1/lr。
+## Export detailed metrics from an existing checkpoint
 
-### 3. 启动界面
+No retraining is needed if the run directory contains `<model>/checkpoints/best.pt`.
 
-```bash
-python scripts/launch_interface.py
+```powershell
+python scripts/export_detailed_eval.py `
+  --run-dir experiments/runs/20260615_000734_class_balanced_khop_mlp-sage `
+  --data data/processed/protocols/class_balanced_khop.pt `
+  --models mlp sage `
+  --device cpu
 ```
 
-## 标签说明
+If a historical run contains only `results.csv` and no checkpoint/predictions, confusion matrices cannot be reconstructed; rerun the benchmark once with the updated code.
 
-| 编码 | 标签 | 说明 |
-|------|------|------|
-| 0 | NONE | 未知类型 |
-| 1 | INDIVIDUAL | 个人用户 |
-| 2 | BET | 博彩 |
-| 3 | GAMBLING | 赌博 |
-| 4 | EXCHANGE | 交易所 |
-| 5 | BRIDGE | 桥接服务 |
+## Summarize benchmark runs
 
-## 支持的模型
+```powershell
+python scripts/summarize_benchmark_runs.py --runs-dir experiments/runs --out experiments/summary/baseline_protocol_comparison.csv
+```
 
-- MLP: 多层感知机
-- GCN: 图卷积网络
-- GAT: 图注意力网络
-- GraphSAGE: 图采样聚合
-- ResGraphSAGE: 残差GraphSAGE
-- APPNP: 近似个性化传播
+## Current interpretation of first-round results
+
+The current first-round results show:
+
+1. GraphSAGE outperforms MLP on all three new 11-class protocols.
+2. `class_balanced_khop` is the strongest main training protocol so far.
+3. `temporal_balanced` is much harder, making temporal generalization the next main research challenge.
+
+Next code stage after detailed metric export: inspect per-class failures and temporal drift before implementing EdgeGatedSAGE / ETD-SAGE.

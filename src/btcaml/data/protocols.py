@@ -213,16 +213,6 @@ class BaseProtocol:
         return sorted(all_neighbors)
 
 
-class CurrentTopKBaselineProtocol(BaseProtocol):
-    name = 'current_topk_baseline'
-
-    def select_aliases(self, conn) -> ProtocolSelection:
-        raise RuntimeError(
-            'current_topk_baseline is a compatibility protocol for existing data.pt. '
-            'Use data.processed_data_path directly instead of rebuilding from raw DB.'
-        )
-
-
 class LabelPreservingProtocol(BaseProtocol):
     name = 'label_preserving'
 
@@ -285,8 +275,6 @@ class TemporalBalancedProtocol(ClassBalancedKHopProtocol):
 def make_protocol(cfg: dict) -> BaseProtocol:
     name = cfg.get('protocol', {}).get('name') or cfg.get('name') or 'label_preserving'
     protocol_cfg = {**cfg.get('data', {}), **cfg.get('protocol', {})}
-    if name == 'current_topk_baseline':
-        return CurrentTopKBaselineProtocol(protocol_cfg)
     if name == 'label_preserving':
         return LabelPreservingProtocol(protocol_cfg)
     if name == 'class_balanced_khop':

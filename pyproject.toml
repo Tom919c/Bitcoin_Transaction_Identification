@@ -1,6 +1,6 @@
 [project]
 name = "btcaml-research"
-version = "0.2.1"
+version = "0.2.2"
 description = "Sampling-aware edge-temporal directional graph learning for Bitcoin entity risk identification."
 requires-python = ">=3.10"
 
