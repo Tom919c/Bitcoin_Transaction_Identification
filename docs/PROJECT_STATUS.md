@@ -1,47 +1,43 @@
-# Project status after first-round baseline
+# 项目状态：第一轮基线实验后
 
-## Completed results already observed
+## 已完成的实验结果
 
-| Dataset | MLP Macro-F1 | SAGE Macro-F1 | SAGE Gain | MLP Minority-F1 | SAGE Minority-F1 | SAGE Gain |
+| 数据集 | MLP Macro-F1 | SAGE Macro-F1 | SAGE 增益 | MLP Minority-F1 | SAGE Minority-F1 | SAGE 增益 |
 |---|---:|---:|---:|---:|---:|---:|
 | label_preserving | 0.3952 | 0.4627 | +0.0675 | 0.4227 | 0.4873 | +0.0646 |
 | class_balanced_khop | 0.4114 | 0.5868 | +0.1754 | 0.4510 | 0.6239 | +0.1728 |
 | temporal_balanced | 0.1255 | 0.1931 | +0.0675 | 0.1852 | 0.2448 | +0.0596 |
 
-## Current conclusion
+## 当前结论
 
-The first-round baseline is complete. The next useful step is not to train more ordinary GNNs blindly, but to export detailed per-class results and diagnose temporal/generalization failures.
+第一轮基线实验已完成。下一步不是盲目训练更多普通 GNN，而是导出详细逐类结果并诊断时间/泛化失败原因。
 
-## Stage 2 code update in this package
+## 本包中的代码更新
 
-This package now supports:
+本包现在支持：
 
-1. Per-class precision / recall / F1 export.
-2. Classification report export.
-3. Raw and normalized confusion matrix export.
-4. Node-level prediction CSV export.
-5. Post-hoc detailed evaluation from existing checkpoints.
-6. Benchmark summary table generation from `experiments/runs/*/results.csv`.
-7. Removal of old top-level modules and GUI code.
+1. 逐类精确率 / 召回率 / F1 导出
+2. 分类报告导出
+3. 原始和归一化混淆矩阵导出
+4. 节点级预测 CSV 导出
+5. 从已有 checkpoint 进行事后详细评估
+6. 从 experiments/runs/*/results.csv 生成基准汇总表
+7. 移除旧的顶层模块和 GUI 代码
 
-## Immediate local commands
+## 立即可用的本地命令
 
-If your previous run directories contain checkpoints:
+如果你之前的运行目录包含 checkpoint：
 
-```powershell
-python scripts/export_detailed_eval.py --run-dir experiments/runs/20260615_000734_class_balanced_khop_mlp-sage --data data/processed/protocols/class_balanced_khop.pt --models mlp sage --device cpu
-python scripts/export_detailed_eval.py --run-dir experiments/runs/20260615_000802_label_preserving_mlp-sage --data data/processed/protocols/label_preserving.pt --models mlp sage --device cpu
-python scripts/export_detailed_eval.py --run-dir experiments/runs/20260615_000816_temporal_balanced_mlp-sage --data data/processed/protocols/temporal_balanced.pt --models mlp sage --device cpu
+\\\powershell
+python scripts/export_detailed_eval.py --run-dir experiments/runs/<目录名> --data data/processed/protocols/<协议>.pt --models mlp sage --device cpu
 python scripts/summarize_benchmark_runs.py --runs-dir experiments/runs --out experiments/summary/baseline_protocol_comparison.csv
-```
+\\\
 
-If old run directories do not contain checkpoints, rerun the three benchmark commands once. The updated code will automatically save all detailed outputs.
+## 获得新详细数据后的下一步
 
-## Next stage after obtaining new detailed data
+在逐类表格和混淆矩阵可用后：
 
-After the per-class tables and confusion matrices are available:
-
-1. Identify which classes fail most under `temporal_balanced`.
-2. Analyze whether PONZI / RANSOMWARE / MIXER / BRIDGE are being confused with INDIVIDUAL, EXCHANGE or BET.
-3. Compare `class_balanced_khop` vs `temporal_balanced` per class.
-4. Then implement EdgeGatedSAGE / ETD-SAGE with a clear target: improve the temporal and minority-class failure cases.
+1. 识别 temporal_balanced 下哪些类别失败最严重。
+2. 分析 PONZI / RANSOMWARE / MIXER / BRIDGE 是否与 INDIVIDUAL、EXCHANGE 或 BET 混淆。
+3. 对比 class_balanced_khop vs temporal_balanced 各类别表现。
+4. 然后实现 EdgeGatedSAGE / ETD-SAGE，明确目标：改善时间和少数类失败情况。

@@ -27,6 +27,8 @@ DEFAULT_MODEL_PARAMS = {
     'graphsage': {'hidden_channels': 128, 'num_layers': 3, 'dropout': 0.3},
     'edge_transformer': {'hidden_channels': 128, 'num_layers': 3, 'heads': 2, 'dropout': 0.3},
     'etd_sage': {'hidden_channels': 128, 'num_layers': 3, 'dropout': 0.3, 'edge_hidden': 64},
+      'edge_gated_sage': {'hidden_channels': 128, 'num_layers': 3, 'dropout': 0.3, 'edge_hidden': 64, 'use_direction': True},
+      'egs': {'hidden_channels': 128, 'num_layers': 3, 'dropout': 0.3, 'edge_hidden': 64, 'use_direction': True},
 }
 
 
@@ -234,3 +236,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
