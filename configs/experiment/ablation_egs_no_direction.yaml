@@ -1,0 +1,4 @@
+model:
+  name: edge_gated_sage
+  params:
+    use_direction: false
