@@ -59,6 +59,24 @@
 
 最低完成 147 篇现有发现池初筛、60 篇来源核验和 30 篇 Tier-A 全文阅读。若连续两轮针对性检索仍发现新的数据集、任务 formulation 或候选问题最近邻工作，则继续，不因达到数量下限而停止。
 
+## Gate 1 进度快照（2026-08-19）
+
+- 发现池：147/147 已完成元数据与摘要初筛。
+- 官方元数据：64 篇已通过 Crossref、arXiv 或出版社一手记录核验；其中 28 篇当前高价值条目已清洗进入 `references.bib`。
+- 全文证据：32 篇已完成面向当前 RQ 的正文检索与主张审计；其中 8 篇完成 Undermind PDF 逐篇定位，24 篇使用 Firecrawl 索引全文或出版社 HTML 做定向内文核验。后 24 篇仍须在最终引用前映射到稳定 PDF 页码或正式版章节，不能把“正文命中”夸大为逐页通读。
+- 专项检索：数据/标签、时间泄漏、开放世界三组 Undermind 深检已完成；预算队列与实体解析已完成 Firecrawl/Tavily 独立反证，仍需在 Undermind 配额恢复后补同主题深检。
+- 当前决策：原“单位一致的预算化 AML 队列”因 `Mal26` 高度重合而 No-Go；“选择性标签下效用识别”因标准理论覆盖而 No-Go；“时间化实体解析不确定性”仅为 Conditional Go；“来源/同名实体捷径”因缺失 node lineage 与类别支持而 Gate 2 No-Go。当前仍没有通过全部 Gate 的主方向。
+
+### 本地 252M 数据 provenance 闸门
+
+- 只读检查 PostgreSQL `information_schema`：当前数据库仅有 `public.node_features` 和 `public.transaction_edges`。
+- 与实体映射相关的可见字段只有 `alias`、`cluster_size`、`cluster_num_edges`、`cluster_num_cc`、`cluster_num_nodes_in_cc`；没有原始地址、address→entity mapping、聚类证据边、heuristic 版本或历史 union events。
+- 仓库 `build_graph.py` 直接读取聚合后的 `alias` 和 entity-level edges，无法从现有表逆推出随时间变化的 partition `H_t`。
+- 结论：CP-02 不能依赖当前资产直接执行；若无法从原数据发布方取得上游映射/构建过程和独立真值，则该方向 No-Go。`cluster_size` 等汇总特征不等于可审计 provenance。
+- 补充检查：`bitcoin-dataset/dataset/dataset/` 的约 73.6 GB 文件是 PostgreSQL directory-format dump；其 `toc.dat` 同样只声明 `node_features` 与 `transaction_edges`，没有隐藏的 mapping table。
+- `bitcoin-dataset/addresses.csv` 有 103,812 条地址级标签记录、`address/entity/category/source` 字段，其中 39,275 条有非空实体名称。它可支持 CP-05 的标签来源审计，但没有 cluster alias、union block height、heuristic reason 或 label discovery time，不能恢复 CP-02 所需的 `H_t` lineage。
+- 去除 231 个空类别行后有 103,581 个可分类地址行；其中 39,047 行同时有类别与规范化实体名称，只对应 697 个名称。地址行随机 40/30/30 诊断中，测试命名地址约 98.9% 在训练集出现同名实体，name lookup accuracy 约 0.987；但这些 raw rows 无法与最终 node 对齐，不能据此声称原论文 node split 已发生泄漏。
+
 ## 检索日志
 
 | 日期 | 检索 | 状态 | 返回规模 | 用途 | 说明 |
@@ -70,13 +88,20 @@
 | 2026-08-19 | Budgeted AML Risk Ranking | fallback discovery completed | 27 条原始命中 | 有限调查预算与人机协同 | Undermind 额度限制；Firecrawl 论文索引与 Tavily 补检，待 DOI 去重和全文核验 |
 | 2026-08-19 | Entity Resolution Error Propagation | fallback discovery completed | 27 条原始命中 | 地址聚类与下游误差 | Firecrawl 论文索引与 Tavily 补检，待 DOI 去重和全文核验 |
 | 2026-08-19 | Temporal/OOD protocol cross-check | fallback discovery completed | 24 条原始命中 | 时间泄漏与模型排序反证 | Firecrawl 与 Tavily 补检；不替代原始论文全文 |
+| 2026-08-19 | Label provenance and identity shortcut audit | independent counter-search completed | 4 个 2025–2026 关键数据/评测邻居 | 来源、同名实体、support 与 split | Firecrawl/Tavily + 本地只读统计；CP-11 因缺失 node lineage 判为 No-Go |
+
+### 来源核验台账（60 篇）
+
+`Web19, Elm23, Sch24, Bel24, Son24, Lor20, Edd21, Car22, Dep24, Pha26, Cha26, Wu20, Mos21, Mul26, Kha26, Mag26, Mal26, Wu24, Ara24, Saf26, Fro19, Xia22b, Gom24, Jen23, Deu22, Che23, Huo25, Joh26, Dep25, Har18, Che25b, Sch24c, Hua22, Li20, Gom22, Alt23, Hua18, Che26b, Luo23, San25, Nic23b, Zho24, Sho26, Oli21, Cor26, Lin24, Alj26, Anu26, Che25d, Sha22, Elo21, Tar23, Har16, Alj25, Din23b, Wah23, Xio26, Shi25, Wu25, Poc22, Real25, Dib26, Mba26, Ama26`。
+
+该台账只证明论文身份和版本可定位，不代表 60 篇均支持当前候选问题。正式年份以一手元数据为准；例如 `Sch24` 的正式 Scientific Data 版本发表于 2025 年，`Dep24` 的卷期年份与预印本键也不一致。
 
 ### 检索降级规则
 
 - Undermind 深检或 PDF 配额不足时，优先使用 arXiv、Crossref 等 T1 官方接口，再使用 Firecrawl 论文索引、Tavily、Semantic Scholar 等发现工具。
 - 搜索引擎摘要和聚合页面只产生 `discovered` 记录；相同摘要被多个工具返回不构成独立证据。
 - 对关键结论回到 DOI、出版社页面、官方数据说明或论文全文，并记录页、节、表或图。
-- 当前 Undermind PDF 阅读配额中断后，已完成 8 篇全文定位；剩余任务在额度恢复后继续，不把失败调用计入完成数。
+- 当前 Undermind 深检与 PDF 调用仍受配额限制；失败调用不计入完成数。独立全文索引可用于正文定位，但最终证据优先回到正式 PDF、出版社 HTML 或官方数据说明。
 
 ## Zotero 长期文献库规则
 

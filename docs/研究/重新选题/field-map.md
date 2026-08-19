@@ -41,17 +41,22 @@
 - BABD address behavior data：`Xia22b`
 - Ethereum heist、ransomware 与多链资源：`Wu24`、`Ara24`
 - synthetic AML data and transaction generators：`Alt23`
+- Real-CATS 与未来日 Sup-CATS：`Real25`
+- ChainAbuse→Elliptic++ 跨数据测试与地址拓扑模型：`Dib26`
+- 10M 多链地址标签数据：`Mba26`（5.3M 为启发式推断标签，不能与 4.7M validated labels 混写）
+- HackForums 证据支持的 Bitcoin 非法地址：`Ama26`
 
-其中 `Web19`、`Elm23`、`Bel24`、`Sch24`、`Son24`、`Kha26`、`Mag26`、`Mul26` 已完成首轮全文定位；其他条目仍需逐项核验规模、标签来源、时间可用性和限制。
+当前已有 30 篇完成面向本研究问题的正文证据审计，详见 `dataset-task-evaluation-matrix.md`。其中 8 篇为 Undermind PDF 逐篇定位，22 篇为 Firecrawl 索引全文或出版社 HTML 的定向内文核验；后者在进入最终主张前仍须映射到稳定 PDF 页码。
 
 ## 替代检索新增的反证邻居
 
-- `Mal26`：直接研究 transaction-level 与 actor-level AML 队列在固定预算下是否一致；与“单位一致的预算化评测”高度重合，必须全文反证。
+- `Mal26`：直接研究 transaction-level 与 address-level AML 队列在固定预算下是否一致；论文虽使用 actor 一词，其行动单位仍是 blockchain address，不是已解析的真实实体。与“单位一致的预算化评测”高度重合，已完成全文反证。
 - `2603.04328`（Algorithmic Compliance and Regulatory Loss in Digital Assets）：声称前向/滚动评估下静态分类指标高估监管效果；目前仅为检索摘要，需核验协议和独立性。
-- `1906.12221`（Safeguarding the Evidential Value of Forensic Cryptocurrency Investigations）：从司法证据角度审视聚类启发式和 attribution tags；可约束实体解析方向的主张边界。
-- `2403.00523`（Assessing the Efficacy of Heuristic-Based Address Clustering for Bitcoin）：直接评估聚类启发式；与下游误差传播方向构成最近邻。
+- `Fro19` / `1906.12221`（Safeguarding the Evidential Value of Forensic Cryptocurrency Investigations）：从司法证据角度审视聚类启发式和 attribution tags；可约束实体解析方向的主张边界。
+- `Sch24c` / `2403.00523`（Assessing the Efficacy of Heuristic-Based Address Clustering for Bitcoin）：直接评估聚类启发式；与下游误差传播方向构成最近邻。该键不得与 Scientific Data 数据集论文 `Sch24` 混用。
+- `Sch23cj` / `2311.12491` 与 `Sto21` / `2109.10229`：CoinJoin 识别依赖协议实现、少量手工交易或启发式一致性，没有覆盖所有协议的完整真值；因此“CoinJoin-aware”只是一种误差缓解，不能作为实体映射无误的证明。
 
-这些条目由 Firecrawl/Tavily 发现，尚未因摘要而升入核心结论。
+上述条目均已回到正文内文；其中仍为 preprint 的工作必须保留出版状态，且最终数值主张需用正式 PDF 页码复核。
 
 ## 评测风险轴
 
@@ -83,3 +88,16 @@
 - 需要寻找图方法在严格协议下仍有独立增益的反证，而非只寻找失败案例。
 - 需要建立正式版本与 preprint 的去重映射。
 - Undermind PDF 阅读曾出现传输错误；失败不能被误记为完成全文核验。
+
+## 理论组件反证结果
+
+- `Bek18sar` 与 `Bek19` 已分别形式化 SAR 和超越 SCAR 的 biased-PU 学习；`Fur22` 进一步讨论 posterior 与 propensity 的联合可识别条件。由此，选择性公开标签下的 SCAR/SAR 恢复、propensity 修正和基本不可识别性不能作为新的 Bitcoin 理论贡献。
+- `Noc21` 已从一般监督学习角度研究 record-linkage error 对下游学习的影响及 margin 缓冲。因此，实体解析方向不能声称“首次研究 linkage error 对 ML 的影响”；唯一可能的差异是 as-of Bitcoin partition、错误集中于高优先级尾部、以及真实队列稳定性证据的联合。
+- 当前两个理论 pivot 均已降级：CP-03 为 No-Go；CP-02 只有在取得可重建 union lineage、独立 entity truth 和真实高分尾部效应后才 Conditional Go。
+
+## 标签来源与同名实体反证
+
+- 本地 `addresses.csv` 的 103,581 个非空类别地址中，source-only 随机切分准确率约 0.748，但 macro-F1 仅约 0.381；来源是强 coverage/selection signal，不等于模型已经直接读取来源特征。
+- 39,047 个带类别且有实体名称的地址只对应 697 个名称；地址行随机切分下约 98.9% 的测试命名地址可在训练集找到同名实体。该结果证明 raw-address 评测的 identity lookup 风险，不能外推为 34,098 个 entity nodes 已泄漏。
+- 当前缺失 `address→script→cluster/node` lineage、冲突丢弃日志和 node-level source/time 字段；这是从地址表诊断到实体图结论之间不可省略的推断桥。
+- `Saf26` 已对 Elliptic 做透明度与 split 隔离审计；`Real25` 已构造未来日 Sup-CATS；`Dib26` 已做跨数据测试。因此 CP-11 只有在发布可审计 lineage、support-matched source/identity/time splits 并复算模型排名时才可能恢复新颖性，当前为 No-Go。
