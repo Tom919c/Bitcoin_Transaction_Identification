@@ -2,7 +2,9 @@
 
 ## 当前状态
 
-**Decision: GATE 2 NO-GO — 条件主方向未通过事件与 artifact 可行性门，只保留一次 BlackSuit/Royal 零模型判别 pilot。**
+**Decision: RETURN TO GATE 2 — BlackSuit/Royal 零模型 pilot 未通过完整证据门，CP-04+CP-07 关闭，当前没有推荐主方向。**
+
+BlackSuit/Royal 的精确链上 target-construction 子测试成功：原定 UTC 日内 1,182,309 个输出只有一个等额 candidate，±1 日三日合计 3,154,828 个输出仍只有该候选；两个冻结 `c` 前 registry 均不包含它。但 DOJ 公开材料遮盖 txid/address，日期按 `on or about` 理解，CS-1 和商业工具上游不可审计。独立 Devil's Advocate 因 construct validity、来源独立性 unknown、永久 artifact 与伦理风险判定完整 pilot No-Go，Research Director 接受该反证。详见 `gate2-prospective-attribution/phase6_decision/black-suit-pilot/pilot-result.md`。
 
 Gate 2 已完成 51 篇去重证据库、8 篇全文深读、14 个事件/家族审计，以及 5 个外部 artifact 和本地 252M 图核验。结果为 0 个完整 Go 事件；BlackSuit/Royal、Upbit、Harmony、Twitter 仅 Conditional，其中前三个分别受目标映射或跨链/VASP 隐边限制，Twitter 规模过小。现有 252M 终态 entity graph 又缺 address/txid/block hash/address-to-alias lineage，不能承载地址级法律证据回填。因此 CP-04+CP-07 当前不得进入正式 benchmark 或模型开发。完整证据见 `gate2-prospective-attribution/phase6_decision/gate2-report.md`。
 
@@ -24,9 +26,9 @@ Gate 2 已完成 51 篇去重证据库、8 篇全文深读、14 个事件/家族
 
 综合创新性、证据与可行性后，当前组合为：
 
-- **条件主方向**：CP-04 与 CP-07 的组合——未来独立公开归因的前瞻恢复。研究在历史 `t0` 冻结图、seed 与候选全集后，有限预算排序能否提前找回后来被**独立原始证据**公开归因的单位。它只获准先做至少 3 个事件家族的档案、首见时间和来源依赖性 pilot；不得先训练模型，也不得称“未来犯罪预测”。
+- **已关闭方向**：CP-04 与 CP-07 的组合——未来独立公开归因的前瞻恢复。唯一获准的 BlackSuit/Royal pilot 无法取得公开一手 txid/address 或可核验独立 root evidence，触发预先写明的 No-Go；未来只有获得新的直接公开证据才可重审。
 - **替代方向一**：CP-02，时间化实体映射误差传播与 decision-conditioned 稳定性；前提仍是可重建 union lineage、独立实体真值和真实高分尾部效应。
-- **替代方向二**：CP-12，可追溯、严格时点的 entity benchmark；当前 No-Go as main direction，仅作为 CP-04 所需的最小 provenance 支撑层。只有 artifact 可发布且产生跨 cutoff 稳定的实质模型选择变化后才重审。
+- **替代方向二**：CP-12，可追溯、严格时点的 entity benchmark；当前 No-Go as main direction。CP-04 关闭后不再为其单独建设 provenance 支撑层。
 - **低风险 fallback**：CP-05，252M 实体类型标签的来源、噪声与严格时间/来源审计；主张限定为 entity type。若 CP-12 的重建或发布许可失败，则退回此方向，但它单独不足以支撑高质量顶会主线。
 - **明确放弃**：普通固定预算队列、单纯 MIH 指标比较、把 entity type 重命名为 AML risk、没有新审计数据的通用 PU/MNAR 理论套用、缺失 lineage 时直接声称来源/同名实体泄漏，以及没有统一真值的跨链迁移。
 
@@ -38,13 +40,13 @@ Gate 2 已完成 51 篇去重证据库、8 篇全文深读、14 个事件/家族
 - 五组独立补充检索完成；另完成“未来独立证据”和“provenance-preserving 重建”两组针对性深检。Undermind 与 Firecrawl/Tavily 两条独立检索链未发现同时固定历史候选全集、审计原始证据独立性并用未来确认做预算评测的公开工作；`Gom22`、`Che23`、`Real25`、`Ama26` 是 CP-04 的关键最近邻。CP-12 则被 `Saf26`、`Len26`、ORBITAAL、`Jal25` 与通用 benchmark 工作显著覆盖。
 - 8–12 张候选问题卡完成。**已完成 12 张。**
 - 排名前三方向完成多轮最近邻与同期工作反证搜索。
-- Devil's Advocate 已否决 CP-03 和当前形态的 CP-12，把 CP-02 降为 Conditional，并将 CP-04+CP-07 列为优先的 Conditional Go；其未关闭风险是未来证据是否真正独立、首见时间是否可核验以及候选全集能否历史冻结。
+- Devil's Advocate 已否决 CP-03、当前形态的 CP-12 和 BlackSuit/Royal 完整 pilot，把 CP-02 降为 Conditional。CP-04+CP-07 因未来证据不能直接定位、来源独立性 unknown 和长期 artifact 不成立而关闭。
 
 ## 最终输出槽位
 
-- **推荐主方向**：CP-04 + CP-07（conditional；仅进入 Gate 2 archive/independence pilot）
+- **推荐主方向**：暂无；返回 Gate 2，重新生成并比较可由现有或可获得数据直接证伪的问题
 - **替代方向一**：CP-02（blocked on new provenance/ground truth）
-- **替代方向二**：CP-12（当前主线 No-Go；仅作 provenance 支撑，满足严格 artifact 门槛后再审）
+- **替代方向二**：CP-12（当前主线 No-Go；不单独建设，取得完整 lineage 后再审）
 - **低风险 fallback**：CP-05
 - **明确放弃方向**：CP-01、CP-03、CP-10、CP-11；CP-09 在统一真值到位前 No-Go；CP-12 当前形态不得作为主线
 
@@ -65,4 +67,4 @@ Gate 2 已完成 51 篇去重证据库、8 篇全文深读、14 个事件/家族
 
 ## 用户确认 Gate
 
-Research Director 建议用户先确认是否允许 CP-04+CP-07 进入 Gate 2 archive/independence pilot。确认只授权至少 3 个事件家族的历史档案、证据传播链、首次公开时间、冻结 seed/候选全集与许可审计；在该门槛通过前，不训练模型、不冻结完整实验协议、不升级到 252M 级全图实验。CP-12 只实现 pilot 必需的最小 provenance，不单独启动全量重建。
+CP-04+CP-07 的人工确认 Gate 已执行并得到 No-Go。下一轮只授权返回 Gate 2：结合当前 252M entity-type 资产、可合法获取的新数据和未被最近邻覆盖的理论/评测缺口，重新生成与反证候选问题。在用户确认新主问题前，不训练模型、不冻结完整实验协议、不升级到 252M 级全图实验。

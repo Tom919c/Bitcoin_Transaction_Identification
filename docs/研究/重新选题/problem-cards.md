@@ -46,9 +46,9 @@
 
 | 排名 | 候选 | 重要性 | 证据质量 | 可行性 | 乘积 | 当前决定 |
 |---:|---|---:|---:|---:|---:|---|
-| 1 | CP-04 + CP-07 未来独立公开归因的前瞻恢复 | 5 | 4 | 2 | 40 | **条件主方向；先做档案与独立性 Gate 2 pilot** |
+| — | CP-04 + CP-07 未来独立公开归因的前瞻恢复 | 5 | 4 | 1 | 20 | **BlackSuit/Royal 完整 pilot No-Go；方向关闭** |
 | 2 | CP-05 252M 实体类型标签审计 | 3 | 4 | 4 | 48 | 低风险 fallback；不足以单独支撑顶会主线 |
-| 3 | CP-12 可追溯、严格时点的 Bitcoin 实体图 benchmark 重建 | 5 | 5 | 1 | 25 | 当前 No-Go；只作主方向的最小 provenance 支撑层 |
+| 3 | CP-12 可追溯、严格时点的 Bitcoin 实体图 benchmark 重建 | 5 | 5 | 1 | 25 | 当前 No-Go；CP-04 关闭后不单独建设 |
 | 4 | CP-06 PU 条件下的主动调查 | 4 | 2 | 3 | 24 | 数据到位前暂缓 |
 | 5 | CP-02 时间化实体映射误差的下游传播与认证 | 5 | 4 | 1 | 20 | 理论窗口存在，但当前数据门槛失败 |
 | 6 | CP-07 事件种子后的严格时间前向发现 | 4 | 2 | 2 | 16 | 已并入 CP-04，不独立推进 |
@@ -59,7 +59,7 @@
 | — | CP-01 普通固定预算队列 | 4 | 5 | 5 | 100 | **直接重合，硬 No-Go** |
 | — | CP-10 单纯聚类准确率比较 | 3 | 5 | 4 | 60 | **直接重合，硬 No-Go** |
 
-硬重合和理论直接覆盖优先于乘积分数；高分但已有标准结论或缺失必要数据的方向不能进入推荐组合。CP-04+CP-07 是当前唯一值得进入 Gate 2 的主候选，但尚未获得“正式 Go”，更不能据此开始新模型开发。CP-12 经独立反方审查降为支撑性 provenance 层。
+硬重合和理论直接覆盖优先于乘积分数；高分但已有标准结论或缺失必要数据的方向不能进入推荐组合。CP-04+CP-07 的 BlackSuit/Royal target-construction 虽在 ±1 日保持唯一，但公开法律材料遮盖 txid/address，来源独立性不可核验，完整 pilot No-Go。当前没有候选获得“正式 Go”，不得开始新模型开发。
 
 ## 创新性反证协议
 
@@ -151,7 +151,7 @@
 - **Failure / No-Go**：没有可核验首见时间；未来标签是 seed attribution 的复制；seed/候选/未来标签来自同一标签包；少于 3 个独立事件家族；无法冻结 `C(e,t0)`；或强 temporal BFS 已解释全部收益。
 - **Ethics**：只使用已公开且可追溯的原始证据；公开确认不等于法律定罪；对个人地址避免新增去匿名化，不对未确认项作无罪或低风险判断。
 - **Strongest rejection**：所谓 future label 只是原有 seed 的延迟转载；候选由 seed 邻域生成，模型只学习邻近性，未确认又不是负类，因此“发现”和 precision 主张均不成立。
-- **Score / decision**：5×4×2=40；**条件主方向，只授权档案/独立性 pilot**。
+- **Score / decision**：5×4×1=20；**完整 pilot No-Go，方向关闭**。只有新的公开一手 txid/address 和可核验独立 root evidence 到位才可重审。
 
 ## CP-05 — 252M 实体类型标签的来源、噪声与时间审计
 
@@ -238,4 +238,4 @@
 - **Ethics and misuse risk**：发布可追溯链路可能增强去匿名化；公开物应最小化真实个人身份，保留公开证据引用而不额外扩散敏感映射，并明确 heuristic entity 不是法律上的个人或受益所有人。
 - **Strongest reviewer rejection argument**：这是工程化数据清洗；评测卫生原则已由 OGB/GOOD/TGB 与 `Saf26` 覆盖，且没有新的任务、理论或足够大的模型排名反转。
 - **Independent Devil's Advocate**：Sch24、ORBITAAL、`Jal25`、`Len26`、`Saf26` 与 OGB/GOOD/TGB 已覆盖实体时间图、原始时序 ETL、多源冲突和通用评测规范的大部分组件；当前缺少的历史 union/claim-time 信息无法从最终资产补录。将其作为主线会面临“已有资产再提取 + 常规 split”的直接拒稿。
-- **Score / decision**：5×5×1=25；**当前 No-Go as main direction**。仅作为 CP-04 pilot 所需的最小 provenance 支撑层；只有逐 claim/union lineage 可发布且 pilot 显示跨 cutoff 稳定的实质模型选择变化，才可重审为 Datasets & Benchmarks 方向。
+- **Score / decision**：5×5×1=25；**当前 No-Go as main direction**。CP-04 关闭后不单独建设；只有逐 claim/union lineage 可发布且新 pilot 显示跨 cutoff 稳定的实质模型选择变化，才可重审为 Datasets & Benchmarks 方向。

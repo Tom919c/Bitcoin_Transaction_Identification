@@ -6,7 +6,7 @@
 
 “未来独立公开归因的前瞻恢复”作为完整 formulation 暂具中等置信度的新颖性，但当前没有可执行的数据基础。14 个事件/家族中没有一个同时满足历史 seed、冻结候选全集、未来 address/tx 级归因、独立 root evidence、可验证 first-public time 和合法可重放 artifact。不能以新颖性替代 ground truth。
 
-只保留一个 **last-chance feasibility pilot**：BlackSuit/Royal 的零模型链上唯一匹配与证据依赖审计。它不是正式实验，不授权训练模型；失败即关闭 CP-04+CP-07。
+最后一次 **feasibility pilot** 已执行。BlackSuit/Royal 在原定 UTC 日及 ±1 日范围内确有唯一等额链上 candidate，但 DOJ 公开材料遮盖 txid/address，来源独立性只能判为 unknown，且长期证据 artifact 不完整。完整 pilot 判定 No-Go，CP-04+CP-07 按预注册关闭。
 
 ## Gate 2 证据规模
 
@@ -30,7 +30,7 @@
 
 | 方向 | Gate 2 后决定 | 说明 |
 |---|---|---|
-| CP-04 + CP-07：未来独立公开归因 | **No-Go now**；仅保留一次零模型 pilot | 0/14 完整合格事件；不足以建 benchmark |
+| CP-04 + CP-07：未来独立公开归因 | **No-Go；已关闭** | BlackSuit target-construction 子测试通过，但直接法律定位、独立性和永久 artifact 门失败 |
 | CP-02：时间化实体映射误差传播 | **Blocked / Conditional** | 本地无 union lineage、独立 entity ground truth 或 address→alias 映射 |
 | CP-12：严格时点 provenance benchmark | **No-Go as main** | 多组件已有工作，且原始 lineage 无法从终态资产恢复 |
 | CP-05：252M entity-type 标签审计 | **Feasible fallback** | 可做、主张诚实；单独贡献大概率不足顶会，除非发现可复现的大规模协议/模型排序反转 |
@@ -42,7 +42,7 @@
 
 ## 唯一获准的下一步
 
-执行 `preregistration-pilot.md`：对 BlackSuit/Royal 做确定性、零模型、可失败的 target construction test。成功后也只说明一个事件可用；仍需再找到两个独立事件才能重开正式 benchmark Gate。失败后关闭该方向，回到新一轮问题生成，优先寻找能由现有 252M entity-type 数据或可获取的新 address-level provenance 数据真实支撑的问题。
+返回 Gate 2 开展新一轮问题生成与比较，优先寻找能由现有 252M entity-type 数据或可合法获取的新数据直接支撑、且未被最近邻覆盖的问题。BlackSuit 负结果与可重放脚本保留为证据，不继续扩展事件，不训练模型。
 
 ## 禁止事项
 
