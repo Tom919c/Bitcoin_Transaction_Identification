@@ -1,0 +1,14 @@
+searches:
+  - query: "cryptocurrency malicious address early detection temporal evaluation"
+    num_results: 100
+    venues:
+      kdd: [2023, 2024, 2025, 2026]
+      neurips: [2024, 2025]
+      icml: [2024, 2025, 2026]
+  - query: "bitcoin cybercrime attribution public reports provenance"
+    num_results: 100
+  - query: "bitcoin ransomware seed tracing future labels"
+    num_results: 100
+output:
+  root: "docs/研究/重新选题/gate2-prospective-attribution/phase1_frontier/search_results"
+  overwrite: false

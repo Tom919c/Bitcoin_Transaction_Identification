@@ -2,7 +2,9 @@
 
 ## 当前状态
 
-**Decision: CONDITIONAL — Gate 1 已形成条件主方向，等待用户确认是否进入 Gate 2 证据可得性试验。**
+**Decision: GATE 2 NO-GO — 条件主方向未通过事件与 artifact 可行性门，只保留一次 BlackSuit/Royal 零模型判别 pilot。**
+
+Gate 2 已完成 51 篇去重证据库、8 篇全文深读、14 个事件/家族审计，以及 5 个外部 artifact 和本地 252M 图核验。结果为 0 个完整 Go 事件；BlackSuit/Royal、Upbit、Harmony、Twitter 仅 Conditional，其中前三个分别受目标映射或跨链/VASP 隐边限制，Twitter 规模过小。现有 252M 终态 entity graph 又缺 address/txid/block hash/address-to-alias lineage，不能承载地址级法律证据回填。因此 CP-04+CP-07 当前不得进入正式 benchmark 或模型开发。完整证据见 `gate2-prospective-attribution/phase6_decision/gate2-report.md`。
 
 现有 147 篇 deep-search 摘要提出“因果时间、跨数据集、有限调查预算下的风险排序基准”作为主方向，但该结论目前只视为待检验假设，不是项目决定。
 
