@@ -45,8 +45,11 @@
 - ChainAbuse→Elliptic++ 跨数据测试与地址拓扑模型：`Dib26`
 - 10M 多链地址标签数据：`Mba26`（5.3M 为启发式推断标签，不能与 4.7M validated labels 混写）
 - HackForums 证据支持的 Bitcoin 非法地址：`Ama26`
+- ORBITAAL 最终 entity-address pool 与多尺度时间图：`Coq25`
+- 高保真 script/transaction/block 时序异构图：`Jal25`
+- 32M 多源地址标签与冲突消解：`Len26`
 
-当前已有 30 篇完成面向本研究问题的正文证据审计，详见 `dataset-task-evaluation-matrix.md`。其中 8 篇为 Undermind PDF 逐篇定位，22 篇为 Firecrawl 索引全文或出版社 HTML 的定向内文核验；后者在进入最终主张前仍须映射到稳定 PDF 页码。
+当前已有 37 篇完成面向本研究问题的正文证据审计，详见 `dataset-task-evaluation-matrix.md`。其中 8 篇为 Undermind PDF 逐篇定位，29 篇为 Firecrawl 索引全文、出版社 HTML 或官方 PDF 的定向内文核验；后者在进入最终主张前仍须映射到稳定 PDF 页码。
 
 ## 替代检索新增的反证邻居
 
@@ -55,6 +58,9 @@
 - `Fro19` / `1906.12221`（Safeguarding the Evidential Value of Forensic Cryptocurrency Investigations）：从司法证据角度审视聚类启发式和 attribution tags；可约束实体解析方向的主张边界。
 - `Sch24c` / `2403.00523`（Assessing the Efficacy of Heuristic-Based Address Clustering for Bitcoin）：直接评估聚类启发式；与下游误差传播方向构成最近邻。该键不得与 Scientific Data 数据集论文 `Sch24` 混用。
 - `Sch23cj` / `2311.12491` 与 `Sto21` / `2109.10229`：CoinJoin 识别依赖协议实现、少量手工交易或启发式一致性，没有覆盖所有协议的完整真值；因此“CoinJoin-aware”只是一种误差缓解，不能作为实体映射无误的证明。
+- `Coq25` / ORBITAAL：发布每个最终用户的地址列表、stream graph 和多尺度 snapshots，但其用户是对全时段共同输入图求连通分量后再与 WalletExplorer 合并；作者明确构建代码因硬件定制而不可复现。因此它能提供终态映射参照，不能直接提供 as-of union lineage。
+- `Jal25`：NeurIPS 2025 数据集保留 Script、Tx、Block 节点和 block-height 边，避免先验实体聚合；可作为 CP-12 的上游重建底座，但论文没有提供 off-chain labels 或实体解析 benchmark。
+- `Len26`：已直接覆盖多源地址标签冲突，构建 32,059,886 条标签并结合 truth discovery 与 MIH 处理地址/cluster 冲突；未评测严格时点的标签迁移、下游 split 或模型排名。CP-12 必须超越“冲突消解”本身。
 
 上述条目均已回到正文内文；其中仍为 preprint 的工作必须保留出版状态，且最终数值主张需用正式 PDF 页码复核。
 
@@ -94,6 +100,7 @@
 - `Bek18sar` 与 `Bek19` 已分别形式化 SAR 和超越 SCAR 的 biased-PU 学习；`Fur22` 进一步讨论 posterior 与 propensity 的联合可识别条件。由此，选择性公开标签下的 SCAR/SAR 恢复、propensity 修正和基本不可识别性不能作为新的 Bitcoin 理论贡献。
 - `Noc21` 已从一般监督学习角度研究 record-linkage error 对下游学习的影响及 margin 缓冲。因此，实体解析方向不能声称“首次研究 linkage error 对 ML 的影响”；唯一可能的差异是 as-of Bitcoin partition、错误集中于高优先级尾部、以及真实队列稳定性证据的联合。
 - 当前两个理论 pivot 均已降级：CP-03 为 No-Go；CP-02 只有在取得可重建 union lineage、独立 entity truth 和真实高分尾部效应后才 Conditional Go。
+- 普通 benchmark hygiene 也不是理论创新：终态 partition 的非预见性、类别支持缺失和平均误差不控制尾部决策均可作为协议检查，但不能单独充当顶会定理。CP-12 的成立依赖可发布 artifact 与改变既有结论的实证 finding。
 
 ## 标签来源与同名实体反证
 
@@ -101,3 +108,11 @@
 - 39,047 个带类别且有实体名称的地址只对应 697 个名称；地址行随机切分下约 98.9% 的测试命名地址可在训练集找到同名实体。该结果证明 raw-address 评测的 identity lookup 风险，不能外推为 34,098 个 entity nodes 已泄漏。
 - 当前缺失 `address→script→cluster/node` lineage、冲突丢弃日志和 node-level source/time 字段；这是从地址表诊断到实体图结论之间不可省略的推断桥。
 - `Saf26` 已对 Elliptic 做透明度与 split 隔离审计；`Real25` 已构造未来日 Sup-CATS；`Dib26` 已做跨数据测试。因此 CP-11 只有在发布可审计 lineage、support-matched source/identity/time splits 并复算模型排名时才可能恢复新颖性，当前为 No-Go。
+- CP-11 的诊断、CP-02 的 as-of clustering 和 CP-05 的标签审计现合并为 CP-12；组合后的增量必须由同一可重放 lineage artifact 支撑，不能把三个普通审计简单拼接成贡献。
+
+## 独立反方审查后的条件主方向
+
+- CP-12 经反方审查降为当前主线 No-Go：Sch24、ORBITAAL、`Jal25`、`Len26`、`Saf26` 与 OGB/GOOD/TGB 已覆盖绝大多数组件，当前发布资产又不能反推出历史 union 与逐 claim 首次公开时间。它只保留为最小 provenance 支撑层。
+- CP-04+CP-07 升为条件主方向：在 `t0` 冻结 seed、链上快照和候选全集，以未来且与 seed/候选生成无共同原始证据的公开归因作为 right-censored positive，衡量有限预算下的前瞻恢复。
+- `Gom22`/Watch Your Back、`Che23`/Evolve Path Tracer、`Real25` 和 `Ama26` 分别覆盖 seed 扩张、早期检测、未来日测试和证据标签，但当前检索未发现把候选历史冻结、来源依赖审计和未来独立确认合为同一 protocol 的工作。
+- 最大风险不是模型，而是证据独立性：不同 URL 可能复制同一原始报告；未来公开时间可能只是旧事实的延迟转载。Gate 2 必须先通过至少 3 个事件家族的档案与传播链审计，不能先训练模型。

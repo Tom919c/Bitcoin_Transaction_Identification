@@ -10,7 +10,7 @@
 - 邻接参照：Ethereum、多链、传统 AML/fraud、temporal graph learning、OOD、open-set、PU learning、entity resolution、human-in-the-loop investigation。
 - 时间：优先 2018-08-19 至 2026-08-19；更早的奠基工作按必要性纳入。
 - 来源：同行评审的一手论文优先；preprint、workshop、技术报告和灰色文献单独标记。
-- 当前阶段：Gate 1 领域地图与证据审计；尚未冻结研究问题。
+- 当前阶段：Gate 1 已形成条件主方向；等待用户确认是否进入 CP-04+CP-07 的 Gate 2 档案/证据独立性试验，尚未冻结完整实验协议。
 - 明确区分：entity type、illicit activity、fraud、AML risk。
 - 未标注节点不能默认作为正常类、负类或未知非法类。
 
@@ -62,10 +62,10 @@
 ## Gate 1 进度快照（2026-08-19）
 
 - 发现池：147/147 已完成元数据与摘要初筛。
-- 官方元数据：64 篇已通过 Crossref、arXiv 或出版社一手记录核验；其中 28 篇当前高价值条目已清洗进入 `references.bib`。
-- 全文证据：32 篇已完成面向当前 RQ 的正文检索与主张审计；其中 8 篇完成 Undermind PDF 逐篇定位，24 篇使用 Firecrawl 索引全文或出版社 HTML 做定向内文核验。后 24 篇仍须在最终引用前映射到稳定 PDF 页码或正式版章节，不能把“正文命中”夸大为逐页通读。
-- 专项检索：数据/标签、时间泄漏、开放世界三组 Undermind 深检已完成；预算队列与实体解析已完成 Firecrawl/Tavily 独立反证，仍需在 Undermind 配额恢复后补同主题深检。
-- 当前决策：原“单位一致的预算化 AML 队列”因 `Mal26` 高度重合而 No-Go；“选择性标签下效用识别”因标准理论覆盖而 No-Go；“时间化实体解析不确定性”仅为 Conditional Go；“来源/同名实体捷径”因缺失 node lineage 与类别支持而 Gate 2 No-Go。当前仍没有通过全部 Gate 的主方向。
+- 官方元数据：68 篇已通过 Crossref、arXiv 或出版社一手记录核验；其中 33 篇当前高价值条目已清洗进入 `references.bib`。
+- 全文证据：37 篇已完成面向当前 RQ 的正文检索与主张审计；其中 8 篇完成 Undermind PDF 逐篇定位，29 篇使用 Firecrawl 索引全文、官方 PDF 或出版社 HTML 做定向内文核验。后 29 篇仍须在最终引用前映射到稳定 PDF 页码或正式版章节，不能把“正文命中”夸大为逐页通读。
+- 专项检索：原计划的五组 Undermind 深检均已完成；因新候选与饱和规则，另完成“未来独立证据前瞻发现”和“provenance-preserving benchmark 重建”两组深检，并以 Firecrawl/Tavily/官方页面独立复核关键近邻。
+- 当前决策：原“单位一致的预算化 AML 队列”因 `Mal26` 高度重合而 No-Go；“选择性标签下效用识别”因标准理论覆盖而 No-Go；纯聚类准确率和缺失 lineage 的来源捷径均 No-Go。独立反方审查进一步将 CP-12 的全量 benchmark 重建判为当前主线 No-Go。CP-04+CP-07“未来独立公开归因的前瞻恢复”是唯一条件主方向，只允许先审计至少 3 个事件家族的档案、首见时间、来源依赖和冻结候选全集；尚未授权训练模型。
 
 ### 本地 252M 数据 provenance 闸门
 
@@ -89,10 +89,14 @@
 | 2026-08-19 | Entity Resolution Error Propagation | fallback discovery completed | 27 条原始命中 | 地址聚类与下游误差 | Firecrawl 论文索引与 Tavily 补检，待 DOI 去重和全文核验 |
 | 2026-08-19 | Temporal/OOD protocol cross-check | fallback discovery completed | 24 条原始命中 | 时间泄漏与模型排序反证 | Firecrawl 与 Tavily 补检；不替代原始论文全文 |
 | 2026-08-19 | Label provenance and identity shortcut audit | independent counter-search completed | 4 个 2025–2026 关键数据/评测邻居 | 来源、同名实体、support 与 split | Firecrawl/Tavily + 本地只读统计；CP-11 因缺失 node lineage 判为 No-Go |
+| 2026-08-19 | Budgeted AML Utility Identifiability | completed | 96 | 选择性/延迟标签与真实调查效用 | `Mal26` 与成熟 selective-label/partial-ID/OPE 理论共同使普通队列与理论套用 No-Go；缺真实审计/action logs |
+| 2026-08-19 | Temporal Entity Resolution Error Propagation | completed | 41 | as-of 聚类、下游误差与稳定性 | 未发现完整的 as-of partition + downstream queue artifact；但 `Mul26`、`Mos21` 与通用 linkage-error 理论显著抬高门槛 |
+| 2026-08-19 | Prospective Discovery with Delayed Independent Evidence | completed | 51 | 未来独立证据、右删失、事件/实体前瞻发现 | 两条独立补检未发现同时冻结 `t0` 候选全集、审计原始证据独立性并按未来确认做预算评测的工作；HackForums 等 artifact 尚未过 Gate |
+| 2026-08-19 | Provenance Preserving Bitcoin Benchmark Reconstruction | completed | 43 | evidence→address→script→cluster→node lineage 与评测复算 | 未发现包含完整 lineage、as-of clustering、冲突日志与下游模型排名的公开 benchmark；`Saf26`、`Len26`、ORBITAAL、`Jal25` 为最近邻 |
 
-### 来源核验台账（60 篇）
+### 来源核验台账（68 篇）
 
-`Web19, Elm23, Sch24, Bel24, Son24, Lor20, Edd21, Car22, Dep24, Pha26, Cha26, Wu20, Mos21, Mul26, Kha26, Mag26, Mal26, Wu24, Ara24, Saf26, Fro19, Xia22b, Gom24, Jen23, Deu22, Che23, Huo25, Joh26, Dep25, Har18, Che25b, Sch24c, Hua22, Li20, Gom22, Alt23, Hua18, Che26b, Luo23, San25, Nic23b, Zho24, Sho26, Oli21, Cor26, Lin24, Alj26, Anu26, Che25d, Sha22, Elo21, Tar23, Har16, Alj25, Din23b, Wah23, Xio26, Shi25, Wu25, Poc22, Real25, Dib26, Mba26, Ama26`。
+`Web19, Elm23, Sch24, Bel24, Son24, Lor20, Edd21, Car22, Dep24, Pha26, Cha26, Wu20, Mos21, Mul26, Kha26, Mag26, Mal26, Wu24, Ara24, Saf26, Fro19, Xia22b, Gom24, Jen23, Deu22, Che23, Huo25, Joh26, Dep25, Har18, Che25b, Sch24c, Hua22, Li20, Gom22, Alt23, Hua18, Che26b, Luo23, San25, Nic23b, Zho24, Sho26, Oli21, Cor26, Lin24, Alj26, Anu26, Che25d, Sha22, Elo21, Tar23, Har16, Alj25, Din23b, Wah23, Xio26, Shi25, Wu25, Poc22, Real25, Dib26, Mba26, Ama26, Dha26, Coq25, Jal25, Len26`。
 
 该台账只证明论文身份和版本可定位，不代表 60 篇均支持当前候选问题。正式年份以一手元数据为准；例如 `Sch24` 的正式 Scientific Data 版本发表于 2025 年，`Dep24` 的卷期年份与预印本键也不一致。
 
