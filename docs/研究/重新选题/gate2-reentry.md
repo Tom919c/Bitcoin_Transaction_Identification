@@ -142,3 +142,11 @@ N1 的最强停止条件是：在预先定义的合理阈值下，几乎所有 e
 | Tironsakkul et al. 2019, *Probing the Mystery…* | `JRVXPK6Q` | `tironsakkul2019probing` | taint rules 与经验分歧基线 |
 
 Zotero item key 与 BibTeX citation key 是两套标识；后续同步 `references.bib` 时以 citation key 为 Git 侧主键。
+
+## 2026-08-24：N1 A1 证据更新（覆盖先前“条件性第一名”判断）
+
+N1 的 48-instance locked synthetic 已在预运行 commit `0aa54ad` 上完成：exact oracle mismatch 为 0，说明当前小图 solver 没有被正确性反例击穿；但 `mixed` 16/16 的 threshold CDR 与 pair CDR 均为 0，median normalized width 为 1。只有按构造不存在混合歧义的 `unique` 族取得点识别，对称族则按预期全部拒证。
+
+该证据不允许外推“真实 Bitcoin CDR 为 0”，但已经击中 N1 当前研究论点的核心机制：一旦 source 与 clean value 发生普通两层混合，仅靠 ledger-compatible completions 可能得到完整而非局部的不确定区间。独立 Devil's Advocate 因此将 N1 从“条件性第一名”降级为 `negative conditional / parked`；不批准 B1、模型扩展或论文主线。
+
+唯一获批的后续工作是一个低成本、预冻结的 B0 structural falsification screen。它只能检验现实两跳结构中非退化证书是否足够常见；不能作为 N1 Go 或现实统计证据。若 B0 接近全 abstain，N1 直接 No-Go，研究回到 Gate 2 比较其余候选方向。

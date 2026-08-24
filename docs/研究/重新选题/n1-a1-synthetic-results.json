@@ -1,0 +1,2190 @@
+{
+  "protocol": "N1-A1-v1",
+  "protocol_document": "n1-flow-certificate-pilot.md v0.2",
+  "code_revision": "0aa54adbaac7ba29ded3ec7461c10ec8befe0830",
+  "suite_sha256": "fd9a5b187db5aa10d3f23de378ce9bdcf7ea6081bfd4e2b1ce6f26790f55427b",
+  "instances": [
+    {
+      "instance_id": "unique-00",
+      "family": "unique",
+      "source_value": 45,
+      "threshold": 1,
+      "oracle_completions": 1,
+      "intervals": {
+        "D0": [
+          3,
+          3
+        ],
+        "D1": [
+          5,
+          5
+        ],
+        "D2": [
+          6,
+          6
+        ],
+        "D3": [
+          8,
+          8
+        ],
+        "D4": [
+          9,
+          9
+        ],
+        "D5": [
+          14,
+          14
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "certified_true",
+        "D1": "certified_true",
+        "D2": "certified_true",
+        "D3": "certified_true",
+        "D4": "certified_true",
+        "D5": "certified_true"
+      },
+      "threshold_cdr": 1.0,
+      "pair_cdr": 1.0,
+      "median_normalized_width": 0.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "unique-01",
+      "family": "unique",
+      "source_value": 39,
+      "threshold": 1,
+      "oracle_completions": 1,
+      "intervals": {
+        "D0": [
+          3,
+          3
+        ],
+        "D1": [
+          4,
+          4
+        ],
+        "D2": [
+          6,
+          6
+        ],
+        "D3": [
+          7,
+          7
+        ],
+        "D4": [
+          9,
+          9
+        ],
+        "D5": [
+          10,
+          10
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "certified_true",
+        "D1": "certified_true",
+        "D2": "certified_true",
+        "D3": "certified_true",
+        "D4": "certified_true",
+        "D5": "certified_true"
+      },
+      "threshold_cdr": 1.0,
+      "pair_cdr": 1.0,
+      "median_normalized_width": 0.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "unique-02",
+      "family": "unique",
+      "source_value": 39,
+      "threshold": 1,
+      "oracle_completions": 1,
+      "intervals": {
+        "D0": [
+          2,
+          2
+        ],
+        "D1": [
+          4,
+          4
+        ],
+        "D2": [
+          6,
+          6
+        ],
+        "D3": [
+          7,
+          7
+        ],
+        "D4": [
+          9,
+          9
+        ],
+        "D5": [
+          11,
+          11
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "certified_true",
+        "D1": "certified_true",
+        "D2": "certified_true",
+        "D3": "certified_true",
+        "D4": "certified_true",
+        "D5": "certified_true"
+      },
+      "threshold_cdr": 1.0,
+      "pair_cdr": 1.0,
+      "median_normalized_width": 0.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "unique-03",
+      "family": "unique",
+      "source_value": 45,
+      "threshold": 1,
+      "oracle_completions": 1,
+      "intervals": {
+        "D0": [
+          2,
+          2
+        ],
+        "D1": [
+          6,
+          6
+        ],
+        "D2": [
+          7,
+          7
+        ],
+        "D3": [
+          8,
+          8
+        ],
+        "D4": [
+          10,
+          10
+        ],
+        "D5": [
+          12,
+          12
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "certified_true",
+        "D1": "certified_true",
+        "D2": "certified_true",
+        "D3": "certified_true",
+        "D4": "certified_true",
+        "D5": "certified_true"
+      },
+      "threshold_cdr": 1.0,
+      "pair_cdr": 1.0,
+      "median_normalized_width": 0.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "unique-04",
+      "family": "unique",
+      "source_value": 43,
+      "threshold": 1,
+      "oracle_completions": 1,
+      "intervals": {
+        "D0": [
+          4,
+          4
+        ],
+        "D1": [
+          5,
+          5
+        ],
+        "D2": [
+          6,
+          6
+        ],
+        "D3": [
+          8,
+          8
+        ],
+        "D4": [
+          9,
+          9
+        ],
+        "D5": [
+          11,
+          11
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "certified_true",
+        "D1": "certified_true",
+        "D2": "certified_true",
+        "D3": "certified_true",
+        "D4": "certified_true",
+        "D5": "certified_true"
+      },
+      "threshold_cdr": 1.0,
+      "pair_cdr": 1.0,
+      "median_normalized_width": 0.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "unique-05",
+      "family": "unique",
+      "source_value": 37,
+      "threshold": 1,
+      "oracle_completions": 1,
+      "intervals": {
+        "D0": [
+          2,
+          2
+        ],
+        "D1": [
+          4,
+          4
+        ],
+        "D2": [
+          6,
+          6
+        ],
+        "D3": [
+          7,
+          7
+        ],
+        "D4": [
+          8,
+          8
+        ],
+        "D5": [
+          10,
+          10
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "certified_true",
+        "D1": "certified_true",
+        "D2": "certified_true",
+        "D3": "certified_true",
+        "D4": "certified_true",
+        "D5": "certified_true"
+      },
+      "threshold_cdr": 1.0,
+      "pair_cdr": 1.0,
+      "median_normalized_width": 0.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "unique-06",
+      "family": "unique",
+      "source_value": 41,
+      "threshold": 1,
+      "oracle_completions": 1,
+      "intervals": {
+        "D0": [
+          3,
+          3
+        ],
+        "D1": [
+          4,
+          4
+        ],
+        "D2": [
+          6,
+          6
+        ],
+        "D3": [
+          8,
+          8
+        ],
+        "D4": [
+          9,
+          9
+        ],
+        "D5": [
+          11,
+          11
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "certified_true",
+        "D1": "certified_true",
+        "D2": "certified_true",
+        "D3": "certified_true",
+        "D4": "certified_true",
+        "D5": "certified_true"
+      },
+      "threshold_cdr": 1.0,
+      "pair_cdr": 1.0,
+      "median_normalized_width": 0.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "unique-07",
+      "family": "unique",
+      "source_value": 41,
+      "threshold": 1,
+      "oracle_completions": 1,
+      "intervals": {
+        "D0": [
+          3,
+          3
+        ],
+        "D1": [
+          5,
+          5
+        ],
+        "D2": [
+          6,
+          6
+        ],
+        "D3": [
+          7,
+          7
+        ],
+        "D4": [
+          9,
+          9
+        ],
+        "D5": [
+          11,
+          11
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "certified_true",
+        "D1": "certified_true",
+        "D2": "certified_true",
+        "D3": "certified_true",
+        "D4": "certified_true",
+        "D5": "certified_true"
+      },
+      "threshold_cdr": 1.0,
+      "pair_cdr": 1.0,
+      "median_normalized_width": 0.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "unique-08",
+      "family": "unique",
+      "source_value": 43,
+      "threshold": 1,
+      "oracle_completions": 1,
+      "intervals": {
+        "D0": [
+          3,
+          3
+        ],
+        "D1": [
+          4,
+          4
+        ],
+        "D2": [
+          6,
+          6
+        ],
+        "D3": [
+          8,
+          8
+        ],
+        "D4": [
+          9,
+          9
+        ],
+        "D5": [
+          13,
+          13
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "certified_true",
+        "D1": "certified_true",
+        "D2": "certified_true",
+        "D3": "certified_true",
+        "D4": "certified_true",
+        "D5": "certified_true"
+      },
+      "threshold_cdr": 1.0,
+      "pair_cdr": 1.0,
+      "median_normalized_width": 0.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "unique-09",
+      "family": "unique",
+      "source_value": 43,
+      "threshold": 1,
+      "oracle_completions": 1,
+      "intervals": {
+        "D0": [
+          3,
+          3
+        ],
+        "D1": [
+          5,
+          5
+        ],
+        "D2": [
+          6,
+          6
+        ],
+        "D3": [
+          8,
+          8
+        ],
+        "D4": [
+          9,
+          9
+        ],
+        "D5": [
+          12,
+          12
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "certified_true",
+        "D1": "certified_true",
+        "D2": "certified_true",
+        "D3": "certified_true",
+        "D4": "certified_true",
+        "D5": "certified_true"
+      },
+      "threshold_cdr": 1.0,
+      "pair_cdr": 1.0,
+      "median_normalized_width": 0.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "unique-10",
+      "family": "unique",
+      "source_value": 44,
+      "threshold": 1,
+      "oracle_completions": 1,
+      "intervals": {
+        "D0": [
+          2,
+          2
+        ],
+        "D1": [
+          3,
+          3
+        ],
+        "D2": [
+          7,
+          7
+        ],
+        "D3": [
+          8,
+          8
+        ],
+        "D4": [
+          11,
+          11
+        ],
+        "D5": [
+          13,
+          13
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "certified_true",
+        "D1": "certified_true",
+        "D2": "certified_true",
+        "D3": "certified_true",
+        "D4": "certified_true",
+        "D5": "certified_true"
+      },
+      "threshold_cdr": 1.0,
+      "pair_cdr": 1.0,
+      "median_normalized_width": 0.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "unique-11",
+      "family": "unique",
+      "source_value": 40,
+      "threshold": 1,
+      "oracle_completions": 1,
+      "intervals": {
+        "D0": [
+          3,
+          3
+        ],
+        "D1": [
+          4,
+          4
+        ],
+        "D2": [
+          6,
+          6
+        ],
+        "D3": [
+          8,
+          8
+        ],
+        "D4": [
+          9,
+          9
+        ],
+        "D5": [
+          10,
+          10
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "certified_true",
+        "D1": "certified_true",
+        "D2": "certified_true",
+        "D3": "certified_true",
+        "D4": "certified_true",
+        "D5": "certified_true"
+      },
+      "threshold_cdr": 1.0,
+      "pair_cdr": 1.0,
+      "median_normalized_width": 0.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "unique-12",
+      "family": "unique",
+      "source_value": 36,
+      "threshold": 1,
+      "oracle_completions": 1,
+      "intervals": {
+        "D0": [
+          2,
+          2
+        ],
+        "D1": [
+          4,
+          4
+        ],
+        "D2": [
+          5,
+          5
+        ],
+        "D3": [
+          7,
+          7
+        ],
+        "D4": [
+          8,
+          8
+        ],
+        "D5": [
+          10,
+          10
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "certified_true",
+        "D1": "certified_true",
+        "D2": "certified_true",
+        "D3": "certified_true",
+        "D4": "certified_true",
+        "D5": "certified_true"
+      },
+      "threshold_cdr": 1.0,
+      "pair_cdr": 1.0,
+      "median_normalized_width": 0.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "unique-13",
+      "family": "unique",
+      "source_value": 38,
+      "threshold": 1,
+      "oracle_completions": 1,
+      "intervals": {
+        "D0": [
+          3,
+          3
+        ],
+        "D1": [
+          4,
+          4
+        ],
+        "D2": [
+          5,
+          5
+        ],
+        "D3": [
+          7,
+          7
+        ],
+        "D4": [
+          8,
+          8
+        ],
+        "D5": [
+          11,
+          11
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "certified_true",
+        "D1": "certified_true",
+        "D2": "certified_true",
+        "D3": "certified_true",
+        "D4": "certified_true",
+        "D5": "certified_true"
+      },
+      "threshold_cdr": 1.0,
+      "pair_cdr": 1.0,
+      "median_normalized_width": 0.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "unique-14",
+      "family": "unique",
+      "source_value": 39,
+      "threshold": 1,
+      "oracle_completions": 1,
+      "intervals": {
+        "D0": [
+          3,
+          3
+        ],
+        "D1": [
+          4,
+          4
+        ],
+        "D2": [
+          5,
+          5
+        ],
+        "D3": [
+          7,
+          7
+        ],
+        "D4": [
+          9,
+          9
+        ],
+        "D5": [
+          11,
+          11
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "certified_true",
+        "D1": "certified_true",
+        "D2": "certified_true",
+        "D3": "certified_true",
+        "D4": "certified_true",
+        "D5": "certified_true"
+      },
+      "threshold_cdr": 1.0,
+      "pair_cdr": 1.0,
+      "median_normalized_width": 0.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "unique-15",
+      "family": "unique",
+      "source_value": 43,
+      "threshold": 1,
+      "oracle_completions": 1,
+      "intervals": {
+        "D0": [
+          3,
+          3
+        ],
+        "D1": [
+          5,
+          5
+        ],
+        "D2": [
+          7,
+          7
+        ],
+        "D3": [
+          8,
+          8
+        ],
+        "D4": [
+          9,
+          9
+        ],
+        "D5": [
+          11,
+          11
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "certified_true",
+        "D1": "certified_true",
+        "D2": "certified_true",
+        "D3": "certified_true",
+        "D4": "certified_true",
+        "D5": "certified_true"
+      },
+      "threshold_cdr": 1.0,
+      "pair_cdr": 1.0,
+      "median_normalized_width": 0.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "mixed-00",
+      "family": "mixed",
+      "source_value": 10,
+      "threshold": 1,
+      "oracle_completions": 3497,
+      "intervals": {
+        "D0": [
+          0,
+          4
+        ],
+        "D1": [
+          0,
+          3
+        ],
+        "D2": [
+          0,
+          10
+        ],
+        "D3": [
+          0,
+          2
+        ],
+        "D4": [
+          0,
+          3
+        ],
+        "D5": [
+          0,
+          6
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 1.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "mixed-01",
+      "family": "mixed",
+      "source_value": 12,
+      "threshold": 1,
+      "oracle_completions": 9547,
+      "intervals": {
+        "D0": [
+          0,
+          6
+        ],
+        "D1": [
+          0,
+          8
+        ],
+        "D2": [
+          0,
+          6
+        ],
+        "D3": [
+          0,
+          3
+        ],
+        "D4": [
+          0,
+          5
+        ],
+        "D5": [
+          0,
+          6
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 1.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "mixed-02",
+      "family": "mixed",
+      "source_value": 11,
+      "threshold": 1,
+      "oracle_completions": 4406,
+      "intervals": {
+        "D0": [
+          0,
+          10
+        ],
+        "D1": [
+          0,
+          1
+        ],
+        "D2": [
+          0,
+          4
+        ],
+        "D3": [
+          0,
+          4
+        ],
+        "D4": [
+          0,
+          6
+        ],
+        "D5": [
+          0,
+          4
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 0.9545454545454546,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "mixed-03",
+      "family": "mixed",
+      "source_value": 12,
+      "threshold": 1,
+      "oracle_completions": 3367,
+      "intervals": {
+        "D0": [
+          0,
+          4
+        ],
+        "D1": [
+          0,
+          4
+        ],
+        "D2": [
+          0,
+          5
+        ],
+        "D3": [
+          0,
+          6
+        ],
+        "D4": [
+          0,
+          3
+        ],
+        "D5": [
+          0,
+          6
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 1.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "mixed-04",
+      "family": "mixed",
+      "source_value": 10,
+      "threshold": 1,
+      "oracle_completions": 2106,
+      "intervals": {
+        "D0": [
+          0,
+          4
+        ],
+        "D1": [
+          0,
+          10
+        ],
+        "D2": [
+          0,
+          6
+        ],
+        "D3": [
+          0,
+          1
+        ],
+        "D4": [
+          0,
+          5
+        ],
+        "D5": [
+          0,
+          6
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 1.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "mixed-05",
+      "family": "mixed",
+      "source_value": 13,
+      "threshold": 1,
+      "oracle_completions": 15729,
+      "intervals": {
+        "D0": [
+          0,
+          3
+        ],
+        "D1": [
+          0,
+          6
+        ],
+        "D2": [
+          0,
+          8
+        ],
+        "D3": [
+          0,
+          7
+        ],
+        "D4": [
+          0,
+          11
+        ],
+        "D5": [
+          0,
+          6
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 1.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "mixed-06",
+      "family": "mixed",
+      "source_value": 10,
+      "threshold": 1,
+      "oracle_completions": 7209,
+      "intervals": {
+        "D0": [
+          0,
+          5
+        ],
+        "D1": [
+          0,
+          7
+        ],
+        "D2": [
+          0,
+          4
+        ],
+        "D3": [
+          0,
+          8
+        ],
+        "D4": [
+          0,
+          9
+        ],
+        "D5": [
+          0,
+          7
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 1.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "mixed-07",
+      "family": "mixed",
+      "source_value": 11,
+      "threshold": 1,
+      "oracle_completions": 6184,
+      "intervals": {
+        "D0": [
+          0,
+          6
+        ],
+        "D1": [
+          0,
+          6
+        ],
+        "D2": [
+          0,
+          5
+        ],
+        "D3": [
+          0,
+          4
+        ],
+        "D4": [
+          0,
+          4
+        ],
+        "D5": [
+          0,
+          3
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 1.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "mixed-08",
+      "family": "mixed",
+      "source_value": 13,
+      "threshold": 1,
+      "oracle_completions": 21103,
+      "intervals": {
+        "D0": [
+          0,
+          3
+        ],
+        "D1": [
+          0,
+          9
+        ],
+        "D2": [
+          0,
+          2
+        ],
+        "D3": [
+          0,
+          5
+        ],
+        "D4": [
+          0,
+          10
+        ],
+        "D5": [
+          0,
+          3
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 1.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "mixed-09",
+      "family": "mixed",
+      "source_value": 12,
+      "threshold": 1,
+      "oracle_completions": 6358,
+      "intervals": {
+        "D0": [
+          0,
+          3
+        ],
+        "D1": [
+          0,
+          3
+        ],
+        "D2": [
+          0,
+          6
+        ],
+        "D3": [
+          0,
+          8
+        ],
+        "D4": [
+          0,
+          6
+        ],
+        "D5": [
+          0,
+          6
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 1.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "mixed-10",
+      "family": "mixed",
+      "source_value": 13,
+      "threshold": 1,
+      "oracle_completions": 7695,
+      "intervals": {
+        "D0": [
+          0,
+          7
+        ],
+        "D1": [
+          0,
+          11
+        ],
+        "D2": [
+          0,
+          3
+        ],
+        "D3": [
+          0,
+          2
+        ],
+        "D4": [
+          0,
+          10
+        ],
+        "D5": [
+          0,
+          5
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 1.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "mixed-11",
+      "family": "mixed",
+      "source_value": 9,
+      "threshold": 1,
+      "oracle_completions": 3614,
+      "intervals": {
+        "D0": [
+          0,
+          4
+        ],
+        "D1": [
+          0,
+          7
+        ],
+        "D2": [
+          0,
+          8
+        ],
+        "D3": [
+          0,
+          4
+        ],
+        "D4": [
+          0,
+          2
+        ],
+        "D5": [
+          0,
+          6
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 1.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "mixed-12",
+      "family": "mixed",
+      "source_value": 13,
+      "threshold": 1,
+      "oracle_completions": 4597,
+      "intervals": {
+        "D0": [
+          0,
+          7
+        ],
+        "D1": [
+          0,
+          4
+        ],
+        "D2": [
+          0,
+          5
+        ],
+        "D3": [
+          0,
+          9
+        ],
+        "D4": [
+          0,
+          2
+        ],
+        "D5": [
+          0,
+          5
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 1.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "mixed-13",
+      "family": "mixed",
+      "source_value": 13,
+      "threshold": 1,
+      "oracle_completions": 19487,
+      "intervals": {
+        "D0": [
+          0,
+          3
+        ],
+        "D1": [
+          0,
+          5
+        ],
+        "D2": [
+          0,
+          5
+        ],
+        "D3": [
+          0,
+          9
+        ],
+        "D4": [
+          0,
+          5
+        ],
+        "D5": [
+          0,
+          6
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 1.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "mixed-14",
+      "family": "mixed",
+      "source_value": 10,
+      "threshold": 1,
+      "oracle_completions": 4295,
+      "intervals": {
+        "D0": [
+          0,
+          5
+        ],
+        "D1": [
+          0,
+          3
+        ],
+        "D2": [
+          0,
+          3
+        ],
+        "D3": [
+          0,
+          4
+        ],
+        "D4": [
+          0,
+          2
+        ],
+        "D5": [
+          0,
+          9
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 1.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "mixed-15",
+      "family": "mixed",
+      "source_value": 13,
+      "threshold": 1,
+      "oracle_completions": 6130,
+      "intervals": {
+        "D0": [
+          0,
+          11
+        ],
+        "D1": [
+          0,
+          7
+        ],
+        "D2": [
+          0,
+          6
+        ],
+        "D3": [
+          0,
+          3
+        ],
+        "D4": [
+          0,
+          2
+        ],
+        "D5": [
+          0,
+          2
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 1.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "symmetric-00",
+      "family": "symmetric",
+      "source_value": 12,
+      "threshold": 1,
+      "oracle_completions": 5075,
+      "intervals": {
+        "D0": [
+          0,
+          8
+        ],
+        "D1": [
+          0,
+          8
+        ],
+        "D2": [
+          0,
+          8
+        ],
+        "D3": [
+          0,
+          8
+        ],
+        "D4": [
+          0,
+          8
+        ],
+        "D5": [
+          0,
+          8
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 1.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "symmetric-01",
+      "family": "symmetric",
+      "source_value": 12,
+      "threshold": 1,
+      "oracle_completions": 5075,
+      "intervals": {
+        "D0": [
+          0,
+          8
+        ],
+        "D1": [
+          0,
+          8
+        ],
+        "D2": [
+          0,
+          8
+        ],
+        "D3": [
+          0,
+          8
+        ],
+        "D4": [
+          0,
+          8
+        ],
+        "D5": [
+          0,
+          8
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 1.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "symmetric-02",
+      "family": "symmetric",
+      "source_value": 12,
+      "threshold": 1,
+      "oracle_completions": 5075,
+      "intervals": {
+        "D0": [
+          0,
+          8
+        ],
+        "D1": [
+          0,
+          8
+        ],
+        "D2": [
+          0,
+          8
+        ],
+        "D3": [
+          0,
+          8
+        ],
+        "D4": [
+          0,
+          8
+        ],
+        "D5": [
+          0,
+          8
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 1.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "symmetric-03",
+      "family": "symmetric",
+      "source_value": 9,
+      "threshold": 1,
+      "oracle_completions": 1624,
+      "intervals": {
+        "D0": [
+          0,
+          6
+        ],
+        "D1": [
+          0,
+          6
+        ],
+        "D2": [
+          0,
+          6
+        ],
+        "D3": [
+          0,
+          6
+        ],
+        "D4": [
+          0,
+          6
+        ],
+        "D5": [
+          0,
+          6
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 1.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "symmetric-04",
+      "family": "symmetric",
+      "source_value": 15,
+      "threshold": 1,
+      "oracle_completions": 12816,
+      "intervals": {
+        "D0": [
+          0,
+          10
+        ],
+        "D1": [
+          0,
+          10
+        ],
+        "D2": [
+          0,
+          10
+        ],
+        "D3": [
+          0,
+          10
+        ],
+        "D4": [
+          0,
+          10
+        ],
+        "D5": [
+          0,
+          10
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 1.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "symmetric-05",
+      "family": "symmetric",
+      "source_value": 12,
+      "threshold": 1,
+      "oracle_completions": 5075,
+      "intervals": {
+        "D0": [
+          0,
+          8
+        ],
+        "D1": [
+          0,
+          8
+        ],
+        "D2": [
+          0,
+          8
+        ],
+        "D3": [
+          0,
+          8
+        ],
+        "D4": [
+          0,
+          8
+        ],
+        "D5": [
+          0,
+          8
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 1.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "symmetric-06",
+      "family": "symmetric",
+      "source_value": 12,
+      "threshold": 1,
+      "oracle_completions": 5075,
+      "intervals": {
+        "D0": [
+          0,
+          8
+        ],
+        "D1": [
+          0,
+          8
+        ],
+        "D2": [
+          0,
+          8
+        ],
+        "D3": [
+          0,
+          8
+        ],
+        "D4": [
+          0,
+          8
+        ],
+        "D5": [
+          0,
+          8
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 1.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "symmetric-07",
+      "family": "symmetric",
+      "source_value": 12,
+      "threshold": 1,
+      "oracle_completions": 5075,
+      "intervals": {
+        "D0": [
+          0,
+          8
+        ],
+        "D1": [
+          0,
+          8
+        ],
+        "D2": [
+          0,
+          8
+        ],
+        "D3": [
+          0,
+          8
+        ],
+        "D4": [
+          0,
+          8
+        ],
+        "D5": [
+          0,
+          8
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 1.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "symmetric-08",
+      "family": "symmetric",
+      "source_value": 15,
+      "threshold": 1,
+      "oracle_completions": 12816,
+      "intervals": {
+        "D0": [
+          0,
+          10
+        ],
+        "D1": [
+          0,
+          10
+        ],
+        "D2": [
+          0,
+          10
+        ],
+        "D3": [
+          0,
+          10
+        ],
+        "D4": [
+          0,
+          10
+        ],
+        "D5": [
+          0,
+          10
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 1.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "symmetric-09",
+      "family": "symmetric",
+      "source_value": 12,
+      "threshold": 1,
+      "oracle_completions": 5075,
+      "intervals": {
+        "D0": [
+          0,
+          8
+        ],
+        "D1": [
+          0,
+          8
+        ],
+        "D2": [
+          0,
+          8
+        ],
+        "D3": [
+          0,
+          8
+        ],
+        "D4": [
+          0,
+          8
+        ],
+        "D5": [
+          0,
+          8
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 1.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "symmetric-10",
+      "family": "symmetric",
+      "source_value": 12,
+      "threshold": 1,
+      "oracle_completions": 5075,
+      "intervals": {
+        "D0": [
+          0,
+          8
+        ],
+        "D1": [
+          0,
+          8
+        ],
+        "D2": [
+          0,
+          8
+        ],
+        "D3": [
+          0,
+          8
+        ],
+        "D4": [
+          0,
+          8
+        ],
+        "D5": [
+          0,
+          8
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 1.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "symmetric-11",
+      "family": "symmetric",
+      "source_value": 9,
+      "threshold": 1,
+      "oracle_completions": 1624,
+      "intervals": {
+        "D0": [
+          0,
+          6
+        ],
+        "D1": [
+          0,
+          6
+        ],
+        "D2": [
+          0,
+          6
+        ],
+        "D3": [
+          0,
+          6
+        ],
+        "D4": [
+          0,
+          6
+        ],
+        "D5": [
+          0,
+          6
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 1.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "symmetric-12",
+      "family": "symmetric",
+      "source_value": 15,
+      "threshold": 1,
+      "oracle_completions": 12816,
+      "intervals": {
+        "D0": [
+          0,
+          10
+        ],
+        "D1": [
+          0,
+          10
+        ],
+        "D2": [
+          0,
+          10
+        ],
+        "D3": [
+          0,
+          10
+        ],
+        "D4": [
+          0,
+          10
+        ],
+        "D5": [
+          0,
+          10
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 1.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "symmetric-13",
+      "family": "symmetric",
+      "source_value": 12,
+      "threshold": 1,
+      "oracle_completions": 5075,
+      "intervals": {
+        "D0": [
+          0,
+          8
+        ],
+        "D1": [
+          0,
+          8
+        ],
+        "D2": [
+          0,
+          8
+        ],
+        "D3": [
+          0,
+          8
+        ],
+        "D4": [
+          0,
+          8
+        ],
+        "D5": [
+          0,
+          8
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 1.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "symmetric-14",
+      "family": "symmetric",
+      "source_value": 15,
+      "threshold": 1,
+      "oracle_completions": 12816,
+      "intervals": {
+        "D0": [
+          0,
+          10
+        ],
+        "D1": [
+          0,
+          10
+        ],
+        "D2": [
+          0,
+          10
+        ],
+        "D3": [
+          0,
+          10
+        ],
+        "D4": [
+          0,
+          10
+        ],
+        "D5": [
+          0,
+          10
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 1.0,
+      "strict_top3": "not_implemented"
+    },
+    {
+      "instance_id": "symmetric-15",
+      "family": "symmetric",
+      "source_value": 12,
+      "threshold": 1,
+      "oracle_completions": 5075,
+      "intervals": {
+        "D0": [
+          0,
+          8
+        ],
+        "D1": [
+          0,
+          8
+        ],
+        "D2": [
+          0,
+          8
+        ],
+        "D3": [
+          0,
+          8
+        ],
+        "D4": [
+          0,
+          8
+        ],
+        "D5": [
+          0,
+          8
+        ]
+      },
+      "threshold_statuses": {
+        "D0": "unresolved_under_ledger_only_provenance",
+        "D1": "unresolved_under_ledger_only_provenance",
+        "D2": "unresolved_under_ledger_only_provenance",
+        "D3": "unresolved_under_ledger_only_provenance",
+        "D4": "unresolved_under_ledger_only_provenance",
+        "D5": "unresolved_under_ledger_only_provenance"
+      },
+      "threshold_cdr": 0.0,
+      "pair_cdr": 0.0,
+      "median_normalized_width": 1.0,
+      "strict_top3": "not_implemented"
+    }
+  ],
+  "family_summary": {
+    "unique": {
+      "instances": 16,
+      "median_threshold_cdr": 1.0,
+      "median_pair_cdr": 1.0,
+      "median_normalized_width": 0.0
+    },
+    "mixed": {
+      "instances": 16,
+      "median_threshold_cdr": 0.0,
+      "median_pair_cdr": 0.0,
+      "median_normalized_width": 1.0
+    },
+    "symmetric": {
+      "instances": 16,
+      "median_threshold_cdr": 0.0,
+      "median_pair_cdr": 0.0,
+      "median_normalized_width": 1.0
+    }
+  },
+  "oracle_mismatches": 0,
+  "gate": "A1_PASS_CORRECTNESS_ONLY"
+}

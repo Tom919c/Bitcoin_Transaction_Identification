@@ -154,3 +154,21 @@ v0.2 尚不授权执行 B1。真实窗口前必须在新版本冻结：每个 so
 ## v0.2 修订说明（A1 执行前）
 
 v0.1 将三族统一施加 certified-rate 门槛，和 `symmetric adversarial` 作为正确拒证控制的目的冲突。v0.2 在尚未生成或查看 A1 结果时修正该问题，冻结确定性实例 ID、参数哈希、共同 targets、独立 oracle、指标和族特定断言。B1 的现实效用门槛保持不变，但其 target、ranking、reachability 与 comparator 定义仍须在执行前另行冻结。
+
+## A1 执行结果（2026-08-24）
+
+预运行协议与 runner 先冻结于 commit `0aa54adbaac7ba29ded3ec7461c10ec8befe0830`，随后一次性执行全部 48 个实例。实例集合 hash 为 `fd9a5b187db5aa10d3f23de378ce9bdcf7ea6081bfd4e2b1ce6f26790f55427b`；完整结果见 `n1-a1-synthetic-results.json`。
+
+| family | instances | median threshold CDR | median pair CDR | median normalized width |
+|---|---:|---:|---:|---:|
+| unique | 16 | 1.00 | 1.00 | 0.00 |
+| mixed | 16 | 0.00 | 0.00 | 1.00 |
+| symmetric | 16 | 0.00 | 0.00 | 1.00 |
+
+- 48 个实例全部完成，共枚举 230,602 个 completion；oracle mismatch 为 0；
+- `unique` 与 `symmetric` 均满足预先固定的族特定不变量；A1 因此是 `PASS_CORRECTNESS_ONLY`；
+- `mixed` 16/16 的 threshold 与 pair CDR 都为 0，实例级 median normalized width 最小值约 0.955、总体中位数为 1；
+- strict Top-3 保持 `not_implemented`，不进入通过率；
+- 该结果支持 solver 的保守正确性，但没有支持现实效用。相反，它对“账本守恒在一般混合结构中能给出非平凡 endpoint/ranking 证书”构成强负信号。
+
+Gate 决定：N1 降级为 `negative conditional / parked`，不进入 B1，也不围绕它开发复杂模型。只允许一个预先冻结的 B0 structural falsification screen 判断真实浅层结构是否频繁落在 unique/容量强约束区域；若 B0 仍接近全 abstain，立即关闭 N1 并返回 Gate 2。
