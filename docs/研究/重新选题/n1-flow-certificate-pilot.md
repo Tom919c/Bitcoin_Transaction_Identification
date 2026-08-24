@@ -1,4 +1,4 @@
-# N1 Flow Certificate Gate-2 Pilot v0.1
+# N1 Flow Certificate Gate-2 Pilot v0.2
 
 ## 状态与目的
 
@@ -56,7 +56,27 @@ pairwise ranking 必须联合优化 `g_a - g_b`，不得把两个独立 marginal
 
 ### A1 — locked synthetic
 
-独立生成 48 个小型 ledger instance：unique-flow、混合/CoinJoin-like、对称等值 adversarial 三族各 16 个。开发例不得进入这 48 个实例。Synthetic 只验证 solver 保守性、正确性与退化条件，不证明真实 Bitcoin provenance。
+独立生成 48 个小型 ledger instance：`unique-00..15`、`mixed-00..15`、`symmetric-00..15` 三族各 16 个。实例由 `SHA256("N1-A1-v1|family|index|field|slot")` 确定参数，不使用运行时随机数、拒绝采样或按结果替换实例。每个实例固定一个 source boundary UTXO、六个 depth-2 终端 `D0..D5`、四笔严格有向交易；共同评估全部六个终端。
+
+三族的角色不同，必须分开报告：
+
+1. `unique`：source 经单输入分拆，预期六个终端均为点区间；用于检查守恒、DAG 和目标边实现；
+2. `mixed`：source 与 clean boundary inputs 在两层中混合；允许出现任意 certified rate，只用于观察非退化行为；
+3. `symmetric`：对称等值混合，预期所有终端为完整歧义区间且严格排序均 unresolved；用于检查算法是否会错误强制归因。
+
+因此，对称族的低 certified-decision rate 是正确拒证，不是研究 No-Go。A1 只验证 solver 正确性、保守性与退化条件，不估计现实 Bitcoin utility。开发例不得进入这 48 个实例，三族不得 pooled 后解释成现实发生率。
+
+主 threshold 固定为 `tau=ceil(source_value/100)`。实例级指标固定为：
+
+```text
+threshold CDR = 六个终端中 certified_true/false 的比例
+normalized width(d) = (upper-lower) / min(source_value, value(d))
+pair CDR = 30 个有序终端对中严格次序被认证的比例
+```
+
+独立 oracle 按交易顺序枚举所有有界整数 source-mass compositions，不能调用 `FlowCertificate`、NetworkX 或复用候选求解图；它对所有终端 interval、`t=0..source_value` 的 threshold 状态和 30 个有序 pairwise difference interval 给出真值。A1 不实现 strict Top-3，明确记录为 `not_implemented`，不得计入通过率。
+
+A1 在 satoshi 整数格上枚举；由于该单商品网络流约束在整数容量下具有整数极点，其线性 extrema 与前述 fractional LP 相同。枚举设置预先固定的 completion 资源护栏；触发即 hard failure 且不写部分结果，不得跳过或替换实例。
 
 ### B0 — 单窗工程 smoke
 
@@ -69,6 +89,8 @@ pairwise ranking 必须联合优化 `g_a - g_b`，不得把两个独立 marginal
 每窗 source 选择冻结为：前 20 blocks 产生、在第 21–90 blocks 首次花费、非 coinbase、正值且 `>=1,000,000 sat` 的标准可花费 UTXO；按 `SHA256(window_id || outpoint)` 取前 50 个。不得按路径有趣程度、标签或 solver 成功选择。
 
 固定 `H=2` transaction transitions，`tau_s=ceil(value_s/100)`，候选排名 `K=10`。窗口外历史/未来、解析缺失、solver 超时或非最优一律输出 unknown，不能输出稳定否定。
+
+v0.2 尚不授权执行 B1。真实窗口前必须在新版本冻结：每个 source 的候选终端全集、参考排序及 outpoint tie-break、strict Top-10 集合判据、reachability 的 endpoint/path 语义，以及 source-conditioning comparator 的 feasible set、共同分母和 timeout 处理。冻结前，B1 的相关数值门槛不可执行或解释。
 
 ## Baselines
 
@@ -98,7 +120,8 @@ pairwise ranking 必须联合优化 `g_a - g_b`，不得把两个独立 marginal
 
 - exact oracle 发现任一 false threshold、ranking 或 reachability certificate；
 - 非最优、超时、解析缺失或边界截断被转成确定答案；
-- 48 个 locked synthetic 中任一族 certified-decision rate 中位数 `<10%`，或总体 `<15%`；
+- A1 任一实例不守恒、无法完整枚举，或 oracle 与候选 solver 的 interval、任一 threshold 或 pairwise difference 不一致；
+- `unique` 任一终端不是点区间，或 `symmetric` 任一终端/严格排序被错误认证；
 - 8 个真实窗中至少 7 个在任一核心证书上的 certified rate `<10%`；
 - source-conditioning 的中位 certified-rate 增益 `<10` percentage points，且 width 降幅 `<20%`；
 - 只有单一 100-block 真实窗；此时最多保留 engineering smoke，不得晋级；
@@ -107,8 +130,7 @@ pairwise ranking 必须联合优化 `g_a - g_b`，不得把两个独立 marginal
 
 ### 最低条件 Go
 
-- exact small-component oracle 为 0 false certificates；所有非最优/超时均为 unknown；
-- locked synthetic 三族各自中位 certified rate `>=25%`、总体 `>=30%`，中位 normalized width `<=0.25`；
+- A1 exact oracle 为 0 false certificates，全部 48 个实例完整枚举且满足各族预期；该结果只允许进入真实数据 smoke，不能单独使 N1 晋级；
 - 至少 6/8 真实窗口同时满足：threshold certified rate `>=25%`、strict Top-10 stability `>=20%`、stable reachability `>=30%`、source-conditioning `+15 pp` 且 width `-25%`、solver timeout/unknown `<=5%`。
 
 即使达到 Go，也只允许进入更大现实审计与理论性质卡，不支持部署、犯罪归因或 AML 主张。
@@ -128,3 +150,7 @@ pairwise ranking 必须联合优化 `g_a - g_b`，不得把两个独立 marginal
 - 验证：定向测试与仓库全量测试均通过，静态检查通过；
 - B0：未执行。公共区块 API 已确认具有输入、输出和值字段，但缺少本地 Bitcoin Core/raw-block 可重放链路；即使完成一个窗口也只能视为 parser/engineering smoke；
 - Gate 状态：N1 仍为 conditional candidate，尚未 Go。A1 的 48 个锁定 synthetic 和 B1 的 8 个跨时期窗口均未完成，不能据此声称真实 Bitcoin 上证书非平凡或方向值得晋级。
+
+## v0.2 修订说明（A1 执行前）
+
+v0.1 将三族统一施加 certified-rate 门槛，和 `symmetric adversarial` 作为正确拒证控制的目的冲突。v0.2 在尚未生成或查看 A1 结果时修正该问题，冻结确定性实例 ID、参数哈希、共同 targets、独立 oracle、指标和族特定断言。B1 的现实效用门槛保持不变，但其 target、ranking、reachability 与 comparator 定义仍须在执行前另行冻结。
