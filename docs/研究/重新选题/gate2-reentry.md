@@ -213,7 +213,7 @@ N1 的负向结果触发了新的独立候选生成。候选先由资产、理�
 
 ### M6：Ordinals 市场协作式 PSBT 对 common-input clustering 的污染
 
-- **核心机制**：Ordinals 市场为实现非托管原子交换，常让卖家对 inscription input 使用 `SIGHASH_SINGLE | SIGHASH_ANYONECANPAY`，买家随后加入付款 input 并完成交易。最终确认交易的 inputs 由不同签名角色共同组成，直接违反 common-input ownership heuristic 的“全部输入由单一主体控制”前提。
+- **核心机制**：Ordinals 市场为实现非托管原子交换，常让卖家对 inscription input 使用 `SIGHASH_SINGLE | SIGHASH_ANYONECANPAY`，买家随后加入付款 input 并完成交易。当不同签名角色确属不同控制者时，对全部 inputs 执行 common-input ownership union 会产生错误合并；链上角色结构本身不证明这个所有权前提。
 - **跨平台证据**：ORD.NET 官方 sale construction、OrdinalsBot 官方 marketplace 示例、Magic Eden 开源 `msigner` 和 OrdinalsWallet 技术说明均给出该组合；因此不是单一网站的偶发现象。PSBT 只是协调格式，最终链上只保留交易和签名；可观测检测必须解析 ECDSA/Taproot signature hash type、spent output 和 inscription movement。
 - **链上锚点**：ORD.NET 官方示例交易 `0f2f22ed557359039a80620bb5d559f3bc2b982f1b03ddfc771668d115a1ce40` 包含平台 anchor、seller/platform 2-of-2 passthrough 和 buyer funding inputs。公开原始交易显示 Taproot witness 中同时存在附加 `0x83` 的 `SINGLE|ANYONECANPAY` 签名、默认签名和其他 `SIGHASH_ALL` inputs。该样本证明协议模式可从链上恢复，不证明总体规模。
 - **文献反证**：Undermind focused deep search 已完成，返回 22 篇近邻；最接近的是 BRC-20 PSBT sniping、PayJoin UIH、MIH 可靠性、协议型 CoinJoin detection 和 Ordinals 网络影响。八篇关键 PDF 的定向全文核验仍未发现直接测量 Ordinals/数字资产市场 PSBT 对 CIOH cluster contamination 的工作。独立 exact/component 搜索得到同一结论；这只支持“当前检索快照未见 exact prior”，不能写成首次。
@@ -225,7 +225,7 @@ N1 的负向结果触发了新的独立候选生成。候选先由资产、理�
 - **资源边界**：现有 252M 图缺 txid、witness 和 union lineage，不能直接执行。Gate 2 只用官方 txid、公开 explorer/ord index 和小窗口；小样本通过后才考虑外部存储、远程节点或流式全链扫描。
 - **硬停止条件**：只存在单一平台；高精度检测不可复现；现有过滤器已去除超过 95%；规模或 component 效应很小；独立主体无法操作化；最近邻已有等价测量；最终只剩简单 ETL 规则。
 - **理论判断**：多签名主体交易下 CIOH 不可靠、错误 bridge 使 union-find component 不可逆合并均为直接性质，不作为主定理。只有得到非平凡可检测充分条件、部分可观测下的污染界或可检验传播保证，理论才能升级为贡献。
-- **当前裁决**：`primary candidate / effect-and-ground-truth gate open`。重要性 5、证据质量 4、可行性 4，乘积 80。文献与规模/结构门已通过；在 Tier 2 跨市场语义真值和聚类传播效应完成前，仍不是正式推荐主方向。
+- **当前裁决**：`conditional lead / input-provenance, ground-truth and effect gates open`。重要性 5、证据质量 3、可行性 4，乘积 60。detector-v2 诊断复算保留规模信号，但独立 prevout 核验、跨市场语义真值和聚类传播效应尚未完成，仍不是正式推荐主方向。
 
 ### CP-13 零模型抽样协议 v1（结果查看前冻结）
 
@@ -243,8 +243,32 @@ N1 的负向结果触发了新的独立候选生成。候选先由资产、理�
 
 > 2026-08-31 复核标记：本节为 detector-v1 历史输出，解析器发现 witness 上下文错误，晋级结论暂停。原始产物不覆盖；修正后另保存 detector-v2 复算。样本不变的修正复算仅用于排错，不能替代后续独立样本检验。
 
-- **规模与时间分布**：24 个冻结区块共 65,545 笔交易，Tier 0 为 838，Tier 1 为 662。六个 control 区块共 13,948 笔交易，Tier 0/Tier 1 均为 0；early-marketplace、post-Runes、recent 三层的 Tier 1 分别为 491、144、27。Tier 1 分布在 17 个后期样本区块，覆盖 123 个结构指纹；86 笔含多个匹配 `0x83` inputs。
+#### Detector-v2 修正协议（复算前记录）
+
+不改变冻结的 24 区块样本和 Tier 1 同 index、同 script、正 value 增量条件。原始扫描只产生字节形状候选，必须在 API prevout 富集后核对脚本上下文：P2TR 按 BIP341 先排除 annex，只接受 key-path 单项显式 `0x83`；native/nested P2WPKH 核对公钥 HASH160、嵌套 redeemScript HASH160、签名位置与 strict-DER 编码。P2WSH、Taproot script path 和其他未解释的脚本路径列为未决，不计入上下文核验后的 Tier 1。API vout 必须逐项等于 raw transaction 的 value/script；当前 prevout 仍依赖 API，未完成逐个原始父交易重算，所以“上下文核验”不是独立密码学验证。旧文件不覆盖，新文件使用 `cp13_pilot_v1_detector_v2.json`；任何新增或删除候选均须报告。
+
+#### Detector-v1 历史计数（已被修正版本替代）
+
+- **规模与时间分布**：24 个冻结区块共 65,545 笔交易，Tier 0 为 838，Tier 1 为 662。六个 control 区块共 13,948 笔交易，Tier 0/Tier 1 均为 0；early-marketplace、post-Runes、recent 三层的 Tier 1 分别为 491、144、27。Tier 1 分布在全部 18 个后期样本区块，覆盖 123 个结构指纹；86 笔含多个匹配 `0x83` inputs。
 - **公开过滤器下界**：636/662（96.1%）Tier 1 存在重复 output script，因而必然不满足 Schnoering–Vazirgiannis 所列 JoinMarket、Wasabi 和 Whirlpool 公开结构规则。该数字是针对这些已发表规则的保守漏检下界，不外推到私有商业过滤器。
 - **公开实现兼容性**：101/662（15.3%）严格符合 Magic Eden Foundation `msigner` 默认 dummy-input/output 与 seller-index 结构，只能记为实现家族兼容，不能直接认定平台归属。ORD.NET、OrdinalsBot 与 `msigner` 已证明至少三个公开实现采用相同协作签名机制，但尚未逐笔验证样本资产语义。
 - **协议裁决**：预设的 Tier 1 数量、非相邻时间层、多个指纹和公开 filter 漏检率四项规模/结构条件均通过。第五项“至少两个公开实现/市场进入 Tier 2”未完成，因此不扩大到 60 区块，也不进入模型开发，只补 ground truth 和传播效应。
 - **当前阻塞**：Magic Eden 官方 block-activity API 的匿名请求连续返回 HTTP 503；这不能解释为样本中没有 inscription transfer。下一步优先使用可审计的官方/开源交易模板、恢复后的官方索引或本地/可信 ord index 交叉验证。
+
+#### Detector-v2 诊断复算与独立复审
+
+2026-08-31 复算结果：同一组 24 区块共 65,545 笔交易，845 个 witness 字节形状候选中有 832 笔在支持的签名上下文通过检查，666 笔满足 Tier 1 条件。control/early-marketplace/post-Runes/recent 的 Tier 1 为 0/494/145/27；全部 18 个后期样本区块均有候选。87 笔有多个匹配 inputs。公开结构规则漏检下界为 640/666（96.1%）；`msigner` 严格模板兼容为 103/666（15.5%）。未通过上下文检查的 13 个交易不计入 Tier 1，不能统一称为假阳性，因为未实现脚本路径中也可能包含真实签名。
+
+与 v1 比较：原 662 个 Tier 1 全部保留，新增 4 个、删除 0 个；新增者均包含被旧代码误删的 `0xc0/0xc1` 前缀单项 Taproot key-path 签名。新增 txids 为 `a23c33ac6c9b5cd4176deed72a08357a143ab2dc821df31403be8adf8d099ada`、`5f2a7a3d22c59563df97a79dfc8b5d9137be629a8e26649bb292c5c2f71398fa`、`eb2bcc3ca006716a6c2417c3d21976d7ababe35750891675547ebcaa7211b7c7`、`740f31e25e2ae0ca42e9945d50d8cbe744e360d03a633ac530c90881eeeefd3b`。字节形状候选总共新增 7 个；另外 3 个新增交易为不支持的 script path，没有进入 Tier 1。
+
+独立只读复审核对了新旧集合、代码与产物 hash、annex 排除、script-path 未决规则以及 native/nested P2WPKH 上下文；未发现当前支持范围内的新关键分类错误。两个脚本的 self-test 通过。所有“验证”仅指 context screening，仍依赖确认链有效性与 API prevout 正确性，不是重新执行 ECDSA/Schnorr 密码学验签。官方规则依据为 [BIP141](https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki)、[BIP341](https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki)、[BIP342](https://github.com/bitcoin/bips/blob/master/bip-0342.mediawiki)。
+
+复算命令（本地缓存目录可替换，原始内容须匹配产物中 hash）：
+
+```powershell
+uv --cache-dir .uv-cache run --no-sync python scripts/research/run_cp13_pilot_v1.py --block-dir "$env:TEMP\btc_cp13_v1_blocks" --cache-dir "$env:TEMP\btc_cp13_v1_txjson_blockchain" --api-base https://blockchain.info --workers 4 --output experiments/diagnostics/cp13_pilot_v1_detector_v2.json
+```
+
+产物 SHA-256 为 `3F517032CF15D35E56F28A5E5F0A2AE4184BDCC437B3334403A5E9FDE96A779F`；scanner 为 `9BE81CF2603B635FDDD9D07B22BE8DB346AF7248CF772A3F168F8DCF71F5E8F2`；runner 为 `D06262421B9C23F7DAC84E054F5ECF53CB6A301173D9B864C5D79B4B5446F7B6`。源代码在 `3573cec` 基线上带本次显式修正 diff 运行。旧产物保持原 hash；同样本复算不作为独立重复验证。
+
+后续只推进输入来源与语义真值硬门：核验原始父交易及 outpoint；取得至少两个实现家族的可审计资产结算语义；不把当前 UTXO 快照当历史 transfer 真值，不把失败请求当无转移。2026-08-31 ordinals.com 单个公开 output 查询返回 HTTP 403，Undermind 同步两次出现 connector transport error；本地证据已保留，远端同步待恢复。

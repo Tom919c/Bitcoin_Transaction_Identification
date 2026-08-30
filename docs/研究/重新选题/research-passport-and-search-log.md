@@ -65,7 +65,7 @@
 - 官方元数据：68 篇已通过 Crossref、arXiv 或出版社一手记录核验；其中 33 篇当前高价值条目已清洗进入 `references.bib`。
 - 全文证据：37 篇已完成面向当前 RQ 的正文检索与主张审计；其中 8 篇完成 Undermind PDF 逐篇定位，29 篇使用 Firecrawl 索引全文、官方 PDF 或出版社 HTML 做定向内文核验。后 29 篇仍须在最终引用前映射到稳定 PDF 页码或正式版章节，不能把“正文命中”夸大为逐页通读。
 - 专项检索：原计划的五组 Undermind 深检均已完成；因新候选与饱和规则，另完成“未来独立证据前瞻发现”和“provenance-preserving benchmark 重建”两组深检，并以 Firecrawl/Tavily/官方页面独立复核关键近邻。
-- 当前决策：原“单位一致的预算化 AML 队列”因 `Mal26` 高度重合而 No-Go；“选择性标签下效用识别”因标准理论覆盖而 No-Go；纯聚类准确率、缺失 lineage 的来源捷径、CP-12 全量 benchmark 重建和 CP-04+CP-07 前瞻恢复均已触发主线 No-Go。CP-13“Bitcoin 数字资产市场协作式结算对 common-input clustering 的系统性污染”已通过文献与预注册规模/结构门，现为唯一首要候选；只授权跨市场 Tier 2 真值和聚类传播效应测量，尚未授权训练模型或冻结最终主方向。
+- 当前决策：原“单位一致的预算化 AML 队列”因 `Mal26` 高度重合而 No-Go；“选择性标签下效用识别”因标准理论覆盖而 No-Go；纯聚类准确率、缺失 lineage 的来源捷径、CP-12 全量 benchmark 重建和 CP-04+CP-07 前瞻恢复均已触发主线 No-Go。CP-13“Bitcoin 数字资产市场协作式结算对 common-input clustering 的系统性污染”经文献反证和 detector-v2 诊断复算仍为首要候选；当前只推进独立 prevout 核验、跨市场 Tier 2 真值和传播效应硬门，不训练模型、不冻结最终主方向。
 
 ### 本地 252M 数据 provenance 闸门
 
@@ -105,8 +105,12 @@
 | 2026-08-30 | CP-13 raw-block zero-model smoke | feasibility passed；effect gate open | 区块 947353；2,856 笔交易；17 个结构合法显式 `0x83` 候选 | 验证 raw block 可检测性与同块模板重复 | 官方示例检出；至少四个额外样本具有固定 index 的小额 Taproot `0x83` input、同 index 的卖方付款和另一脚本承担其余 inputs/outputs。目的性单块不能估计流行率、跨市场覆盖或独立所有权；下一步须预注册多时段样本 |
 | 2026-08-31 | CP-13 frozen 24-block pilot v1 | scale/structure gate passed；Tier 2/effect gate open | 24 个预注册区块；65,545 笔交易；Tier 0 838；Tier 1 662 | 检验规模、跨时期分布、模板多样性与公开规则漏口 | control 为 0；后三层 Tier 1 为 491/144/27，覆盖 123 个结构指纹。636/662（96.1%）因重复 output script 必然绕过已发表 JoinMarket/Wasabi/Whirlpool 结构规则；101/662（15.3%）严格符合 `msigner` 默认模板。Magic Eden 官方 activity API 返回 HTTP 503，Tier 2 资产/市场语义仍未完成；不得把 Tier 1 当真实成交真值 |
 | 2026-08-31 | CP-13 parser integrity review | v1 quarantined；promotion on hold | BIP141/341/342 与本地 scanner 调用链 | 排除 witness 外形误识别与合法签名漏检 | 发现 `0xc0/0xc1` 开头的 65-byte key-path 签名被误当 control block；annex、prevout 类型和脚本参数消费语义不足。保留 v1，要求 detector-v2 修正复算及差异清单。上行的规模/结构通过状态被本行暂停，不改变历史数值 |
+| 2026-08-31 | CP-13 detector-v2 diagnostic reanalysis | completed；independent code review passed；semantic gate open | 相同 24 区块；845 形状候选；832 上下文通过；666 Tier 1 | 用支持的脚本路径修正计数，并保留版本差异 | 原 662 全保留，新增 4 笔 C0/C1 前缀 key-path 交易；control/后三层 Tier 1 为 0/494/145/27。640/666（96.1%）为公开规则必漏下界，103/666（15.5%）为 msigner-compatible。同样本复算不是独立重复验证；API prevout 信任、script-path 未解释、Tier 2 未完成三项限制保留 |
+| 2026-08-31 | CP-13 external semantic access and workspace sync | unavailable；not a negative scientific result | Magic Eden activity API、ordinals.com output、Undermind workspace | 尝试公开资产语义核验与双重留档 | Magic Eden HTTP 503；ordinals.com 单点 HTTP 403；Undermind 两次 transport error。本地证据已保存，远端同步待恢复；失败查询绝不计作无资产转移 |
 
 CP-13 v1 隔离产物 SHA-256：`experiments/diagnostics/cp13_pilot_v1.json` = `851FEFAF74D7AB9226F9ACA9FB96FE8D71FB77B94E43490251BE6653C4965343`；原始 scanner = `5112B68446D601742A11AC333F689D7FB15C6073CE57D7B6E290075800B3A7EC`。该哈希只保证内容可追溯，不表示解析正确。
+
+CP-13 detector-v2 产物 SHA-256：`experiments/diagnostics/cp13_pilot_v1_detector_v2.json` = `3F517032CF15D35E56F28A5E5F0A2AE4184BDCC437B3334403A5E9FDE96A779F`。逐区块 hash、逐 API response hash、代码 hash 和验证范围均在该产物中。两个脚本 self-test 与独立新旧集合检查通过；研究登记、命令及修正原因见 `gate2-reentry.md` 的 detector-v2 部分。本次是零模型 Gate 2 诊断，不向旧 F1 模型分数表填入无意义数值。
 
 ### 来源核验台账（68 篇）
 

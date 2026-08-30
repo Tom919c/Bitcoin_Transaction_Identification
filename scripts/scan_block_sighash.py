@@ -1,4 +1,4 @@
-"""Scan a raw Bitcoin block for explicit SIGHASH_SINGLE|ANYONECANPAY signatures."""
+"""Discover witness byte-shape candidates; prevout-aware validation is required."""
 
 from __future__ import annotations
 
@@ -12,6 +12,8 @@ TARGET_SIGHASH = 0x83
 
 
 def read_compact_size(data: bytes, pos: int) -> tuple[int, int]:
+    if pos >= len(data):
+        raise ValueError("truncated CompactSize")
     first = data[pos]
     pos += 1
     if first < 0xFD:
@@ -31,17 +33,21 @@ def is_der_signature_with_hash_type(item: bytes) -> bool:
     if item[2] != 0x02 or s_tag + 2 >= len(item) or item[s_tag] != 0x02:
         return False
     len_s = item[s_tag + 1]
-    return s_tag + 2 + len_s == len(item) - 1
-
-
-def is_taproot_control_block(item: bytes) -> bool:
-    return len(item) >= 33 and (len(item) - 33) % 32 == 0 and item[0] & 0xFE == 0xC0
+    if not len_r or not len_s or s_tag + 2 + len_s != len(item) - 1:
+        return False
+    r, s = item[4:s_tag], item[s_tag + 2:-1]
+    return all(
+        not value[0] & 0x80
+        and not (len(value) > 1 and value[0] == 0 and not value[1] & 0x80)
+        for value in (r, s)
+    )
 
 
 def signature_kind(item: bytes) -> str | None:
+    """Byte shape only: neither signature use nor cryptographic validity is implied."""
     if not item or item[-1] != TARGET_SIGHASH:
         return None
-    if len(item) == 65 and not is_taproot_control_block(item):
+    if len(item) == 65:
         return "schnorr"
     if is_der_signature_with_hash_type(item):
         return "ecdsa"
@@ -67,6 +73,7 @@ def parse_transaction(data: bytes, pos: int) -> tuple[dict[str, object], int]:
     vin_start = pos
     input_count, pos = read_compact_size(data, pos)
     prevouts: list[str] = []
+    script_sigs: list[str] = []
     for _ in range(input_count):
         outpoint_end = take(data, pos, 36)
         prev_txid = data[pos : pos + 32][::-1].hex()
@@ -74,18 +81,24 @@ def parse_transaction(data: bytes, pos: int) -> tuple[dict[str, object], int]:
         prevouts.append(f"{prev_txid}:{prev_vout}")
         pos = outpoint_end
         script_len, pos = read_compact_size(data, pos)
+        script_sigs.append(data[pos:take(data, pos, script_len)].hex())
         pos = take(data, pos, script_len + 4)
     vin_end = pos
 
     vout_start = pos
     output_count, pos = read_compact_size(data, pos)
+    outputs = []
     for _ in range(output_count):
+        value = int.from_bytes(data[pos:take(data, pos, 8)], "little")
         pos = take(data, pos, 8)
         script_len, pos = read_compact_size(data, pos)
-        pos = take(data, pos, script_len)
+        end = take(data, pos, script_len)
+        outputs.append({"value": value, "scriptpubkey": data[pos:end].hex()})
+        pos = end
     vout_end = pos
 
     matches: list[dict[str, object]] = []
+    candidate_witnesses = {}
     if has_witness:
         for input_index in range(input_count):
             item_count, pos = read_compact_size(data, pos)
@@ -96,16 +109,13 @@ def parse_transaction(data: bytes, pos: int) -> tuple[dict[str, object], int]:
                 items.append(data[pos:end])
                 pos = end
 
-            excluded: set[int] = set()
-            if items and is_taproot_control_block(items[-1]):
-                excluded.add(len(items) - 1)
-                if len(items) >= 2:
-                    excluded.add(len(items) - 2)
             for item_index, item in enumerate(items):
-                if item_index in excluded:
-                    continue
                 kind = signature_kind(item)
                 if kind:
+                    candidate_witnesses[str(input_index)] = {
+                        "script_sig": script_sigs[input_index],
+                        "items": [value.hex() for value in items],
+                    }
                     matches.append(
                         {
                             "input_index": input_index,
@@ -125,6 +135,8 @@ def parse_transaction(data: bytes, pos: int) -> tuple[dict[str, object], int]:
         "output_count": output_count,
         "prevouts": prevouts,
         "matches": matches,
+        "candidate_witnesses": candidate_witnesses,
+        "outputs": outputs,
     }, pos
 
 
@@ -141,6 +153,7 @@ def scan_block(data: bytes) -> dict[str, object]:
     if pos != len(data):
         raise ValueError(f"unparsed bytes: {len(data) - pos}")
     return {
+        "block_hash": hashlib.sha256(hashlib.sha256(data[:80]).digest()).digest()[::-1].hex(),
         "transaction_count": transaction_count,
         "candidate_transaction_count": len(candidates),
         "candidates": candidates,
@@ -153,7 +166,8 @@ def self_test() -> None:
     der = bytes.fromhex("3006020101020101") + bytes([TARGET_SIGHASH])
     assert signature_kind(der) == "ecdsa"
     assert signature_kind(bytes(64) + bytes([TARGET_SIGHASH])) == "schnorr"
-    assert signature_kind(bytes([0xC0]) + bytes(63) + bytes([TARGET_SIGHASH])) is None
+    assert signature_kind(bytes([0xC0]) + bytes(63) + bytes([TARGET_SIGHASH])) == "schnorr"
+    assert not is_der_signature_with_hash_type(bytes.fromhex("300602018102010183"))
 
 
 def main() -> None:

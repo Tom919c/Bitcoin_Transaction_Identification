@@ -2,13 +2,13 @@
 
 ## 当前状态
 
-**Decision: GATE 2 HOLD — CP-13 仍是首要候选，但 2026-08-31 解析器审查发现 witness 上下文错误，规模/结构晋级暂停；先修正复算，再检查跨市场真值与传播效应。**
+**Decision: GATE 2 CONDITIONAL LEAD — CP-13 已完成解析器修正和原样本诊断复算，仍是首要候选；跨市场真值、独立输入来源核验和聚类传播效应未通过，最终方向不冻结。**
 
-下面列出的 838/662 等数值为保留的 detector-v1 历史结果，不得作为最终实证结论。已确认的错误包括合法 Taproot 签名与 control block 的外形碰撞，以及缺少 prevout/annex/脚本执行上下文核验。原始产物保持不变；修正后产物单独编号，同样本复算不宣称独立重复验证。
+2026-08-31 的独立审查确认 detector-v1 混淆了 witness 外形与签名语义。旧产物和旧代码保留在 `3573cec`，新结果使用 `cp13_pilot_v1_detector_v2.json`：同一组 24 区块、65,545 笔交易中，845 笔是字节形状候选，832 笔在支持的脚本路径中通过上下文检查，666 笔满足 Tier 1 结构条件。相对原始 662 笔，新增 4 笔、删除 0 笔；新增者均为旧代码误删的 `0xc0/0xc1` 前缀 Taproot key-path 签名。13 笔未通过当前上下文检查的候选不计入已验证 Tier 1。
 
-截至 2026-08-31，CP-13 的预注册 24 区块零模型 pilot 扫描 65,545 笔交易，得到 Tier 0 838 笔、Tier 1 662 笔；六个 control 区块为 0，后三个时期分别为 491、144、27。Tier 1 覆盖 123 个结构指纹；636/662（96.1%）因重复 output script 必然绕过已发表的 JoinMarket、Wasabi 与 Whirlpool 结构规则，101/662（15.3%）严格符合 Magic Eden Foundation `msigner` 默认模板。该结果通过预设的规模、跨时期、多模板与公开规则漏检门。
+修正后，control 的 Tier 1 为 0；后三个时期分别为 494、145、27，覆盖全部 18 个后期样本区块。640/666（96.1%）因重复 output script 必然绕过所审查的 JoinMarket、Wasabi 与 Whirlpool 公开结构规则；103/666（15.5%）严格符合 `msigner` 默认模板。规模信号未因修正消失，但这是同样本排错，不是独立复制，更不是总体流行率估计。
 
-这仍不是论文结论。Tier 1 只表示链上结构与协作式 `SINGLE|ANYONECANPAY` 结算相容，不证明 inscription/Runes/其他资产类型、平台归属、独立现实所有人或真实 sale。Magic Eden 官方 block-activity API 当前连续返回 HTTP 503，不能据此把未验证记录计为无转移。CP-13 只有在至少两个公开实现中建立可审计的 Tier 2 语义，并显示非平凡 component/union 传播效应后，才可请求用户冻结为主方向。
+这仍不是论文结论。上下文检查目前支持 Taproot key path 与 native/nested P2WPKH；脚本路径未解释，prevout 元数据仍信任公开 API，未逐项由原始父交易复算。Tier 1 不证明资产类型、平台归属、不同现实所有人或真实 sale。Magic Eden activity API 返回 HTTP 503，ordinals.com 单点只读请求返回 HTTP 403，均不能解释为“无资产转移”。至少两个公开实现的可审计 Tier 2 语义、独立 prevout 核验和非平凡 component/union 传播效应完成后，才请求用户冻结主方向。
 
 BlackSuit/Royal 的精确链上 target-construction 子测试成功：原定 UTC 日内 1,182,309 个输出只有一个等额 candidate，±1 日三日合计 3,154,828 个输出仍只有该候选；两个冻结 `c` 前 registry 均不包含它。但 DOJ 公开材料遮盖 txid/address，日期按 `on or about` 理解，CS-1 和商业工具上游不可审计。独立 Devil's Advocate 因 construct validity、来源独立性 unknown、永久 artifact 与伦理风险判定完整 pilot No-Go，Research Director 接受该反证。详见 `gate2-prospective-attribution/phase6_decision/black-suit-pilot/pilot-result.md`。
 
@@ -53,7 +53,7 @@ Gate 2 已完成 51 篇去重证据库、8 篇全文深读、14 个事件/家族
 
 ## 最终输出槽位
 
-- **首要候选（未冻结）**：CP-13（规模/结构门已通过；跨市场真值与传播效应门开放）
+- **首要候选（未冻结）**：CP-13（修正复算保留规模信号；输入来源、跨市场真值与传播效应门开放）
 - **替代方向一**：CP-02（blocked on new provenance/ground truth）
 - **替代方向二**：M1（blocked on prediction-time-complete multi-observer data or new measurement）
 - **低风险 fallback**：CP-05

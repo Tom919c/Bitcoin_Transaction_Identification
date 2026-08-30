@@ -16,7 +16,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts.research.scan_exact_bitcoin_outputs import fetch
-from scripts.scan_block_sighash import scan_block
+from scripts.scan_block_sighash import is_der_signature_with_hash_type, scan_block
 
 
 STRATA = {
@@ -25,6 +25,47 @@ STRATA = {
     "post_runes": [847310, 848410, 848594, 877986, 887012, 888771],
     "recent": [901077, 902343, 918143, 918573, 939796, 943404],
 }
+
+
+def validate_signature_context(candidate: dict, transaction: dict) -> tuple[list, list]:
+    """Validate signature positions, assuming confirmed-chain and API prevout data."""
+    accepted, unresolved = [], []
+    for index_text, witness in candidate["candidate_witnesses"].items():
+        index = int(index_text)
+        previous = transaction["vin"][index].get("prevout")
+        if previous is None:
+            raise ValueError("missing prevout for signature candidate")
+        script = bytes.fromhex(previous["scriptpubkey"])
+        items = [bytes.fromhex(item) for item in witness["items"]]
+        script_sig = bytes.fromhex(witness["script_sig"])
+        kind, path = None, None
+        if len(script) == 34 and script[:2] == b"\x51\x20":
+            if len(items) >= 2 and items[-1][:1] == b"\x50":
+                items = items[:-1]
+            if len(items) == 1 and len(items[0]) == 65 and items[0][-1] == 0x83:
+                kind, path = "schnorr", "taproot-key-path"
+        else:
+            if len(script) == 23 and script[:2] == b"\xa9\x14" and script[-1:] == b"\x87":
+                if len(script_sig) == 23 and script_sig[:3] == b"\x16\x00\x14":
+                    redeem = script_sig[1:]
+                    digest = hashlib.new("ripemd160", hashlib.sha256(redeem).digest()).digest()
+                    if digest != script[2:22]:
+                        raise ValueError("nested witness program does not match prevout")
+                    script = redeem
+                    path = "p2sh-p2wpkh"
+            if len(script) == 22 and script[:2] == b"\x00\x14" and len(items) == 2:
+                digest = hashlib.new("ripemd160", hashlib.sha256(items[1]).digest()).digest()
+                if digest != script[2:]:
+                    raise ValueError("witness public key does not match prevout")
+                if is_der_signature_with_hash_type(items[0]) and items[0][-1] == 0x83:
+                    kind, path = "ecdsa", path or "p2wpkh"
+        if kind:
+            accepted.append({"input_index": index, "witness_item_index": 0,
+                             "signature_kind": kind, "spend_path": path})
+        else:
+            unresolved.append({"input_index": index,
+                               "reason": "no target signature in supported path; script paths unimplemented"})
+    return accepted, unresolved
 
 
 def classify_tier1(candidate: dict, transaction: dict) -> list[dict]:
@@ -170,6 +211,26 @@ def load_inscription_transfer_txids(
 
 
 def self_test() -> None:
+    key_signature = bytes([0xC0]) + bytes(63) + b"\x83"
+    context_candidate = {"candidate_witnesses": {"0": {
+        "script_sig": "", "items": [key_signature.hex()]}}}
+    context_tx = {"vin": [{"prevout": {"scriptpubkey": "5120" + "00" * 32}}]}
+    assert validate_signature_context(context_candidate, context_tx)[0][0]["signature_kind"] == "schnorr"
+    context_candidate["candidate_witnesses"]["0"]["items"].append((b"\x50" + bytes(63) + b"\x83").hex())
+    assert len(validate_signature_context(context_candidate, context_tx)[0]) == 1
+    context_candidate["candidate_witnesses"]["0"]["items"][0] = bytes(64).hex()
+    assert validate_signature_context(context_candidate, context_tx)[0] == []
+    context_candidate["candidate_witnesses"]["0"]["items"] = [
+        key_signature.hex(), "75", (b"\xc0" + bytes(32)).hex()]
+    assert validate_signature_context(context_candidate, context_tx)[0] == []
+    pubkey = b"\x02" + bytes(32)
+    redeem = b"\x00\x14" + hashlib.new("ripemd160", hashlib.sha256(pubkey).digest()).digest()
+    context_candidate["candidate_witnesses"]["0"] = {
+        "script_sig": (b"\x16" + redeem).hex(),
+        "items": ["300602010102010183", pubkey.hex()]}
+    context_tx["vin"][0]["prevout"]["scriptpubkey"] = (
+        b"\xa9\x14" + hashlib.new("ripemd160", hashlib.sha256(redeem).digest()).digest() + b"\x87").hex()
+    assert validate_signature_context(context_candidate, context_tx)[0][0]["spend_path"] == "p2sh-p2wpkh"
     candidate = {
         "txid": "a",
         "matches": [{"input_index": 1, "signature_kind": "schnorr"}],
@@ -249,6 +310,7 @@ def main() -> None:
                 "stratum": stratum_by_height[height],
                 "transaction_count": result["transaction_count"],
                 "tier0_count": result["candidate_transaction_count"],
+                "block_hash": result["block_hash"],
                 "raw_block_sha256": hashlib.sha256(raw_block).hexdigest(),
             }
         )
@@ -261,11 +323,18 @@ def main() -> None:
         transaction, url, digest = load_transaction(
             candidate["txid"], args.cache_dir, args.api_base
         )
-        tier1_matches = classify_tier1(candidate, transaction)
+        api_outputs = [{"value": row["value"], "scriptpubkey": row["scriptpubkey"]}
+                       for row in transaction["vout"]]
+        if len(transaction["vin"]) != candidate["input_count"] or api_outputs != candidate["outputs"]:
+            raise ValueError(f"API transaction does not match raw transaction: {candidate['txid']}")
+        context_matches, unresolved = validate_signature_context(candidate, transaction)
+        tier1_matches = classify_tier1({**candidate, "matches": context_matches}, transaction)
         return {
             **candidate,
             "source_url": url,
             "response_sha256": digest,
+            "context_validated_matches": context_matches,
+            "unresolved_shape_inputs": unresolved,
             "tier1": bool(tier1_matches),
             "tier1_matches": tier1_matches,
             "public_filter_structure": public_filter_structure(transaction),
@@ -314,6 +383,13 @@ def main() -> None:
     result = {
         "protocol": {
             "name": "CP-13 zero-model sample v1",
+            "detector_revision": 2,
+            "analysis_role": "diagnostic reanalysis of original sample, not independent validation",
+            "validation_scope": "P2TR key path and native/nested P2WPKH; script paths unresolved; API prevout metadata trusted",
+            "code_sha256": {
+                "scanner": hashlib.sha256((ROOT / "scripts/scan_block_sighash.py").read_bytes()).hexdigest(),
+                "runner": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+            },
             "as_of_height": 947352,
             "excluded_smoke_height": 947353,
             "strata": STRATA,
@@ -330,6 +406,7 @@ def main() -> None:
             "blocks": len(block_records),
             "transactions": sum(row["transaction_count"] for row in block_records),
             "tier0": len(enriched),
+            "context_validated_transactions": sum(bool(row["context_validated_matches"]) for row in enriched),
             "tier1": sum(row["tier1"] for row in enriched),
             "tier1_published_protocol_rules_guaranteed_miss": sum(
                 row["tier1"]

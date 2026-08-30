@@ -1,6 +1,6 @@
 # Candidate Research Problem Cards
 
-> 状态：Gate 2 第三轮候选反证中。2026-08-31 解析器审查发现 Taproot witness 上下文判断错误；CP-13 的规模/结构晋级暂挂，v1 数字仅作待纠正的历史结果。候选必须从已核验证据产生，不从旧 EGS 叙事反推。
+> 状态：Gate 2 第三轮候选反证中。CP-13 完成 detector-v2 原样本诊断复算；规模信号仍存在，跨市场语义、独立 prevout 核验和传播效应硬门开放。v1 数字仅保留为已纠正的历史结果。
 
 ## 问题卡结构
 
@@ -46,7 +46,7 @@
 
 | 排名 | 候选 | 重要性 | 证据质量 | 可行性 | 乘积 | 当前决定 |
 |---:|---|---:|---:|---:|---:|---|
-| 1 | CP-13 Ordinals/数字资产市场协作式结算对地址聚类的系统性污染 | 5 | 3 | 3 | 45 | **首要候选；解析器修正复算中，暂不晋级** |
+| 1 | CP-13 Ordinals/数字资产市场协作式结算对地址聚类的系统性污染 | 5 | 3 | 4 | 60 | **首要候选；修正复算完成，真值与传播门开放** |
 | — | CP-04 + CP-07 未来独立公开归因的前瞻恢复 | 5 | 4 | 1 | 20 | **BlackSuit/Royal 完整 pilot No-Go；方向关闭** |
 | 2 | CP-05 252M 实体类型标签审计 | 3 | 4 | 4 | 48 | 低风险 fallback；不足以单独支撑顶会主线 |
 | 3 | CP-12 可追溯、严格时点的 Bitcoin 实体图 benchmark 重建 | 5 | 5 | 1 | 25 | 当前 No-Go；CP-04 关闭后不单独建设 |
@@ -60,7 +60,7 @@
 | — | CP-01 普通固定预算队列 | 4 | 5 | 5 | 100 | **直接重合，硬 No-Go** |
 | — | CP-10 单纯聚类准确率比较 | 3 | 5 | 4 | 60 | **直接重合，硬 No-Go** |
 
-硬重合和理论直接覆盖优先于乘积分数；高分但已有标准结论或缺失必要数据的方向不能进入推荐组合。CP-04+CP-07 的 BlackSuit/Royal target-construction 虽在 ±1 日保持唯一，但公开法律材料遮盖 txid/address，来源独立性不可核验，完整 pilot No-Go。CP-13 已通过规模/结构门，但还不是正式 Go；在跨市场真值和聚类传播效应完成前，不得开始新模型开发。
+硬重合和理论直接覆盖优先于乘积分数；高分但已有标准结论或缺失必要数据的方向不能进入推荐组合。CP-04+CP-07 的 BlackSuit/Royal target-construction 虽在 ±1 日保持唯一，但公开法律材料遮盖 txid/address，来源独立性不可核验，完整 pilot No-Go。CP-13 修正复算保留规模信号，但还不是正式 Go；在跨市场真值和聚类传播效应完成前，不得开始新模型开发。
 
 ## 创新性反证协议
 
@@ -255,9 +255,9 @@
 - **Actual gap**：潜在贡献不是“发现多方交易会破坏 CIOH”这一已知常识，而是识别一个 2023 年后出现、可由链上密码学签名角色高精度检测、未被常用 CoinJoin 规则覆盖的规模化交易族；量化其 union cascade 和公开数据集偏差；发布可复查 detector、污染清单与修正后的图统计。
 - **Minimum decisive experiment**：先选三个具有公开构造或开源实现的市场，各收集官方示例和一个连续区块/交易样本；解析 ECDSA/Taproot sighash、spent output、inscription movement 和 input/output role。不得用“witness 元素最后一字节为 `0x83`”作粗字符串匹配：ECDSA 必须验证 DER signature 结构与尾部 hash type，Taproot 必须区分 64-byte default 和 65-byte explicit hash type，并结合 key/script-path witness 位置。比较未过滤 CIOH、已发表协议型 CoinJoin rules、BlockSci-style filter、删除全部 `ANYONECANPAY` 的粗基线和 protocol-aware filter。只报告交易数、候选错误 union、component merge 增量、cascade size、现有过滤器召回和人工核验 precision；暂不训练 GNN。
 - **Strong baselines**：无过滤 CIOH；BlockSci/GraphSense/ORBITAAL 风格 common-input pipeline；等额输出与结构型 CoinJoin filters；删除所有 `ANYONECANPAY` 交易的高 recall 低 precision 基线；人工市场模板规则。
-- **Zero-model feasibility result**：第一步在 ORD.NET 官方示例所在区块 947353 做目的性 smoke，2,856 笔交易中检出 17 笔结构合法的显式 `0x83` 候选并命中官方示例。第二步严格排除该区块，按事先冻结的 SHA-256 规则抽取四个时期共 24 个区块，扫描 65,545 笔交易，得到 Tier 0 838 笔、Tier 1 662 笔；六个 control 区块为 0，early-marketplace、post-Runes、recent 分别为 491、144、27。Tier 1 覆盖 18 个后期区块中的 17 个、123 个结构指纹，其中 86 笔含多个匹配的 `0x83` inputs。该结果通过预设规模、跨时期与模板多样性门，但 Tier 1 仍不等于 inscription sale、市场归属或独立所有者真值。
-- **Published-filter check**：Schnoering–Vazirgiannis 2023 的 JoinMarket、Wasabi 1.0/1.1/2.0 与 Whirlpool 规则均要求输出脚本互异或固定协议结构；662 个 Tier 1 中有 636 个存在重复 output script，因此可由规则条件直接判定这些已发表规则必然漏检，保守下界为 96.1%。代表样本也未触发 BlockSci 官方 `isCoinjoin`、`isCoinjoinExtra` 或 `isPossibleCoinjoin`，其聚类调用链随后会 union 所有 inputs。该下界只针对明确复现的公开规则，不代表所有商业过滤器，也不声称停止维护的原始 BlockSci 已能端到端解析现代 Taproot。
-- **Implementation-family evidence**：662 个 Tier 1 中有 101 个严格符合 Magic Eden Foundation `msigner` 默认结构：seller signature/input index 为 2、两个 580–1000 sat 同脚本 dummy inputs、对应 buyer output 覆盖 dummy 总额，且 outputs 4/5 为同脚本 600 sat dummy outputs。它们只能称为 `msigner-compatible`，不能在缺少平台或资产索引证据时直接归属 Magic Eden。
+- **Zero-model feasibility result（v1 历史结果）**：第一步在 ORD.NET 官方示例所在区块 947353 做目的性 smoke，2,856 笔交易中检出 17 笔结构合法的显式 `0x83` 候选并命中官方示例。第二步严格排除该区块，按事先冻结的 SHA-256 规则抽取四个时期共 24 个区块，扫描 65,545 笔交易，得到 Tier 0 838 笔、Tier 1 662 笔；六个 control 区块为 0，early-marketplace、post-Runes、recent 分别为 491、144、27。Tier 1 覆盖全部 18 个后期样本区块、123 个结构指纹，其中 86 笔含多个匹配的 `0x83` inputs。该结果通过预设规模、跨时期与模板多样性门，但 Tier 1 仍不等于 inscription sale、市场归属或独立所有者真值。
+- **Published-filter check（v1 历史结果）**：Schnoering–Vazirgiannis 2023 的 JoinMarket、Wasabi 1.0/1.1/2.0 与 Whirlpool 规则均要求输出脚本互异或固定协议结构；662 个 Tier 1 中有 636 个存在重复 output script，因此可由规则条件直接判定这些已发表规则必然漏检，保守下界为 96.1%。代表样本也未触发 BlockSci 官方 `isCoinjoin`、`isCoinjoinExtra` 或 `isPossibleCoinjoin`，其聚类调用链随后会 union 所有 inputs。该下界只针对明确复现的公开规则，不代表所有商业过滤器，也不声称停止维护的原始 BlockSci 已能端到端解析现代 Taproot。
+- **Implementation-family evidence（v1 历史结果）**：662 个 Tier 1 中有 101 个严格符合 Magic Eden Foundation `msigner` 默认结构：seller signature/input index 为 2、两个 580–1000 sat 同脚本 dummy inputs、对应 buyer output 覆盖 dummy 总额，且 outputs 4/5 为同脚本 600 sat dummy outputs。它们只能称为 `msigner-compatible`，不能在缺少平台或资产索引证据时直接归属 Magic Eden。
 - **Primary metrics**：人工核验 precision/recall；被标准过滤器漏掉的 protocol-incompatible union 比例；新增合并 component 数与地址数；最大/分位 cascade size；过滤前后 cluster-size distribution 与预注册图统计效应量。下游标签或模型结果仅在 union 影响足够大且标签语义合法时作为次要分析。
 - **Data and feasibility**：原 252M 终态图不含 txid/witness/union lineage，不能直接做检测。Gate 2 pilot 可使用官方 txids、公开 explorer API、官方 `ord` index 和小区块窗口；完整测量可从 2023 年后的区块流式扫描标准签名，再与 inscription input/transfer 索引相交，不必依赖不透明的 marketplace sale 标签。当前磁盘不足以无条件保存完整 Bitcoin Core 与全量解析副本，因此只有小样本通过后才申请外部存储、远程节点或流式扫描。任何第三方“公开 sales endpoint、许可和历史覆盖”必须逐项核对官方文档，不能采用搜索代理生成但无法定位的接口。
 - **Theory property card**：在明确存在两个独立签名主体的交易中，对全部输入执行 CIOH union 必然违反单一控制假设；一个错误 bridge union 会不可逆地合并其连接的既有 components。两者目前属于直接性质，只能支撑检测正确性和传播量定义，不能当主定理。理论升级必须得到非平凡的可检测充分条件、污染传播界或在部分可观测签名下的可识别性结果，并通过反例审查。
@@ -265,4 +265,5 @@
 - **No-Go conditions**：效果只限单一新平台；`SINGLE|ANYONECANPAY` 不能可靠区分市场交易与其他协作用途；自成交/托管使不同主体无法操作化；标准过滤器已移除超过 95%；过滤前后 component 和下游统计变化很小；贡献只剩十几行 ETL 规则。
 - **Ethics and misuse risk**：目标是减少错误合并与错误归因，原则上改善隐私和科学有效性。发布样本应避免额外标注真实个人，只公开已在链上和官方文档可定位的交易结构；不把 cluster 当法律身份。
 - **Strongest reviewer rejection**：协作交易破坏 CIOH 早已已知；Ordinals 只是一个显然的新实例，检测规则过于简单，缺少独立实体真值，规模或下游影响不足以形成顶会贡献。
-- **Score / decision**：5×4×4=80；**首要候选，规模/结构门已通过，只批准跨市场真值与聚类传播效应测量**。Magic Eden 官方 block-activity API 当前连续返回 HTTP 503，Tier 2 尚未完成；不得把 662 个 Tier 1 写成 662 笔已验证市场成交。若不能在至少两个公开实现中建立可审计语义，或聚类传播效应很小，则立即 No-Go。
+- **Corrected diagnostic result**：detector-v2 只把支持的脚本上下文中的目标签名计入 Tier 1。24 区块复算为 845 个字节形状候选、832 个上下文通过交易、666 个 Tier 1；原 662 个全部保留，新增 4 个合法 `0xc0/0xc1` 前缀 key-path 签名交易。公开结构规则漏检下界为 640/666（96.1%），`msigner` 严格模板兼容为 103/666（15.5%）。这不是独立验证；当前 API prevout 信任和不支持脚本路径的边界必须保留。
+- **Score / decision**：5×3×4=60；**首要候选，只批准独立输入来源核验、跨市场真值与聚类传播效应测量**。Tier 2 尚未完成；不得把 666 个 Tier 1 写成已验证市场成交。若不能在至少两个公开实现中建立可审计语义，或聚类传播效应很小，则立即 No-Go。
