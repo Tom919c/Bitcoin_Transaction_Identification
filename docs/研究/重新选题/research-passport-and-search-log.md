@@ -10,7 +10,7 @@
 - 邻接参照：Ethereum、多链、传统 AML/fraud、temporal graph learning、OOD、open-set、PU learning、entity resolution、human-in-the-loop investigation。
 - 时间：优先 2018-08-19 至 2026-08-19；更早的奠基工作按必要性纳入。
 - 来源：同行评审的一手论文优先；preprint、workshop、技术报告和灰色文献单独标记。
-- 当前阶段：Gate 1 已形成条件主方向；等待用户确认是否进入 CP-04+CP-07 的 Gate 2 档案/证据独立性试验，尚未冻结完整实验协议。
+- 当前阶段：Gate 2 重新选题继续开放。CP-04+CP-07 已因公开证据不独立而关闭，N1 资金流证书已在冻结合成试验中得到负向条件证据；当前正在审计新的 mempool、同块顺序、查询保持采样和标签生命周期候选，尚未冻结主问题或完整实验协议。
 - 明确区分：entity type、illicit activity、fraud、AML risk。
 - 未标注节点不能默认作为正常类、负类或未知非法类。
 
@@ -65,7 +65,7 @@
 - 官方元数据：68 篇已通过 Crossref、arXiv 或出版社一手记录核验；其中 33 篇当前高价值条目已清洗进入 `references.bib`。
 - 全文证据：37 篇已完成面向当前 RQ 的正文检索与主张审计；其中 8 篇完成 Undermind PDF 逐篇定位，29 篇使用 Firecrawl 索引全文、官方 PDF 或出版社 HTML 做定向内文核验。后 29 篇仍须在最终引用前映射到稳定 PDF 页码或正式版章节，不能把“正文命中”夸大为逐页通读。
 - 专项检索：原计划的五组 Undermind 深检均已完成；因新候选与饱和规则，另完成“未来独立证据前瞻发现”和“provenance-preserving benchmark 重建”两组深检，并以 Firecrawl/Tavily/官方页面独立复核关键近邻。
-- 当前决策：原“单位一致的预算化 AML 队列”因 `Mal26` 高度重合而 No-Go；“选择性标签下效用识别”因标准理论覆盖而 No-Go；纯聚类准确率和缺失 lineage 的来源捷径均 No-Go。独立反方审查进一步将 CP-12 的全量 benchmark 重建判为当前主线 No-Go。CP-04+CP-07“未来独立公开归因的前瞻恢复”是唯一条件主方向，只允许先审计至少 3 个事件家族的档案、首见时间、来源依赖和冻结候选全集；尚未授权训练模型。
+- 当前决策：原“单位一致的预算化 AML 队列”因 `Mal26` 高度重合而 No-Go；“选择性标签下效用识别”因标准理论覆盖而 No-Go；纯聚类准确率、缺失 lineage 的来源捷径、CP-12 全量 benchmark 重建和 CP-04+CP-07 前瞻恢复均已触发主线 No-Go。CP-13“Bitcoin 数字资产市场协作式结算对 common-input clustering 的系统性污染”已通过文献与预注册规模/结构门，现为唯一首要候选；只授权跨市场 Tier 2 真值和聚类传播效应测量，尚未授权训练模型或冻结最终主方向。
 
 ### 本地 252M 数据 provenance 闸门
 
@@ -93,6 +93,20 @@
 | 2026-08-19 | Temporal Entity Resolution Error Propagation | completed | 41 | as-of 聚类、下游误差与稳定性 | 未发现完整的 as-of partition + downstream queue artifact；但 `Mul26`、`Mos21` 与通用 linkage-error 理论显著抬高门槛 |
 | 2026-08-19 | Prospective Discovery with Delayed Independent Evidence | completed | 51 | 未来独立证据、右删失、事件/实体前瞻发现 | 两条独立补检未发现同时冻结 `t0` 候选全集、审计原始证据独立性并按未来确认做预算评测的工作；HackForums 等 artifact 尚未过 Gate |
 | 2026-08-19 | Provenance Preserving Bitcoin Benchmark Reconstruction | completed | 43 | evidence→address→script→cluster→node lineage 与评测复算 | 未发现包含完整 lineage、as-of clustering、冲突日志与下游模型排名的公开 benchmark；`Saf26`、`Len26`、ORBITAAL、`Jal25` 为最近邻 |
+| 2026-08-30 | Multi Observer Bitcoin Mempool Conflicts | completed | 40 | 多观察点分歧、确认/替换/驱逐/包结果 | 初步发现“跨观察点校准结果预测”空白；现成 16 节点 artifact 只有交易哈希与首次接收时间，不能直接支持手续费、冲突或驱逐强基线，须过数据硬门 |
+| 2026-08-30 | Bitcoin Within Block Order Sensitivity | completed | 49 | 合法同块线性扩展下的特征/模型稳定性 | Undermind 未检出完全等价模型审计；独立链找到 Arnold et al. 2024 已做 Bitcoin 同块随机排序及 motif 敏感性，单纯审计不新 |
+| 2026-08-30 | Bitcoin Audit Query Preserving Sampling | completed | 75 | 面向审计查询的全链采样/摘要 | 通用 reachability/flow preserver、temporal spanner 与 streaming lower bound 已成熟；没有冻结的真实查询负载和 Bitcoin 特有保证，M3 主线 No-Go |
+| 2026-08-30 | Cryptocurrency Service Label Lifecycle | completed | 73 | 标签时间有效性、撤销、冲突与来源依赖 | 有污染、冲突、opacity 的直接近邻；公开数据缺有效时间与撤销 outcome，M4 lifecycle 主线 No-Go，静态 source 审计并入 M5 |
+| 2026-08-30 | Entity Exposure Aware Crypto Address Evaluation | quota-blocked | 0 | 同现实实体跨地址切分、unseen-entity 泛化与模型排名 | 已提交专门 deep search，但本轮额度暂时耗尽；独立链已核对 MBAL 的 entity/source 字段与随机地址抽样，并排除 StableAML 的“地址不重复”是 entity-disjoint 的误读 |
+| 2026-08-30 | M5 independent direct/component countersearch | completed | 6 个关键近邻全文级核对 | 地址分类、实体分类、cluster 分类、wallet-level split 与 grouped evaluation | Lin 2019、Yin 2019 已覆盖实体/cluster 作为分类单位，Sforzin 2022 是大规模随机地址基线；未找到同任务下 random-address 与 unseen-entity 的模型排名/校准完整对照，但仅补 GroupKFold 不足以构成顶会创新，M5 当前主线 No-Go |
+| 2026-08-30 | Ordinals Marketplace PSBT Address Clustering | completed | Undermind deep search 22 篇；8 篇关键 PDF 定向核验；独立 exact/component 搜索与 4 个官方实现入口 | 协作式 inscription sale、`SINGLE|ANYONECANPAY` 与 CIOH 污染 | 未发现 exact prior；最接近者覆盖 BRC-20 PSBT sniping、PayJoin UIH、MIH 可靠性和协议型 CoinJoin detection。该 absence 结论只绑定当前检索快照；独立链确认 ORD.NET、OrdinalsBot、Magic Eden `msigner` 的跨平台协议模式 |
+| 2026-08-30 | CP-13 official transaction mechanism check | source-verified pilot anchor | 1 个官方示例 tx、3 个市场实现/说明 | 判断链上是否能恢复协作签名角色 | ORD.NET 示例 `0f2f22ed…ce40` 的 raw transaction 含平台 anchor、2-of-2 passthrough、买家付款 inputs；witness 含 `0x83` 与默认/ALL 签名。仅证明可检测性，不证明规模、独立所有权或论文价值 |
+| 2026-08-30 | CP-13 current-filter countersearch | source- and interpretation-verified for published rules | Schnoering–Vazirgiannis 2023 PDF；Stütz et al. 2022；BlockSci 官方 CoinJoin predicates 与 cluster call path | 判断公开 CoinJoin rules 是否已经排除该交易族 | 代表样本 `1f533fce…0abe6f` 不满足 JoinMarket、Wasabi、Whirlpool 或 BlockSci predicates；BlockSci rule path 会继续 union inputs。只覆盖已发表/公开规则，不覆盖商业规则；原始 BlockSci 已停止维护，结论是源码谓词复现，不是现代 Taproot 端到端运行 |
+| 2026-08-30 | CP-13 raw-block zero-model smoke | feasibility passed；effect gate open | 区块 947353；2,856 笔交易；17 个结构合法显式 `0x83` 候选 | 验证 raw block 可检测性与同块模板重复 | 官方示例检出；至少四个额外样本具有固定 index 的小额 Taproot `0x83` input、同 index 的卖方付款和另一脚本承担其余 inputs/outputs。目的性单块不能估计流行率、跨市场覆盖或独立所有权；下一步须预注册多时段样本 |
+| 2026-08-31 | CP-13 frozen 24-block pilot v1 | scale/structure gate passed；Tier 2/effect gate open | 24 个预注册区块；65,545 笔交易；Tier 0 838；Tier 1 662 | 检验规模、跨时期分布、模板多样性与公开规则漏口 | control 为 0；后三层 Tier 1 为 491/144/27，覆盖 123 个结构指纹。636/662（96.1%）因重复 output script 必然绕过已发表 JoinMarket/Wasabi/Whirlpool 结构规则；101/662（15.3%）严格符合 `msigner` 默认模板。Magic Eden 官方 activity API 返回 HTTP 503，Tier 2 资产/市场语义仍未完成；不得把 Tier 1 当真实成交真值 |
+| 2026-08-31 | CP-13 parser integrity review | v1 quarantined；promotion on hold | BIP141/341/342 与本地 scanner 调用链 | 排除 witness 外形误识别与合法签名漏检 | 发现 `0xc0/0xc1` 开头的 65-byte key-path 签名被误当 control block；annex、prevout 类型和脚本参数消费语义不足。保留 v1，要求 detector-v2 修正复算及差异清单。上行的规模/结构通过状态被本行暂停，不改变历史数值 |
+
+CP-13 v1 隔离产物 SHA-256：`experiments/diagnostics/cp13_pilot_v1.json` = `851FEFAF74D7AB9226F9ACA9FB96FE8D71FB77B94E43490251BE6653C4965343`；原始 scanner = `5112B68446D601742A11AC333F689D7FB15C6073CE57D7B6E290075800B3A7EC`。该哈希只保证内容可追溯，不表示解析正确。
 
 ### 来源核验台账（68 篇）
 
@@ -126,7 +140,7 @@
 
 只保存重要、可核验且允许长期保存的文献。不得把 147 篇发现池全部导入 Zotero。优先 DOI 去重；正式发表版作为主记录，预印本与主记录建立版本关系。
 
-当前 Zotero 状态：本机 Zotero local API 端口可见，但当前运行时未暴露 Zotero connector 写工具，也没有 `ZOTERO_*` Web API 凭据。local API 只用于安全读取；在写能力接通前，不直接修改 Zotero SQLite。
+当前 Zotero 状态：CP-13 已通过 focused deep search 和零模型规模/结构硬门，核心近邻现已具备入库资格；但本轮本地 Zotero API 与 connector 均未运行，因此尚未声称导入。Zotero 恢复后只导入已核验的关键近邻与反证，并继续用 `Bitcoin Evidence Research 2026`、`btgr:cp13` 和核验状态标签隔离；不直接修改 Zotero SQLite。
 
 ## 安全与伦理
 

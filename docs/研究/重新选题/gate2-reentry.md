@@ -140,8 +140,16 @@ N1 的最强停止条件是：在预先定义的合理阈值下，几乎所有 e
 | Gavenda et al. 2025, *Analysis of Input-Output Mappings…* | `XVWA7QGV` | `gavenda2025mappings` | 原始 N7 的致命最近邻 |
 | Maurer et al. 2017, *Anonymous CoinJoin Transactions…* | `ZY9V86UE` | `maurer2017anonymous` | arbitrary-value CoinJoin mapping 先行工作 |
 | Tironsakkul et al. 2019, *Probing the Mystery…* | `JRVXPK6Q` | `tironsakkul2019probing` | taint rules 与经验分歧基线 |
+| Albrecht and Karame 2026, *On the Effectiveness of Mempool-based Transaction Auditing* | `DF2ZPIDJ` | `Alb26` | M1 最近邻与 16 节点公开 artifact |
+| Arnold et al. 2024, *Insights and Caveats from Mining Local and Global Temporal Motifs…* | `B5EL7T7F` | `Arn24` | M2 的直接同块顺序反证 |
+| He et al. 2026, *MBAL: A 10-Million Annotated Crypto Address Dataset…* | `7J99D9ZI` | `He26MBAL` | M5 核心数据论文；数据结构与原随机地址切分来源 |
+| Lin et al. 2019, *An Evaluation of Bitcoin Address Classification…* | `FFVQ8FAU` | `Lin19AddressEntity` | M5 的 address/entity 双任务直接组件反证 |
+| Yin et al. 2019, *Regulating Cryptocurrencies…* | `DXV3YET5` | `Yin19Regulating` | Bitcoin cluster/entity 分类直接先行工作 |
+| Zola et al. 2022, *Attacking Bitcoin Anonymity…* | `DQU849FC` | `Zola22GANEntity` | 大规模 Bitcoin entity 分类近邻 |
 
 Zotero item key 与 BibTeX citation key 是两套标识；后续同步 `references.bib` 时以 citation key 为 Git 侧主键。
+
+当前 connector 只能导入到 Zotero 根文库，不能创建 collection；新增条目用 `Bitcoin Evidence Research 2026` 及 `btgr:*` 标签隔离。collection 创建能力接通后再移动，不直接修改 Zotero 数据库。
 
 ## 2026-08-24：N1 A1 证据更新（覆盖先前“条件性第一名”判断）
 
@@ -150,3 +158,93 @@ N1 的 48-instance locked synthetic 已在预运行 commit `0aa54ad` 上完成�
 该证据不允许外推“真实 Bitcoin CDR 为 0”，但已经击中 N1 当前研究论点的核心机制：一旦 source 与 clean value 发生普通两层混合，仅靠 ledger-compatible completions 可能得到完整而非局部的不确定区间。独立 Devil's Advocate 因此将 N1 从“条件性第一名”降级为 `negative conditional / parked`；不批准 B1、模型扩展或论文主线。
 
 唯一获批的后续工作是一个低成本、预冻结的 B0 structural falsification screen。它只能检验现实两跳结构中非退化证书是否足够常见；不能作为 N1 Go 或现实统计证据。若 B0 接近全 abstain，N1 直接 No-Go，研究回到 Gate 2 比较其余候选方向。
+
+## 2026-08-30：第二轮新候选与第一道硬门
+
+N1 的负向结果触发了新的独立候选生成。候选先由资产、理论和反方三个互不共享结论的视角提出，再启动 Undermind 与独立官方来源检索。当前排序不是最终选题。
+
+### M1：多观察点 mempool 分歧下的校准结果预测
+
+- **RQ**：对预测时点已被若干独立 Bitcoin 节点观察到的交易，多观察点的覆盖、首次接收时间分歧和地理/策略视图，是否能在严格时间外与 observer-held-out 评测中，提高一定时间窗内确认结果的概率校准和选择性覆盖？
+- **主张边界**：当前只允许研究 confirmation-within-horizon。公开 artifact 没有原始交易、输入输出、手续费、RBF 冲突或 eviction 事件，不能把问题扩写为 replacement、package 或 eviction prediction。
+- **最近邻**：Albrecht and Karame 2026 用 16 个全球观察点审计交易集合/顺序一致性和 displacement/censorship 判定；其 Bitcoin 主测量持续 196 小时，记录约 313 万笔交易。Kim et al. 2020 比较四个 mempool 的 Jaccard 相似度。Koops 2018 与 Aronoff et al. 2026 提供单视图排队/延迟强基线。
+- **真正待证差异**：最近邻没有把 observer disagreement 用于经过时间外和 held-out observer 检验的 confirmation probability calibration；但“没有检出”不是首次性证明。
+- **数据硬门**：Albrecht artifact 仅发布交易哈希和 16 个首次接收时间，许可为 CC BY-NC 4.0。它可以与最终链上确认状态连接，但对未确认交易无法恢复预测时本应可见的手续费与完整交易内容，因而无法公平运行 fee/package 强基线。若不能获得原始交易或重新开展多节点采集，M1 No-Go。
+- **最小判别实验**：先只读审计 artifact 的覆盖期、缺失模式、链上连接率和 outcome 删失；不训练新模型。只有能构造无 outcome-dependent feature missingness 的 fee/age/queue baseline，才冻结 chronological、congestion-stratified 和 observer-held-out 协议。
+- **指标**：Brier score、log loss、reliability、coverage–risk、不同拥堵区间的 calibration；accuracy 不是主要指标。
+- **理论性质候选**：研究 private relay 与 observer-specific policy 下 outcome probability 的可识别边界，以及 observer-set permutation/metadata 条件下的预测不变性。该方向目前只是理论问题卡；若只得到标准的“增加信息不提高 Bayes risk”或普通 missing-data 界，不作为贡献。
+- **最强拒稿理由**：数据只支持一次短期网络测量；增益来自更多时间戳而非新问题；手续费强基线缺失；2026 审计论文已覆盖多观察点主要现象。
+- **当前裁决**：`high-upside alternative / new-measurement-gated`。重要性 4、证据质量 3、当前数据可行性 1，乘积 12；只有获得包含预测时可见手续费、交易内容、冲突/替换状态和多观察点时间戳的数据，或获批重新开展数周多节点采集，才重新评分。
+
+### M2：合法同块线性扩展下的结论稳定性
+
+- **RQ**：对只有区块级时间、但被实现赋予区块内总序的 Bitcoin temporal graph，沿所有依赖保持的线性扩展改变事件顺序，是否会改变特征、嵌入、预测或模型排名？
+- **直接反证**：Arnold et al. 2024 已明确指出同块内只有 UTXO 依赖带来的拓扑顺序保证，并已随机化同块顺序；其 temporal motif count 最大偏差约 3%。通用 temporal graph 文献也已讨论 ties、batching、reachability 和 event-order sensitivity。
+- **剩余差异**：模型预测/排名与严格依赖保持的线性扩展尚未被当前检索完全覆盖；但单纯把 motif 审计换成 TGN 审计仍高度增量。
+- **当前裁决**：`main-track No-Go / method component only`。只有先证明常用模型结论出现实质翻转，并形成非平凡的 ledger-semantic invariance 方法或界，才允许重新入池。
+
+### M3–M4：反证后降级
+
+- **M3 audit-query-preserving sampling**：Undermind 检出 75 篇相关工作。需求对 reachability/distance/flow preservers、temporal spanners、streaming lower bounds 和区块链索引已有成熟理论；Bitcoin 系统也已覆盖摄取、遍历、时间分区和大图采样。当前没有冻结的真实 audit query family，也没有 Bitcoin 特有且不能由通用 preserver 覆盖的保证，因此裁决为 `main-track No-Go / theory-dependent reserve`。
+- **M4 service-label lifecycle**：Undermind 检出 73 篇相关工作，已存在 abuse-report 污染、multi-source conflict resolution、dataset opacity 和 attribution reliability 的直接近邻。公开 MBAL 虽提供 `source`，但没有标签获取时间、有效时间、撤销记录或冲突 outcome；其 `source` 只是 `ground_truth / heuristic / external` 三档。当前裁决为 `No-Go as lifecycle study / merge into evaluation audit`。
+
+### M5：实体暴露感知的加密货币地址分类评测
+
+- **RQ**：当训练集和测试集按现实服务/实体严格隔离，而不是只保证地址字符串不重复时，地址类别分类的性能、校准和模型排名是否显著下降或翻转？随机地址切分到底估计“已见实体的新地址”，还是“未见实体的泛化”？
+- **现实决策**：研究对象是 `entity/service type classification`，不是 illicit、fraud 或 AML 风险识别。部署含义限定为：面对训练时未出现的服务实体，模型能否根据地址行为特征预测其服务类别。
+- **直接数据机会**：MBAL 发布 1000 万地址、62/63 个类别、933 个实体和三档来源；master 表包含 `chain / address / categories / entity / source`，Bitcoin 与 Ethereum 实验表分别包含地址、类别及 144/207 个特征。官方 Kaggle 说明表明原实验按地址行随机抽取测试样本，而非按实体分组。
+- **第一性问题**：若一个实体拥有多个地址，随机地址切分会让同一实体同时进入训练和测试。测试风险可以分解为已见实体风险和未见实体风险；只报告混合风险不能回答 unseen-entity 部署问题。该分解本身是标准 grouped evaluation 思想，不能单独作为理论贡献。
+- **本地先验证据**：现有公开地址标签中，39,047 个同时有类别和实体名的地址只对应 697 个规范化实体；一次 40/30/30 随机切分中，约 98.9% 的具名测试地址所属实体已在训练集出现，实体名查表准确率约 0.987。这是泄漏风险信号，不是 MBAL 的最终结果，也不能外推 252M 节点图。
+- **最近邻与反证**：StableAML 的“wallet-level split”只保证唯一地址行不重复，其节点本身是 wallet address，并未证明同一现实服务/实体不会跨分区。更强反证来自既有实体级分类：Lin et al. 2019 已在 26,313 个具名地址和 1,353 个实体上分别执行 address-based 与 entity-based classification；Yin et al. 2019 以 957 个已识别 Bitcoin clusters 为分类样本；Sforzin et al. 2022 则在 327 个 WalletExplorer 实体、约 1600 万地址上采用地址随机切分。它们没有完成 M5 所要求的同任务 random-address vs unseen-entity 模型排名/校准对照，但已经覆盖“实体是独立预测单位”和“随机地址切分会混入同实体地址”两个核心组件。
+- **最小判别实验**：不下载完整 4.8GB 特征前，先核验 master 表中 Bitcoin/Ethereum 的 entity 覆盖、每实体地址数、类别纯度、source 分布，以及实验地址能否稳定连接回 master。通过后，对原作者随机地址 split、entity-disjoint split、entity-and-source stratified split 使用同一特征和同一调参预算，比较查表诊断、logistic regression、random forest、XGBoost 与论文模型。
+- **主要指标**：macro-F1、per-class recall、Brier/ECE、模型排名相关性及随机切分相对 entity-disjoint 的效应量；必须报告无实体名地址和小实体类别的支持度，不用 accuracy 掩盖类别坍缩。
+- **理论审计**：随机地址 split 中测试地址已见同实体的概率 `1-(1-p)^(n_e-1)`、seen/unseen 风险混合、cluster bootstrap 和按实体 GroupKFold 均属于成熟 grouped evaluation/domain generalization 范畴。该分解不适用于 macro-F1/ECE 的线性校正，IPW 也不能把随机训练模型变成 entity-held-out 模型；这些性质可约束协议，但不能作为顶会理论主贡献。
+- **创新硬门**：至少满足以下一项才允许重新竞争主方向：跨 Bitcoin 与 Ethereum 复现稳定的大幅性能/校准变化；强模型排名翻转；`source × entity` 双重隔离揭示仅按实体 GroupKFold 仍不能消除的可验证机制；或有限预算决策发生稳定而实质的改变。若只是“换成 GroupKFold 后分数下降”，立即 No-Go。
+- **最强拒稿理由**：分组切分是常识；只审计一个刚发布数据集；三分之二地址缺实体名；实体字段本身可能由标签源推导并存在误归属；没有时间戳，不能声称时间部署有效。
+- **当前裁决**：`main-track No-Go as currently formulated / low-cost rescue screen only`。重要性 4、证据质量 5、可行性 4，表面乘积 80；但直接组件覆盖和标准方法学硬门优先于分数。仅允许先做 master→experiment join 与支持度审计；只有它预示可执行的跨链 `source × entity` 对照，才可预注册一个低成本 rescue pilot。
+
+### 当前董事判断
+
+第二轮没有产生可直接冻结的主方向。M1 有较高研究上限，但公开数据缺关键预测特征，必须重新开展多节点测量；M5 具备低成本可证伪性，但当前问题退化为标准 grouped evaluation，主线 No-Go；M2、M3 不作为主方向，M4 的静态来源信息只可作为 M5 的 rescue component。下一步进入第三轮候选生成，硬约束为：不依赖现有 11 类标签支撑 AML、不以普通 split 修正或模型堆叠作为创新、公开数据能执行最小判别实验，并优先寻找 ledger-specific 的新性质。
+
+## 2026-08-30：第三轮候选与协议机制核验
+
+第三轮独立生成先剔除了两个伪新方向：比例 UTXO-to-entity graph 的可识别性与 N1 等价；单条聚类 bridge/error certificate 与 CP-02 的错误传播问题等价，且仍缺独立真值与 union lineage。两者不重新编号、不换名复活。
+
+### M6：Ordinals 市场协作式 PSBT 对 common-input clustering 的污染
+
+- **核心机制**：Ordinals 市场为实现非托管原子交换，常让卖家对 inscription input 使用 `SIGHASH_SINGLE | SIGHASH_ANYONECANPAY`，买家随后加入付款 input 并完成交易。最终确认交易的 inputs 由不同签名角色共同组成，直接违反 common-input ownership heuristic 的“全部输入由单一主体控制”前提。
+- **跨平台证据**：ORD.NET 官方 sale construction、OrdinalsBot 官方 marketplace 示例、Magic Eden 开源 `msigner` 和 OrdinalsWallet 技术说明均给出该组合；因此不是单一网站的偶发现象。PSBT 只是协调格式，最终链上只保留交易和签名；可观测检测必须解析 ECDSA/Taproot signature hash type、spent output 和 inscription movement。
+- **链上锚点**：ORD.NET 官方示例交易 `0f2f22ed557359039a80620bb5d559f3bc2b982f1b03ddfc771668d115a1ce40` 包含平台 anchor、seller/platform 2-of-2 passthrough 和 buyer funding inputs。公开原始交易显示 Taproot witness 中同时存在附加 `0x83` 的 `SINGLE|ANYONECANPAY` 签名、默认签名和其他 `SIGHASH_ALL` inputs。该样本证明协议模式可从链上恢复，不证明总体规模。
+- **文献反证**：Undermind focused deep search 已完成，返回 22 篇近邻；最接近的是 BRC-20 PSBT sniping、PayJoin UIH、MIH 可靠性、协议型 CoinJoin detection 和 Ordinals 网络影响。八篇关键 PDF 的定向全文核验仍未发现直接测量 Ordinals/数字资产市场 PSBT 对 CIOH cluster contamination 的工作。独立 exact/component 搜索得到同一结论；这只支持“当前检索快照未见 exact prior”，不能写成首次。
+- **潜在新贡献**：不是重复“多方交易破坏 CIOH”，而是识别一个 2023 年后规模化、可由密码学签名角色和 inscription 语义高精度检测、可能绕过常见等额输出 CoinJoin filter 的交易族；量化其错误 union、component cascade 和公开 entity graph 偏差，并提供 protocol-aware filter 与修正清单。
+- **构造效度边界**：`SINGLE|ANYONECANPAY` 证明该 input 的承诺范围，不证明签名者属于不同现实所有者。wash trade、自成交、共同托管和平台共签必须单列；当前允许的主张是 `protocol-incompatible common-input union`，只有独立证据支持时才称为 false ownership merge。
+- **最小硬门**：三个市场的官方/开源模板与人工核验样本；比较未过滤 CIOH、常见 CoinJoin filter、删除全部 `ANYONECANPAY` 的粗基线和 protocol-aware filter。先测 detector precision、标准过滤器漏检、交易量、component merge/cascade；不训练 GNN，不接 11 类 AML 叙事。
+- **零模型 smoke**：标准库 raw-block scanner 在区块 947353 的 2,856 笔交易中检出 17 笔结构合法的显式 `0x83` 候选，并命中官方示例。该区块只验证解析器和机制，已从估计样本排除。
+- **现有过滤器复核**：Schnoering–Vazirgiannis 2023 的 JoinMarket/Wasabi/Whirlpool 规则和 BlockSci 官方 CoinJoin predicates 均不标记代表交易 `1f533fce…0abe6f`；BlockSci 的共同输入聚类调用链因此会执行 union。该结果支持“已发表公开规则存在漏口”，不覆盖私有商业规则，也不证明不同现实所有者。
+- **资源边界**：现有 252M 图缺 txid、witness 和 union lineage，不能直接执行。Gate 2 只用官方 txid、公开 explorer/ord index 和小窗口；小样本通过后才考虑外部存储、远程节点或流式全链扫描。
+- **硬停止条件**：只存在单一平台；高精度检测不可复现；现有过滤器已去除超过 95%；规模或 component 效应很小；独立主体无法操作化；最近邻已有等价测量；最终只剩简单 ETL 规则。
+- **理论判断**：多签名主体交易下 CIOH 不可靠、错误 bridge 使 union-find component 不可逆合并均为直接性质，不作为主定理。只有得到非平凡可检测充分条件、部分可观测下的污染界或可检验传播保证，理论才能升级为贡献。
+- **当前裁决**：`primary candidate / effect-and-ground-truth gate open`。重要性 5、证据质量 4、可行性 4，乘积 80。文献与规模/结构门已通过；在 Tier 2 跨市场语义真值和聚类传播效应完成前，仍不是正式推荐主方向。
+
+### CP-13 零模型抽样协议 v1（结果查看前冻结）
+
+- **As-of boundary**：只使用不晚于区块 947352 的确认交易；已查看的区块 947353 完全排除出估计样本，只保留为机制和解析器 smoke。
+- **Deterministic sampling**：以 `SHA256("CP13-pilot-v1|2026-08-30|stratum|counter")` 的前 8 bytes 对区间长度取模，每层无放回选择 6 个区块。四层共 24 个区块：pre-inscription control `700000–759999` 取 `722970, 727123, 732002, 738810, 741953, 750002`；early marketplace `780000–839999` 取 `789561, 815344, 820955, 824355, 827471, 830004`；post-Runes `840000–899999` 取 `847310, 848410, 848594, 877986, 887012, 888771`；recent `900000–947352` 取 `901077, 902343, 918143, 918573, 939796, 943404`。区间名称只表示时间层，不预先假设每笔候选的资产协议。
+- **Tier 0 detector**：结构合法的 ECDSA 或 Schnorr witness signature 显式携带 `0x83`；Taproot script/control-block 项必须排除。Tier 0 只测候选召回入口，不等同市场交易。
+- **Tier 1 structural candidate**：存在 `0x83` input `j`；`vout[j]` 存在并回到该 input prevout 的 script；同一交易至少还有一个不同 input script；`vout[j]` value 大于该 prevout value。该规则表达 `SIGHASH_SINGLE` 卖方输入与同 index 收款的可观测结构，不证明 inscription、市场归属或不同受益所有人。
+- **Tier 2 validated settlement**：除 Tier 1 外，还须由官方/开源 marketplace template、官方示例、可信 ord index 的 asset movement 或可核验平台模板至少一项确认交易语义。平台名称、资产类型和独立交易方只在相应证据存在时记录。
+- **Published-filter comparison**：逐笔复现 Schnoering–Vazirgiannis 的 JoinMarket/Wasabi/Whirlpool 条件和 BlockSci CoinJoin predicates；不把“代码搜索未命中”当 filter 结果。
+- **Primary outputs**：各层 transaction count、Tier 0/1/2 数与 block-level distribution；Tier 1 中已发表 filters 漏检率；独立 input-script union 数；可重复 template fingerprint 数；control 与后三层的差异。单块内交易不作为独立总体样本；区间比较以 block 为采样单位并同时报告原始计数。
+- **Advance rule**：24 个区块合计至少 20 个 Tier 1，覆盖至少两个非相邻时间层，并出现至少两个可区分 template fingerprints；已发表 filters 对 Tier 1 的漏检率至少 50%；至少两个公开实现/市场能进入 Tier 2。满足前三项但 Tier 2 暂缺时只允许补 ground-truth，不允许直接晋级。
+- **Stop rule**：Tier 1 少于 10 个、只集中于一个区块/单一模板、过滤器漏检低于 5%、或人工检查显示大多数为非市场协作用途，则 CP-13 main track No-Go。介于 Advance 与 Stop 之间只允许一次扩大到 60 个按同算法生成的区块；不得改 detector 追逐结果，规则变更必须作为 v2 并在新样本评估。
+
+### CP-13 零模型抽样协议 v1 结果
+
+> 2026-08-31 复核标记：本节为 detector-v1 历史输出，解析器发现 witness 上下文错误，晋级结论暂停。原始产物不覆盖；修正后另保存 detector-v2 复算。样本不变的修正复算仅用于排错，不能替代后续独立样本检验。
+
+- **规模与时间分布**：24 个冻结区块共 65,545 笔交易，Tier 0 为 838，Tier 1 为 662。六个 control 区块共 13,948 笔交易，Tier 0/Tier 1 均为 0；early-marketplace、post-Runes、recent 三层的 Tier 1 分别为 491、144、27。Tier 1 分布在 17 个后期样本区块，覆盖 123 个结构指纹；86 笔含多个匹配 `0x83` inputs。
+- **公开过滤器下界**：636/662（96.1%）Tier 1 存在重复 output script，因而必然不满足 Schnoering–Vazirgiannis 所列 JoinMarket、Wasabi 和 Whirlpool 公开结构规则。该数字是针对这些已发表规则的保守漏检下界，不外推到私有商业过滤器。
+- **公开实现兼容性**：101/662（15.3%）严格符合 Magic Eden Foundation `msigner` 默认 dummy-input/output 与 seller-index 结构，只能记为实现家族兼容，不能直接认定平台归属。ORD.NET、OrdinalsBot 与 `msigner` 已证明至少三个公开实现采用相同协作签名机制，但尚未逐笔验证样本资产语义。
+- **协议裁决**：预设的 Tier 1 数量、非相邻时间层、多个指纹和公开 filter 漏检率四项规模/结构条件均通过。第五项“至少两个公开实现/市场进入 Tier 2”未完成，因此不扩大到 60 区块，也不进入模型开发，只补 ground truth 和传播效应。
+- **当前阻塞**：Magic Eden 官方 block-activity API 的匿名请求连续返回 HTTP 503；这不能解释为样本中没有 inscription transfer。下一步优先使用可审计的官方/开源交易模板、恢复后的官方索引或本地/可信 ord index 交叉验证。

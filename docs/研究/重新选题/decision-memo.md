@@ -2,7 +2,13 @@
 
 ## 当前状态
 
-**Decision: RETURN TO GATE 2 — BlackSuit/Royal 零模型 pilot 未通过完整证据门，CP-04+CP-07 关闭，当前没有推荐主方向。**
+**Decision: GATE 2 HOLD — CP-13 仍是首要候选，但 2026-08-31 解析器审查发现 witness 上下文错误，规模/结构晋级暂停；先修正复算，再检查跨市场真值与传播效应。**
+
+下面列出的 838/662 等数值为保留的 detector-v1 历史结果，不得作为最终实证结论。已确认的错误包括合法 Taproot 签名与 control block 的外形碰撞，以及缺少 prevout/annex/脚本执行上下文核验。原始产物保持不变；修正后产物单独编号，同样本复算不宣称独立重复验证。
+
+截至 2026-08-31，CP-13 的预注册 24 区块零模型 pilot 扫描 65,545 笔交易，得到 Tier 0 838 笔、Tier 1 662 笔；六个 control 区块为 0，后三个时期分别为 491、144、27。Tier 1 覆盖 123 个结构指纹；636/662（96.1%）因重复 output script 必然绕过已发表的 JoinMarket、Wasabi 与 Whirlpool 结构规则，101/662（15.3%）严格符合 Magic Eden Foundation `msigner` 默认模板。该结果通过预设的规模、跨时期、多模板与公开规则漏检门。
+
+这仍不是论文结论。Tier 1 只表示链上结构与协作式 `SINGLE|ANYONECANPAY` 结算相容，不证明 inscription/Runes/其他资产类型、平台归属、独立现实所有人或真实 sale。Magic Eden 官方 block-activity API 当前连续返回 HTTP 503，不能据此把未验证记录计为无转移。CP-13 只有在至少两个公开实现中建立可审计的 Tier 2 语义，并显示非平凡 component/union 传播效应后，才可请求用户冻结为主方向。
 
 BlackSuit/Royal 的精确链上 target-construction 子测试成功：原定 UTC 日内 1,182,309 个输出只有一个等额 candidate，±1 日三日合计 3,154,828 个输出仍只有该候选；两个冻结 `c` 前 registry 均不包含它。但 DOJ 公开材料遮盖 txid/address，日期按 `on or about` 理解，CS-1 和商业工具上游不可审计。独立 Devil's Advocate 因 construct validity、来源独立性 unknown、永久 artifact 与伦理风险判定完整 pilot No-Go，Research Director 接受该反证。详见 `gate2-prospective-attribution/phase6_decision/black-suit-pilot/pilot-result.md`。
 
@@ -26,9 +32,11 @@ Gate 2 已完成 51 篇去重证据库、8 篇全文深读、14 个事件/家族
 
 综合创新性、证据与可行性后，当前组合为：
 
+- **首要候选**：CP-13，Bitcoin 数字资产市场协作式结算对 common-input clustering 的系统性污染；文献与规模/结构门已通过，只允许继续跨市场真值与传播效应测量，不允许训练新模型。
 - **已关闭方向**：CP-04 与 CP-07 的组合——未来独立公开归因的前瞻恢复。唯一获准的 BlackSuit/Royal pilot 无法取得公开一手 txid/address 或可核验独立 root evidence，触发预先写明的 No-Go；未来只有获得新的直接公开证据才可重审。
 - **替代方向一**：CP-02，时间化实体映射误差传播与 decision-conditioned 稳定性；前提仍是可重建 union lineage、独立实体真值和真实高分尾部效应。
-- **替代方向二**：CP-12，可追溯、严格时点的 entity benchmark；当前 No-Go as main direction。CP-04 关闭后不再为其单独建设 provenance 支撑层。
+- **替代方向二**：M1，多观察点 mempool 分歧下的校准结果预测；研究上限较高，但必须先取得含预测时可见交易内容、费率、冲突/替换状态和多观察点时间戳的数据，或获批重新采集。现有公开 artifact 不足以公平比较强基线。
+- **支撑层而非替代主线**：CP-12，可追溯、严格时点的 entity benchmark；当前 No-Go as main direction。CP-04 关闭后不再为其单独建设 provenance 支撑层。
 - **低风险 fallback**：CP-05，252M 实体类型标签的来源、噪声与严格时间/来源审计；主张限定为 entity type。若 CP-12 的重建或发布许可失败，则退回此方向，但它单独不足以支撑高质量顶会主线。
 - **明确放弃**：普通固定预算队列、单纯 MIH 指标比较、把 entity type 重命名为 AML risk、没有新审计数据的通用 PU/MNAR 理论套用、缺失 lineage 时直接声称来源/同名实体泄漏，以及没有统一真值的跨链迁移。
 
@@ -38,17 +46,18 @@ Gate 2 已完成 51 篇去重证据库、8 篇全文深读、14 个事件/家族
 - 至少 60 篇一手来源完成来源核验。**已达到最低数，但仍按饱和规则扩展。**
 - 至少 30 篇完成正文证据审计，并将最终关键证据定位到稳定页/节/表/图。**正文审计数已达到 37；其中 29 篇的正式 PDF 页码映射尚未全部完成。**
 - 五组独立补充检索完成；另完成“未来独立证据”和“provenance-preserving 重建”两组针对性深检。Undermind 与 Firecrawl/Tavily 两条独立检索链未发现同时固定历史候选全集、审计原始证据独立性并用未来确认做预算评测的公开工作；`Gom22`、`Che23`、`Real25`、`Ama26` 是 CP-04 的关键最近邻。CP-12 则被 `Saf26`、`Len26`、ORBITAAL、`Jal25` 与通用 benchmark 工作显著覆盖。
+- CP-13 focused deep search 已完成 22 篇近邻发现与 8 篇关键全文定向核验；独立 exact/component 检索未发现直接测量该交易族对 CIOH 污染的工作。该 absence 判断只绑定 2026-08-30 检索快照，不写成“首次”。
 - 8–12 张候选问题卡完成。**已完成 12 张。**
 - 排名前三方向完成多轮最近邻与同期工作反证搜索。
-- Devil's Advocate 已否决 CP-03、当前形态的 CP-12 和 BlackSuit/Royal 完整 pilot，把 CP-02 降为 Conditional。CP-04+CP-07 因未来证据不能直接定位、来源独立性 unknown 和长期 artifact 不成立而关闭。
+- Devil's Advocate 已否决 CP-03、当前形态的 CP-12 和 BlackSuit/Royal 完整 pilot，把 CP-02 降为 Conditional。CP-04+CP-07 因未来证据不能直接定位、来源独立性 unknown 和长期 artifact 不成立而关闭。CP-13 尚需在 Tier 2 与传播效应结果冻结后接受一次不继承当前推荐的独立反方审查。
 
 ## 最终输出槽位
 
-- **推荐主方向**：暂无；返回 Gate 2，重新生成并比较可由现有或可获得数据直接证伪的问题
+- **首要候选（未冻结）**：CP-13（规模/结构门已通过；跨市场真值与传播效应门开放）
 - **替代方向一**：CP-02（blocked on new provenance/ground truth）
-- **替代方向二**：CP-12（当前主线 No-Go；不单独建设，取得完整 lineage 后再审）
+- **替代方向二**：M1（blocked on prediction-time-complete multi-observer data or new measurement）
 - **低风险 fallback**：CP-05
-- **明确放弃方向**：CP-01、CP-03、CP-10、CP-11；CP-09 在统一真值到位前 No-Go；CP-12 当前形态不得作为主线
+- **支撑层/明确放弃方向**：CP-12 当前形态不得作为主线；CP-01、CP-03、CP-10、CP-11 放弃；CP-09 在统一真值到位前 No-Go
 
 ## 已预先确定的放弃条件
 
@@ -67,4 +76,4 @@ Gate 2 已完成 51 篇去重证据库、8 篇全文深读、14 个事件/家族
 
 ## 用户确认 Gate
 
-CP-04+CP-07 的人工确认 Gate 已执行并得到 No-Go。下一轮只授权返回 Gate 2：结合当前 252M entity-type 资产、可合法获取的新数据和未被最近邻覆盖的理论/评测缺口，重新生成与反证候选问题。在用户确认新主问题前，不训练模型、不冻结完整实验协议、不升级到 252M 级全图实验。
+CP-04+CP-07 的人工确认 Gate 已执行并得到 No-Go。CP-13 现为唯一首要候选，但用户尚未被要求冻结主问题：下一步只授权补齐至少两个公开实现的 Tier 2 语义真值，并测量未过滤与 protocol-aware 过滤下的 union/component 传播差异。若任一硬门失败，CP-13 No-Go 并返回 CP-02、M1 或 CP-05；若两门通过并完成独立反方审查，再提交用户确认。此前不训练模型、不冻结完整实验协议、不升级到 252M 级全图实验。
