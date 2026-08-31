@@ -2,6 +2,8 @@
 
 ## 决策目标
 
+最新状态（2026-08-31）：CP-13 有界第二实现取证未通过，暂停主线晋级；当前没有满足全部硬门的主方向。下文保留各阶段历史判断，最新依据见文末“第二实现证据包结果”。
+
 在不继承旧 EGS/GNN 叙事、也不复活已被反证方向的前提下，重新生成并比较可由现有资产或可合法获得的新数据直接证伪的研究问题。最终仍只输出一个主方向、两个替代方向和一个低风险 fallback；用户确认前不进入协议冻结或模型开发。
 
 ## 冻结边界
@@ -251,13 +253,13 @@ N1 的负向结果触发了新的独立候选生成。候选先由资产、理�
 
 - **规模与时间分布**：24 个冻结区块共 65,545 笔交易，Tier 0 为 838，Tier 1 为 662。六个 control 区块共 13,948 笔交易，Tier 0/Tier 1 均为 0；early-marketplace、post-Runes、recent 三层的 Tier 1 分别为 491、144、27。Tier 1 分布在全部 18 个后期样本区块，覆盖 123 个结构指纹；86 笔含多个匹配 `0x83` inputs。
 - **公开过滤器下界**：636/662（96.1%）Tier 1 存在重复 output script，因而必然不满足 Schnoering–Vazirgiannis 所列 JoinMarket、Wasabi 和 Whirlpool 公开结构规则。该数字是针对这些已发表规则的保守漏检下界，不外推到私有商业过滤器。
-- **公开实现兼容性**：101/662（15.3%）严格符合 Magic Eden Foundation `msigner` 默认 dummy-input/output 与 seller-index 结构，只能记为实现家族兼容，不能直接认定平台归属。ORD.NET、OrdinalsBot 与 `msigner` 已证明至少三个公开实现采用相同协作签名机制，但尚未逐笔验证样本资产语义。
+- **公开实现兼容性**：101/662（15.3%）匹配 `msigner` 的部分 dummy-input/output 与 seller-index 布局（源码复核后更正，非严格默认模板），只能记为实现家族兼容，不能直接认定平台归属。ORD.NET、OrdinalsBot 与 `msigner` 已证明至少三个公开实现采用相同协作签名机制，但尚未逐笔验证样本资产语义。
 - **协议裁决**：预设的 Tier 1 数量、非相邻时间层、多个指纹和公开 filter 漏检率四项规模/结构条件均通过。第五项“至少两个公开实现/市场进入 Tier 2”未完成，因此不扩大到 60 区块，也不进入模型开发，只补 ground truth 和传播效应。
 - **当前阻塞**：Magic Eden 官方 block-activity API 的匿名请求连续返回 HTTP 503；这不能解释为样本中没有 inscription transfer。下一步优先使用可审计的官方/开源交易模板、恢复后的官方索引或本地/可信 ord index 交叉验证。
 
 #### Detector-v2 诊断复算与独立复审
 
-2026-08-31 复算结果：同一组 24 区块共 65,545 笔交易，845 个 witness 字节形状候选中有 832 笔在支持的签名上下文通过检查，666 笔满足 Tier 1 条件。control/early-marketplace/post-Runes/recent 的 Tier 1 为 0/494/145/27；全部 18 个后期样本区块均有候选。87 笔有多个匹配 inputs。公开结构规则漏检下界为 640/666（96.1%）；`msigner` 严格模板兼容为 103/666（15.5%）。未通过上下文检查的 13 个交易不计入 Tier 1，不能统一称为假阳性，因为未实现脚本路径中也可能包含真实签名。
+2026-08-31 复算结果：同一组 24 区块共 65,545 笔交易，845 个 witness 字节形状候选中有 832 笔在支持的签名上下文通过检查，666 笔满足 Tier 1 条件。control/early-marketplace/post-Runes/recent 的 Tier 1 为 0/494/145/27；全部 18 个后期样本区块均有候选。87 笔有多个匹配 inputs。公开结构规则漏检下界为 640/666（96.1%）；`msigner` 部分布局特征匹配为 103/666（15.5%，源码复核后更正）。未通过上下文检查的 13 个交易不计入 Tier 1，不能统一称为假阳性，因为未实现脚本路径中也可能包含真实签名。
 
 与 v1 比较：原 662 个 Tier 1 全部保留，新增 4 个、删除 0 个；新增者均包含被旧代码误删的 `0xc0/0xc1` 前缀单项 Taproot key-path 签名。新增 txids 为 `a23c33ac6c9b5cd4176deed72a08357a143ab2dc821df31403be8adf8d099ada`、`5f2a7a3d22c59563df97a79dfc8b5d9137be629a8e26649bb292c5c2f71398fa`、`eb2bcc3ca006716a6c2417c3d21976d7ababe35750891675547ebcaa7211b7c7`、`740f31e25e2ae0ca42e9945d50d8cbe744e360d03a633ac530c90881eeeefd3b`。字节形状候选总共新增 7 个；另外 3 个新增交易为不支持的 script path，没有进入 Tier 1。
 
@@ -326,3 +328,26 @@ uv --cache-dir .uv-cache run --no-sync python scripts/scan_block_sighash.py --se
 输入为 ORD.NET 官方锚点、冻结 666 个 Tier 1 和本轮 11 笔语义子样本。先固定官方仓库 revision，再完整核对 README、结算相关源码、测试与 fixtures；只读、不运行签名/广播代码、不调用钱包。寻找由官方来源直接提供的可解码 PSBT、交易 fixture 或 confirmed mainnet txid；要求能定位 seller input、对应收款 output、资产 outpoint/去向、签名路径与 hash type、dummy/padding 布局，并区分模拟 fixture 与主网事实。
 
 输出为一张双实现证据卡，记录 revision、精确文件/行/交易位置、支持项和缺失项。代码证明构造可能性，不单独证明曾经成交；模拟 PSBT 不计作主网量或市场归属真值。若完成该官方材料包仍无法得到闭合的第二实现语义链，停止当前扩展并将 CP-13 标为数据/取证条件未满足，不用模板相似或任意扩大搜索补齐。该停止只说明当前公开证据和资源未过门，不证明第二实现不存在；Research Director 再据此与其他候选比较。
+
+#### 第二实现证据包结果：机制成立，主网语义链未闭合
+
+通过 GitHub connector 读取并固定 `me-foundation/msigner` commit `30499e1a8b352b8e4b6007450932be1a15b92955`（提交日期 2023-07-10）。核对该 revision 的完整目录、README、`src/signer.ts`、`src/constant.ts`、`src/interfaces.ts`、`src/util.ts`、feeprovider/fullnoderpc、package 配置、唯一测试 `test/signer.spec.ts` 及唯一文档示意图。只读源码，未安装或执行其测试、签名、广播和钱包操作。
+
+| 证据项 | ORD.NET 官方示例 | msigner 固定源码/示例 |
+|---|---|---|
+| 卖方签名与路径 | 2-of-2 script path，卖方 0x83、平台 DEFAULT | `src/signer.ts:48` listing 构造，`:76` 0x83；Taproot internal-key 路径与其他地址分支 |
+| 卖方 input/output | 官方主网 tx input/output 2；输入与收款脚本不同 | `src/constant.ts:2` index 2；`src/signer.ts:412` 加入 seller input/output |
+| 资产落点 | 官方说明和主网交易结构，仍须独立索引核对具体 inscription | `src/signer.ts:394–406` output 0 吸收双 dummy 与已知 offset，output 1 收资产 |
+| dummy 与输出值 | 平台 anchor 与 passthrough，不是同一双 dummy 模板 | 两个买方 dummy；默认 580–1000 sat、重建 600 sat、资产 postage 10,000 sat |
+| 可直接核验的成交工件 | 官方给出 mainnet tx `0f2f22ed…ce40` | 唯一 fixture 为 `btc-signet`，没有完整签名 PSBT 或 mainnet sale txid |
+| 可支持结论 | 此官方协议确实采用不同签名角色，旧 detector 会漏 | 第二套构造代码存在；不能单独证明本样本归属或主网成交 |
+
+稳定来源：[msigner signer.ts](https://github.com/me-foundation/msigner/blob/30499e1a8b352b8e4b6007450932be1a15b92955/src/signer.ts)、[constants](https://github.com/me-foundation/msigner/blob/30499e1a8b352b8e4b6007450932be1a15b92955/src/constant.ts)、[tests](https://github.com/me-foundation/msigner/blob/30499e1a8b352b8e4b6007450932be1a15b92955/test/signer.spec.ts)。测试第 22 行明确是 signet，第 98–100 行的测试体只有 `true;`，并不运行或断言交易构造。README 没有主网成交链接，示意图没有 PSBT/txid；图 SHA-256 为 `4B607E8EE446254A632D5D549AC3D1CDA1B79F65D1C058219F27434CCB451BC3`。
+
+**必须修正的旧解释**：本地 `msigner_default_template` 谓词只核对了双 dummy、部分 index/value/script，没有检查官方默认 `ORDINALS_POSTAGE_VALUE=10000`、真实资产 offset 或平台费用来源；同脚本 Tier 1 也比官方允许不同收款地址的实现更窄。固定 103 个匹配者中，output 1 为 10,000 sat 的仅 49 个，另外 54 个不是该默认参数的完整匹配。10,000 sat 条件也是必要而非充分条件，不能把 49 个重写为严格平台样本。参数可配置意味着另 54 个也不能断定不来自该软件。原始 JSON 和谓词保留用于复现；字段仅解释为“部分布局特征匹配”，历史“严格默认模板兼容”论断作废，不静默改计数。
+
+复算方法：读取冻结 `cp13_pilot_v1_detector_v2.json`，筛选 `msigner_default_template == true`，按 `outputs[1].value` 分组；103 条中值为 10,000 的 49 条。该诊断不改变原先 11 条语义样本，不重抽，不作为新 detector 或 precision 估计。
+
+独立只读复审再次重算得到相同的 103/49/54 分组，核对源码构造与验证侧常量，确认旧“严格默认模板”措辞过强。审查支持暂停裁决，同时明确不否定已经核验的结构与 witness 证据。历史文字中的模板解释已作显式更正，旧计数及冻结 JSON 不变。
+
+**Research Director 裁决**：有界材料包没有补齐预定的第二实现闭合主网语义链，触发停止条件。CP-13 改为 `parked pending semantic ground truth`；保留机制、666 个结构候选、7 个已锚定 reveal 和反例证据，停止扩大样本、过滤器工程和 component 效应实验。该决定是当前证据/资源条件下的选择，不是证明机制无价值、没有市场活动或文献已经完全解决问题。若未来出现可直接连接的第二实现官方工件或可审计历史资产索引，才重开；否则继续比较其他数据已可用的候选，不因已有投入降低门槛。

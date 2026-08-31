@@ -2,15 +2,17 @@
 
 ## 当前状态
 
-**Decision: GATE 2 CONDITIONAL LEAD — CP-13 已完成固定子样本的原始父交易与 witness 承诺核验，仍是首要候选；第二实现的完整语义证据和聚类传播效应未通过，最终方向不冻结。**
+**Decision: GATE 2 OPEN — CP-13 暂停主线晋级（parked pending semantic ground truth）。固定子样本的来源核验成立，但有界官方取证未补出第二实现的完整成交证据；历史“严格默认模板兼容”措辞也被源码核验推翻。当前没有通过全部硬门的推荐主方向。**
 
 2026-08-31 的独立审查确认 detector-v1 混淆了 witness 外形与签名语义。旧产物和旧代码保留在 `3573cec`，新结果使用 `cp13_pilot_v1_detector_v2.json`：同一组 24 区块、65,545 笔交易中，845 笔是字节形状候选，832 笔在支持的脚本路径中通过上下文检查，666 笔满足 Tier 1 结构条件。相对原始 662 笔，新增 4 笔、删除 0 笔；新增者均为旧代码误删的 `0xc0/0xc1` 前缀 Taproot key-path 签名。13 笔未通过当前上下文检查的候选不计入已验证 Tier 1。
 
-修正后，control 的 Tier 1 为 0；后三个时期分别为 494、145、27，覆盖全部 18 个后期样本区块。640/666（96.1%）因重复 output script 必然绕过所审查的 JoinMarket、Wasabi 与 Whirlpool 公开结构规则；103/666（15.5%）严格符合 `msigner` 默认模板。规模信号未因修正消失，但这是同样本排错，不是独立复制，更不是总体流行率估计。
+修正后，control 的 Tier 1 为 0；后三个时期分别为 494、145、27，覆盖全部 18 个后期样本区块。640/666（96.1%）因重复 output script 必然绕过所审查的 JoinMarket、Wasabi 与 Whirlpool 公开结构规则；103/666（15.5%）仅匹配 `msigner` 的部分布局特征。源码核验发现默认资产 output 1 为 10,000 sat，而这 103 笔仅 49 笔满足该值；旧谓词没有检查它，也没有核验 inscription offset，故“严格默认模板”解释作废。49 笔同样不是已验证平台成交。规模信号保留，但不能作为总体流行率或 precision。
 
 固定语义子样本现已补强：按时间层与模板兼容性预先选出的 11 笔交易，涉及 43 笔原始父交易，11 个匹配输入的 value/script 均与原始 outpoint 一致。其中 7 笔可按限定的直接 reveal 规则追踪内容承载首 sat，均移至 output 1，且目标脚本不同于卖方输入脚本；内容为 6 条 BRC-20 transfer 声明和 1 个 image/webp payload。全部七个 reveal 的 witness 已匹配到独立主链 hash 锚定的区块，并通过 txid Merkle root 与 BIP141 witness commitment 检查。其余 4 笔为未决，不是无 inscription；11 笔不是总体 precision 或市场成交率估计。
 
-这仍不是论文结论。完整 666 笔的 prevout 尚未全部原始核验；BRC-20 声明不证明余额或有效 token transfer；脚本变化不证明不同现实所有者或平台归属。另发现明确覆盖缺口：[ORD.NET 官方 sale construction](https://docs.ord.net/technicals/sale-psbt-construction/) 的示例使用 2-of-2 Taproot script path，且资产输入与卖方收款脚本不同，当前 key-path、同脚本 Tier 1 必然漏检。24 区块的 845 个形状候选没有匹配该官方平台公钥模板；这不能解释为该市场没有活动，也不能据此临时放宽规则并声称跨实现验证通过。Magic Eden HTTP 503、ordinals.com HTTP 403 和 Undermind transport error 均作为访问失败保留。至少两个公开实现的可审计语义及非平凡 component/union 传播效应完成后，才请求用户冻结主方向。
+这仍不是论文结论。完整 666 笔的 prevout 尚未全部原始核验；BRC-20 声明不证明余额或有效 token transfer；脚本变化不证明不同现实所有者或平台归属。另发现明确覆盖缺口：[ORD.NET 官方 sale construction](https://docs.ord.net/technicals/sale-psbt-construction/) 的示例使用 2-of-2 Taproot script path，且资产输入与卖方收款脚本不同，当前 key-path、同脚本 Tier 1 必然漏检。24 区块的 845 个形状候选没有匹配该官方平台公钥模板；这不能解释为该市场没有活动，也不能据此临时放宽规则并声称跨实现验证通过。Magic Eden HTTP 503、ordinals.com HTTP 403 和 Undermind transport error 均作为访问失败保留。
+
+最后一次有界取证锁定 Magic Eden 官方 `msigner` revision `30499e1a8b352b8e4b6007450932be1a15b92955`。代码给出了双 dummy 的结算机制，但唯一测试文件是 signet fixture 与空占位测试，没有完整签名 PSBT 或可追溯的主网成交示例；README 和示意图也未补足。按执行前写明的停止条件，暂停 CP-13，不扩大窗口、不开发过滤器或图模型。暂停原因是当前公开证据与资源未满足构造效度门，不是证明该现象不存在；只有新增可直接连接的第二实现主网语义证据，才能重开效应协议评审。
 
 BlackSuit/Royal 的精确链上 target-construction 子测试成功：原定 UTC 日内 1,182,309 个输出只有一个等额 candidate，±1 日三日合计 3,154,828 个输出仍只有该候选；两个冻结 `c` 前 registry 均不包含它。但 DOJ 公开材料遮盖 txid/address，日期按 `on or about` 理解，CS-1 和商业工具上游不可审计。独立 Devil's Advocate 因 construct validity、来源独立性 unknown、永久 artifact 与伦理风险判定完整 pilot No-Go，Research Director 接受该反证。详见 `gate2-prospective-attribution/phase6_decision/black-suit-pilot/pilot-result.md`。
 
@@ -34,7 +36,7 @@ Gate 2 已完成 51 篇去重证据库、8 篇全文深读、14 个事件/家族
 
 综合创新性、证据与可行性后，当前组合为：
 
-- **首要候选**：CP-13，Bitcoin 数字资产市场协作式结算对 common-input clustering 的系统性污染；文献与规模/结构门已通过，只允许继续跨市场真值与传播效应测量，不允许训练新模型。
+- **待定主方向**：当前为空。CP-13 曾为首要候选，现因第二实现语义门未过而暂停；保留原始取证资产，不以已有投入替代创新性与可行性。
 - **已关闭方向**：CP-04 与 CP-07 的组合——未来独立公开归因的前瞻恢复。唯一获准的 BlackSuit/Royal pilot 无法取得公开一手 txid/address 或可核验独立 root evidence，触发预先写明的 No-Go；未来只有获得新的直接公开证据才可重审。
 - **替代方向一**：CP-02，时间化实体映射误差传播与 decision-conditioned 稳定性；前提仍是可重建 union lineage、独立实体真值和真实高分尾部效应。
 - **替代方向二**：M1，多观察点 mempool 分歧下的校准结果预测；研究上限较高，但必须先取得含预测时可见交易内容、费率、冲突/替换状态和多观察点时间戳的数据，或获批重新采集。现有公开 artifact 不足以公平比较强基线。
@@ -51,11 +53,11 @@ Gate 2 已完成 51 篇去重证据库、8 篇全文深读、14 个事件/家族
 - CP-13 focused deep search 已完成 22 篇近邻发现与 8 篇关键全文定向核验；独立 exact/component 检索未发现直接测量该交易族对 CIOH 污染的工作。该 absence 判断只绑定 2026-08-30 检索快照，不写成“首次”。
 - 8–12 张候选问题卡完成。**已完成 12 张。**
 - 排名前三方向完成多轮最近邻与同期工作反证搜索。
-- Devil's Advocate 已否决 CP-03、当前形态的 CP-12 和 BlackSuit/Royal 完整 pilot，把 CP-02 降为 Conditional。CP-04+CP-07 因未来证据不能直接定位、来源独立性 unknown 和长期 artifact 不成立而关闭。CP-13 尚需在 Tier 2 与传播效应结果冻结后接受一次不继承当前推荐的独立反方审查。
+- Devil's Advocate 已否决 CP-03、当前形态的 CP-12 和 BlackSuit/Royal 完整 pilot，把 CP-02 降为 Conditional。CP-04+CP-07 因未来证据不能直接定位、来源独立性 unknown 和长期 artifact 不成立而关闭。CP-13 的反方审查要求先补第二实现的闭合语义链，有界取证未满足该条件；本轮据此暂停，不先用未归属窗口的 component 数量晋级。
 
 ## 最终输出槽位
 
-- **首要候选（未冻结）**：CP-13（修正复算保留规模信号；输入来源、跨市场真值与传播效应门开放）
+- **主方向**：暂无通过全部硬门者；CP-13 暂存，等待新增独立语义证据。
 - **替代方向一**：CP-02（blocked on new provenance/ground truth）
 - **替代方向二**：M1（blocked on prediction-time-complete multi-observer data or new measurement）
 - **低风险 fallback**：CP-05
@@ -78,4 +80,4 @@ Gate 2 已完成 51 篇去重证据库、8 篇全文深读、14 个事件/家族
 
 ## 用户确认 Gate
 
-CP-04+CP-07 的人工确认 Gate 已执行并得到 No-Go。CP-13 现为唯一首要候选，但用户尚未被要求冻结主问题：下一步只授权补齐至少两个公开实现的 Tier 2 语义真值，并测量未过滤与 protocol-aware 过滤下的 union/component 传播差异。若任一硬门失败，CP-13 No-Go 并返回 CP-02、M1 或 CP-05；若两门通过并完成独立反方审查，再提交用户确认。此前不训练模型、不冻结完整实验协议、不升级到 252M 级全图实验。
+CP-04+CP-07 的人工确认 Gate 已执行并得到 No-Go。CP-13 的有界取证阶段现已关闭为 `parked pending semantic ground truth`，不向用户提交冻结请求。下一步回到候选比较：优先核查其他方向是否有任务所需字段齐全、许可可用、能执行强基线的公开数据，再讨论新颖机制；不复活已被直接先行工作覆盖的问题，也不把低风险 fallback 包装成顶会主线。此前不训练模型、不冻结完整实验协议、不升级到 252M 级全图实验。

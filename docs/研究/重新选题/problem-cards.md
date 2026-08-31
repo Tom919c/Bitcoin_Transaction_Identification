@@ -243,6 +243,8 @@
 
 ## CP-13 — Ordinals 市场协作式 PSBT 对地址聚类的系统性污染
 
+> 最新裁决（2026-08-31）：`parked pending semantic ground truth`。第二实现有界取证未过，暂停主线扩展。下文历史“严格 msigner 默认模板”措辞被源码审计覆盖：103 条只是部分布局特征匹配，其中仅 49 条满足默认 output 1 的 10,000 sat 条件；两者均不构成平台归属或成交真值。
+
 > 2026-08-31 审计覆盖说明：以下 v1 计数暂时隔离，不能作为已通过硬门的最终证据。旧 scanner 将任意形状相似的 65-byte witness 项识别为 Schnorr，又把以 `0xc0/0xc1` 开头的合法签名误当 control block；未充分处理 annex、prevout 类型和实际签名消费位置。修正必须保留 v1，另产出 detector-v2 复算与差异清单；重复使用同一组区块只算诊断复算，不算独立验证。
 
 - **Research question**：Ordinals 市场使用协作式 PSBT 完成 inscription 销售时，卖家以 `SIGHASH_SINGLE | SIGHASH_ANYONECANPAY` 预签资产输入，买家再加入付款输入。这类协议级多方交易会产生多少不满足共同控制假设的 common-input unions？错误 union 在全局地址/实体图中传播多远？基于链上签名角色与 inscription 转移的过滤器能否在不明显损失合法聚类 recall 的条件下阻断污染？
@@ -257,7 +259,7 @@
 - **Strong baselines**：无过滤 CIOH；BlockSci/GraphSense/ORBITAAL 风格 common-input pipeline；等额输出与结构型 CoinJoin filters；删除所有 `ANYONECANPAY` 交易的高 recall 低 precision 基线；人工市场模板规则。
 - **Zero-model feasibility result（v1 历史结果）**：第一步在 ORD.NET 官方示例所在区块 947353 做目的性 smoke，2,856 笔交易中检出 17 笔结构合法的显式 `0x83` 候选并命中官方示例。第二步严格排除该区块，按事先冻结的 SHA-256 规则抽取四个时期共 24 个区块，扫描 65,545 笔交易，得到 Tier 0 838 笔、Tier 1 662 笔；六个 control 区块为 0，early-marketplace、post-Runes、recent 分别为 491、144、27。Tier 1 覆盖全部 18 个后期样本区块、123 个结构指纹，其中 86 笔含多个匹配的 `0x83` inputs。该结果通过预设规模、跨时期与模板多样性门，但 Tier 1 仍不等于 inscription sale、市场归属或独立所有者真值。
 - **Published-filter check（v1 历史结果）**：Schnoering–Vazirgiannis 2023 的 JoinMarket、Wasabi 1.0/1.1/2.0 与 Whirlpool 规则均要求输出脚本互异或固定协议结构；662 个 Tier 1 中有 636 个存在重复 output script，因此可由规则条件直接判定这些已发表规则必然漏检，保守下界为 96.1%。代表样本也未触发 BlockSci 官方 `isCoinjoin`、`isCoinjoinExtra` 或 `isPossibleCoinjoin`，其聚类调用链随后会 union 所有 inputs。该下界只针对明确复现的公开规则，不代表所有商业过滤器，也不声称停止维护的原始 BlockSci 已能端到端解析现代 Taproot。
-- **Implementation-family evidence（v1 历史结果）**：662 个 Tier 1 中有 101 个严格符合 Magic Eden Foundation `msigner` 默认结构：seller signature/input index 为 2、两个 580–1000 sat 同脚本 dummy inputs、对应 buyer output 覆盖 dummy 总额，且 outputs 4/5 为同脚本 600 sat dummy outputs。它们只能称为 `msigner-compatible`，不能在缺少平台或资产索引证据时直接归属 Magic Eden。
+- **Implementation-family evidence（v1 历史结果）**：662 个 Tier 1 中有 101 个匹配 `msigner` 的部分布局特征（源码复核后更正）：seller signature/input index 为 2、两个 580–1000 sat 同脚本 dummy inputs、对应 buyer output 覆盖 dummy 总额，且 outputs 4/5 为同脚本 600 sat dummy outputs。它们只能称为 `msigner-compatible`，不能在缺少平台或资产索引证据时直接归属 Magic Eden。
 - **Primary metrics**：人工核验 precision/recall；被标准过滤器漏掉的 protocol-incompatible union 比例；新增合并 component 数与地址数；最大/分位 cascade size；过滤前后 cluster-size distribution 与预注册图统计效应量。下游标签或模型结果仅在 union 影响足够大且标签语义合法时作为次要分析。
 - **Data and feasibility**：原 252M 终态图不含 txid/witness/union lineage，不能直接做检测。Gate 2 pilot 可使用官方 txids、公开 explorer API、官方 `ord` index 和小区块窗口；完整测量可从 2023 年后的区块流式扫描标准签名，再与 inscription input/transfer 索引相交，不必依赖不透明的 marketplace sale 标签。当前磁盘不足以无条件保存完整 Bitcoin Core 与全量解析副本，因此只有小样本通过后才申请外部存储、远程节点或流式扫描。任何第三方“公开 sales endpoint、许可和历史覆盖”必须逐项核对官方文档，不能采用搜索代理生成但无法定位的接口。
 - **Theory property card**：在明确存在两个独立签名主体的交易中，对全部输入执行 CIOH union 必然违反单一控制假设；一个错误 bridge union 会不可逆地合并其连接的既有 components。两者目前属于直接性质，只能支撑检测正确性和传播量定义，不能当主定理。理论升级必须得到非平凡的可检测充分条件、污染传播界或在部分可观测签名下的可识别性结果，并通过反例审查。
@@ -265,7 +267,7 @@
 - **No-Go conditions**：效果只限单一新平台；`SINGLE|ANYONECANPAY` 不能可靠区分市场交易与其他协作用途；自成交/托管使不同主体无法操作化；标准过滤器已移除超过 95%；过滤前后 component 和下游统计变化很小；贡献只剩十几行 ETL 规则。
 - **Ethics and misuse risk**：目标是减少错误合并与错误归因，原则上改善隐私和科学有效性。发布样本应避免额外标注真实个人，只公开已在链上和官方文档可定位的交易结构；不把 cluster 当法律身份。
 - **Strongest reviewer rejection**：协作交易破坏 CIOH 早已已知；Ordinals 只是一个显然的新实例，检测规则过于简单，缺少独立实体真值，规模或下游影响不足以形成顶会贡献。
-- **Corrected diagnostic result**：detector-v2 只把支持的脚本上下文中的目标签名计入 Tier 1。24 区块复算为 845 个字节形状候选、832 个上下文通过交易、666 个 Tier 1；原 662 个全部保留，新增 4 个合法 `0xc0/0xc1` 前缀 key-path 签名交易。公开结构规则漏检下界为 640/666（96.1%），`msigner` 严格模板兼容为 103/666（15.5%）。这不是独立验证；当前 API prevout 信任和不支持脚本路径的边界必须保留。
+- **Corrected diagnostic result**：detector-v2 只把支持的脚本上下文中的目标签名计入 Tier 1。24 区块复算为 845 个字节形状候选、832 个上下文通过交易、666 个 Tier 1；原 662 个全部保留，新增 4 个合法 `0xc0/0xc1` 前缀 key-path 签名交易。公开结构规则漏检下界为 640/666（96.1%），`msigner` 部分布局特征匹配为 103/666（15.5%，源码复核后更正）。这不是独立验证；当前 API prevout 信任和不支持脚本路径的边界必须保留。
 - **Raw semantic audit**：预先固定 11 笔分层子样本，复核 43 笔原始父交易，11 个目标 prevout 全部匹配。7 笔含支持范围内的直接 simple reveal，6 个 BRC-20 transfer 声明、1 个 image/webp；按限定 FIFO 规则，其内容承载首 sat 均移至不同脚本的 output 1。七个 reveal 所在区块的 header、txid Merkle root、BIP141 witness commitment 及目标 raw witness 一致性均通过。主链 hash 锚点信任 Blockstream，不等同全节点共识验证。其余 4 笔未决；不估计总体 precision，不把声明当有效代币转移，不把不同脚本当不同所有人。
 - **Known coverage counterexample**：ORD.NET 官方示例 `0f2f22ed557359039a80620bb5d559f3bc2b982f1b03ddfc771668d115a1ce40` 使用平台和卖方 2-of-2 Taproot script path，输入为 P2TR、对应卖方收款为 P2WPKH。当前上下文支持范围与同脚本 Tier 1 条件均会漏掉它。冻结 24 区块内没有匹配官方平台公钥的该模板。不得把官方示例、模板相似和样本资产语义拼成已通过的跨平台 precision 证据；扩大检测范围须另立版本并使用独立样本。
-- **Score / decision**：5×3×4=60；**首要候选，只批准补齐第二实现语义与低成本传播效应判别**。原始来源和 witness 完整性已在固定子样本通过，但 Tier 2 跨实现硬门尚未完成；不得把 666 个 Tier 1 写成已验证市场成交。若不能在至少两个公开实现中建立可审计语义，或聚类传播效应很小，则立即 No-Go。投入工程量和密码学完整性检查本身不计作论文创新。
+- **Score / decision**：历史评分 5×3×4=60 不再代表可晋级。**当前暂停：第二实现语义证据未满足，停止 component 与 detector 扩展。** 官方 msigner 固定源码只提供机制、signet fixture 与占位测试，没有闭合主网成交工件；官方同一份构造又揭示旧模板计数解释过强。固定子样本的原始来源和 witness 完整性通过仍有效，但不足以补上该缺口。只有新增可直接连接的第二实现证据才重开；投入工程量和密码学完整性检查不计作论文创新。
