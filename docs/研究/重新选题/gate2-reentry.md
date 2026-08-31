@@ -272,3 +272,57 @@ uv --cache-dir .uv-cache run --no-sync python scripts/research/run_cp13_pilot_v1
 产物 SHA-256 为 `3F517032CF15D35E56F28A5E5F0A2AE4184BDCC437B3334403A5E9FDE96A779F`；scanner 为 `9BE81CF2603B635FDDD9D07B22BE8DB346AF7248CF772A3F168F8DCF71F5E8F2`；runner 为 `D06262421B9C23F7DAC84E054F5ECF53CB6A301173D9B864C5D79B4B5446F7B6`。源代码在 `3573cec` 基线上带本次显式修正 diff 运行。旧产物保持原 hash；同样本复算不作为独立重复验证。
 
 后续只推进输入来源与语义真值硬门：核验原始父交易及 outpoint；取得至少两个实现家族的可审计资产结算语义；不把当前 UTXO 快照当历史 transfer 真值，不把失败请求当无转移。2026-08-31 ordinals.com 单个公开 output 查询返回 HTTP 403，Undermind 同步两次出现 connector transport error；本地证据已保留，远端同步待恢复。
+
+### CP-13 原始父交易与直接 reveal 审计 v1（执行前冻结）
+
+目的为验证语义证据获取是否可行，不估计总体比例或 detector precision。以 detector-v2 的 666 个 Tier 1 为固定输入，按三个后期时间层与 `msigner-compatible` 布尔值形成六个单元，每单元取 `SHA256("CP13-semantic-v1|txid")` 最小的两笔；不足两笔不补选。共 11 笔，直接父交易去重后 36 笔；不得按 reveal 是否容易解析替换样本。
+
+核验规则：由公开 raw hex 重新计算父交易 txid，按 child raw outpoint 提取 value/script，与已记录的 Tier 1 prevout 比对；所有输入均从父交易取值，以复算独立脚本数和 ordinal FIFO 输出落点。直接 reveal 只接受一输入一输出、一个标准 Taproot `CHECKSIG` 后单 envelope、仅 content-type 字段、无 pointer 的简单情形，并核验其 commit outpoint 是 P2TR。其他情况一律未决，不视为无 inscription。只保留 MIME、body hash 和必要的 BRC-20 声明字段，不复制图片内容。BRC-20 transfer 声明不等于已核验有效余额或 token transfer；资产脚本变化不证明平台归属或不同现实所有人。
+
+两笔先前手工探查样例（`00e2b4e4…89f009` 与 `88851136…0b8be2`）只用于设计此最小解析范围，不纳入这 11 笔的新样本结果。raw witness 与父交易元数据来自同一公开提供者；txid 复算约束非 witness 序列化，但没有重新验证区块 witness commitment。因此不得把该步骤称为完整密码学独立验证。执行入口为 `scripts/research/audit_cp13_parent_semantics.py`，产物另存 `experiments/diagnostics/cp13_parent_semantics_v1.json`。
+
+#### 语义审计 v2 完整性补充（执行前记录）
+
+v1 固定样本得到 7 个直接 simple-reveal-shaped witness；独立审查强调 txid 不承诺 witness，因此全部七个都要核验，不筛选成功案例。v2 保留同一样本与识别规则，另从 Blockstream 取得各 reveal 所在高度的区块 hash，再从 Blockchain.com 获取该 hash 的完整 raw block；重算 header hash、txid Merkle root、wtxid Merkle root、coinbase witness reserved value 和最高 output index 的 BIP141 witness commitment，并要求目标父交易的原始序列化逐字节 hash 匹配。全部成功才将这七条 payload 记为 anchored-block witness evidence；失败或缺失保留未核验。该步骤信任 Blockstream 的主链 hash 锚点，不等同完整 Bitcoin Core 共识与 PoW 链验证。新产物为 `cp13_parent_semantics_v2.json`，不得覆盖 v1。
+
+#### 语义与完整性审计结果（2026-08-31）
+
+固定选择得到 11 笔交易、36 笔直接父交易；为核对 reveal 的 commit outpoint 再取 7 笔父交易，共 43 笔。11 个 Tier 1 匹配输入的原始 prevout value/script 全部一致，11 笔交易各涉及两个不同 input scripts。7 笔符合事先限定的单输入、单输出、无 pointer 的 simple-reveal 规则；其余 4 笔超出直接 reveal 范围，保留未决，不递归追踪到出现正例为止。
+
+7 个 payload 中，6 个含 BRC-20 `op=transfer` 声明，1 个为 532-byte image/webp。它们的内容承载首 sat 按限定 FIFO 规则均进入 child output 1，且该脚本不同于卖方输入脚本。逐交易 outpoint、MIME、body SHA-256、声明字段与目标输出见 `cp13_parent_semantics_v2.json` 的 `records`。该结果只确认简单内容与 sat 路径，不核验 BRC-20 余额、合法铸造/转移状态，也不替代完整 Ordinals 索引、真实成交或现实所有权真值。
+
+全部 7 个 reveal 的完整 raw witness 已核验到区块 `820951, 824153, 847510, 873887, 888412, 918139, 918533`。每个区块均核对 Blockstream 高度→hash 锚点、Blockchain.com raw block、header hash、txid Merkle root、零 coinbase wtxid 叶子的 witness Merkle root、coinbase reserved value、最高索引 commitment output，以及目标交易 raw SHA-256。七项全部成功；验证范围与信任边界保存在 `block_proofs` 和 `limitations`。独立只读复审未发现会改变结论的字节序、奇数 Merkle 叶复制或 commitment 选择错误；包含变异 witness root 拒绝检查的 self-test 通过。
+
+复现命令（输出不得覆盖历史版本，重复核验时使用新的临时路径）：
+
+```powershell
+uv --cache-dir .uv-cache run --no-sync python scripts/research/audit_cp13_parent_semantics.py --cache-dir "$env:TEMP\btc_cp13_parent_hex_v1" --verify-witness-blocks --output experiments/diagnostics/cp13_parent_semantics_v2.json
+uv --cache-dir .uv-cache run --no-sync python scripts/research/audit_cp13_parent_semantics.py --self-test
+uv --cache-dir .uv-cache run --no-sync python scripts/scan_block_sighash.py --self-test
+```
+
+版本与内容追溯：
+
+- 输入 detector-v2 快照仍为 `6d0e23d` 所记录的 666 个 Tier 1，不重新筛选样本。
+- `cp13_parent_semantics_v1.json` SHA-256：`E192E587D8E66DB451A5DF5906B24FFB26C2E2761981F197972F0B4B684F38F2`；缺少 witness commitment 的历史限制保留。
+- `cp13_parent_semantics_v2.json` SHA-256：`2E75DFC081A4E14D739D59DD66869AB20561F945DA99DEF8EBE9F04E20DD4A6F`。
+- v2 audit 脚本 SHA-256：`806DA59921A7DC7CB3804C4F82DB7ABBD7F0E9E3AC5D71CCCA4AFAD4E1D285F5`；scanner SHA-256：`024E3F457631CB582685DF046575E69900203CADA66D4E1CD1FD40282723DED7`。
+- scanner 本次只增加可选 `retain_witnesses`，默认候选扫描逻辑不变；旧 pilot 的代码 hash 不回填为当前 hash。v2 在 `6d0e23d` 加显式工作区 diff 上运行，代码和产物在本里程碑一起保留。
+
+#### 公开实现覆盖反证与当前裁决
+
+[ORD.NET 官方构造](https://docs.ord.net/technicals/sale-psbt-construction/) 的 `Sale path`、`Passthrough Tapscript` 与链接示例说明：卖方签名为 `SINGLE|ANYONECANPAY`，平台签名为 DEFAULT，成交走 `multi_a(2, seller, platform)` script path。官方示例 `0f2f22ed557359039a80620bb5d559f3bc2b982f1b03ddfc771668d115a1ce40` 的 input 2 有四项 witness，script 内平台公钥为 `d2dc3222298e2a5f4e1c7d702fae2bcf7821cc0a095a478b95c62195b0df7398`；其 prevout 为 `ff46c2aa8f80eb4ce1083ffc167ab6506741bbf4f93e1765ccb51302a18a7dea:0`，对应 output 2 为 99,330 sat 的 P2WPKH，而非输入 P2TR 脚本。
+
+这给出了当前 detector 的两个独立漏检原因：未支持 script path，以及 Tier 1 要求输入和付款输出脚本相同。官方目的性示例本来就排除在 24 区块样本外；对 845 个字节形状候选检查该平台公钥的精确 2-of-2 模板，命中为 0。该数不估计市场活动量或召回率。后续若支持该协议，必须冻结新版本、独立评估，不静默修改原样本的成功条件。
+
+[Ordinals Wallet 官方解释](https://ordinalswallet.com/learn/how-psbt-settlement-works) 及 OrdinalsBot SDK/文档提供了第二实现的文本级机制，但本轮没有取得可逐字节连接的第二平台主网成交链。`msigner-compatible` 仍不等于 Magic Eden 归属。当前结论为：固定子样本的来源/内容完整性通过；跨实现 Tier 2、独立所有权语义与传播效应门开放。不会因已投入解析器工程而降低创新性和效应标准。Undermind 本轮再次出现 transport error，尚未完成远端同步；本地记录是当前版本。
+
+回归核验使用已有区块和 API 缓存，把当前 scanner 的输出另存临时路径；`summary`、24 个 `blocks` 和全部 845 个 `candidates` 与冻结 detector-v2 快照逐字段一致。变化只有记录代码版本的 hash，不把缓存复算当新观测。
+
+#### 第二实现证据包：有界取证协议（执行前记录）
+
+独立反方建议先完成第二实现证据，再做 component 敏感性；主代理接受这一顺序。锁定 `me-foundation/msigner` 和其官方直接链接的文档/示例，不新增市场或任意交易窗口。本次使用 `github-research` 的实际源码阅读与结构对照方法；用户任务是验证既定实现，因此不执行该技能面向全生态的 50–200 仓库发现、打分和框架集成。
+
+输入为 ORD.NET 官方锚点、冻结 666 个 Tier 1 和本轮 11 笔语义子样本。先固定官方仓库 revision，再完整核对 README、结算相关源码、测试与 fixtures；只读、不运行签名/广播代码、不调用钱包。寻找由官方来源直接提供的可解码 PSBT、交易 fixture 或 confirmed mainnet txid；要求能定位 seller input、对应收款 output、资产 outpoint/去向、签名路径与 hash type、dummy/padding 布局，并区分模拟 fixture 与主网事实。
+
+输出为一张双实现证据卡，记录 revision、精确文件/行/交易位置、支持项和缺失项。代码证明构造可能性，不单独证明曾经成交；模拟 PSBT 不计作主网量或市场归属真值。若完成该官方材料包仍无法得到闭合的第二实现语义链，停止当前扩展并将 CP-13 标为数据/取证条件未满足，不用模板相似或任意扩大搜索补齐。该停止只说明当前公开证据和资源未过门，不证明第二实现不存在；Research Director 再据此与其他候选比较。

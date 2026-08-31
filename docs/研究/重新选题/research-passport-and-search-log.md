@@ -114,6 +114,14 @@ CP-13 detector-v2 产物 SHA-256：`experiments/diagnostics/cp13_pilot_v1_detect
 
 ### 来源核验台账（68 篇）
 
+2026-08-31 CP-13 增量审计（不计作新增论文数）：
+
+- **固定语义子样本**：按已冻结哈希规则选择 11 笔，获取 36 笔直接父交易和 7 笔 commit 父交易；11 个目标 prevout 原始值/脚本核对通过。7 笔满足限定 simple-reveal 规则，6 个 BRC-20 transfer 声明、1 个 image/webp；4 笔未决。仅作取证可行性，不估计总体 precision。
+- **内容完整性补充**：对全部七个 reveal 从 Blockstream 取得主链 block hash，从 Blockchain.com 获取 raw block；七个 header、txid Merkle root、BIP141 witness commitment 和完整 witness 逐字节一致性均通过。独立审查与 self-test 通过；主链锚点信任边界、完整索引和所有权限制仍保留。
+- **负向覆盖证据**：复核 ORD.NET 官方 `Sale path` / `Passthrough Tapscript` 与官方 tx `0f2f22ed…ce40`，发现当前 key-path/同脚本检测必漏其 2-of-2 结算；24 区块中该官方平台公钥精确模板命中 0。OrdinalsWallet 官方页面与 OrdinalsBot 文档没有补出第二平台主网成交 artifact，不能把文档数量当跨平台样本数量。
+- **版本和产物**：`cp13_parent_semantics_v1.json` SHA-256 `E192E587D8E66DB451A5DF5906B24FFB26C2E2761981F197972F0B4B684F38F2`；`cp13_parent_semantics_v2.json` SHA-256 `2E75DFC081A4E14D739D59DD66869AB20561F945DA99DEF8EBE9F04E20DD4A6F`。命令、脚本 hash、范围、原始 URL 和逐交易证据见 `gate2-reentry.md` 与产物。旧版本不覆盖。
+- **双重留档状态**：本轮调用 Undermind `/03 Candidate Problems/` 再次返回 connector transport error。未同步，不记作远端更新成功，也不将工具失败计为科学反证。
+
 `Web19, Elm23, Sch24, Bel24, Son24, Lor20, Edd21, Car22, Dep24, Pha26, Cha26, Wu20, Mos21, Mul26, Kha26, Mag26, Mal26, Wu24, Ara24, Saf26, Fro19, Xia22b, Gom24, Jen23, Deu22, Che23, Huo25, Joh26, Dep25, Har18, Che25b, Sch24c, Hua22, Li20, Gom22, Alt23, Hua18, Che26b, Luo23, San25, Nic23b, Zho24, Sho26, Oli21, Cor26, Lin24, Alj26, Anu26, Che25d, Sha22, Elo21, Tar23, Har16, Alj25, Din23b, Wah23, Xio26, Shi25, Wu25, Poc22, Real25, Dib26, Mba26, Ama26, Dha26, Coq25, Jal25, Len26`。
 
 该台账只证明论文身份和版本可定位，不代表 60 篇均支持当前候选问题。正式年份以一手元数据为准；例如 `Sch24` 的正式 Scientific Data 版本发表于 2025 年，`Dep24` 的卷期年份与预印本键也不一致。

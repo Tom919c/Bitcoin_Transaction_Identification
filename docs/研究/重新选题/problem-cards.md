@@ -266,4 +266,6 @@
 - **Ethics and misuse risk**：目标是减少错误合并与错误归因，原则上改善隐私和科学有效性。发布样本应避免额外标注真实个人，只公开已在链上和官方文档可定位的交易结构；不把 cluster 当法律身份。
 - **Strongest reviewer rejection**：协作交易破坏 CIOH 早已已知；Ordinals 只是一个显然的新实例，检测规则过于简单，缺少独立实体真值，规模或下游影响不足以形成顶会贡献。
 - **Corrected diagnostic result**：detector-v2 只把支持的脚本上下文中的目标签名计入 Tier 1。24 区块复算为 845 个字节形状候选、832 个上下文通过交易、666 个 Tier 1；原 662 个全部保留，新增 4 个合法 `0xc0/0xc1` 前缀 key-path 签名交易。公开结构规则漏检下界为 640/666（96.1%），`msigner` 严格模板兼容为 103/666（15.5%）。这不是独立验证；当前 API prevout 信任和不支持脚本路径的边界必须保留。
-- **Score / decision**：5×3×4=60；**首要候选，只批准独立输入来源核验、跨市场真值与聚类传播效应测量**。Tier 2 尚未完成；不得把 666 个 Tier 1 写成已验证市场成交。若不能在至少两个公开实现中建立可审计语义，或聚类传播效应很小，则立即 No-Go。
+- **Raw semantic audit**：预先固定 11 笔分层子样本，复核 43 笔原始父交易，11 个目标 prevout 全部匹配。7 笔含支持范围内的直接 simple reveal，6 个 BRC-20 transfer 声明、1 个 image/webp；按限定 FIFO 规则，其内容承载首 sat 均移至不同脚本的 output 1。七个 reveal 所在区块的 header、txid Merkle root、BIP141 witness commitment 及目标 raw witness 一致性均通过。主链 hash 锚点信任 Blockstream，不等同全节点共识验证。其余 4 笔未决；不估计总体 precision，不把声明当有效代币转移，不把不同脚本当不同所有人。
+- **Known coverage counterexample**：ORD.NET 官方示例 `0f2f22ed557359039a80620bb5d559f3bc2b982f1b03ddfc771668d115a1ce40` 使用平台和卖方 2-of-2 Taproot script path，输入为 P2TR、对应卖方收款为 P2WPKH。当前上下文支持范围与同脚本 Tier 1 条件均会漏掉它。冻结 24 区块内没有匹配官方平台公钥的该模板。不得把官方示例、模板相似和样本资产语义拼成已通过的跨平台 precision 证据；扩大检测范围须另立版本并使用独立样本。
+- **Score / decision**：5×3×4=60；**首要候选，只批准补齐第二实现语义与低成本传播效应判别**。原始来源和 witness 完整性已在固定子样本通过，但 Tier 2 跨实现硬门尚未完成；不得把 666 个 Tier 1 写成已验证市场成交。若不能在至少两个公开实现中建立可审计语义，或聚类传播效应很小，则立即 No-Go。投入工程量和密码学完整性检查本身不计作论文创新。

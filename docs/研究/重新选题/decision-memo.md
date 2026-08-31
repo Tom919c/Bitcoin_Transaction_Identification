@@ -2,13 +2,15 @@
 
 ## 当前状态
 
-**Decision: GATE 2 CONDITIONAL LEAD — CP-13 已完成解析器修正和原样本诊断复算，仍是首要候选；跨市场真值、独立输入来源核验和聚类传播效应未通过，最终方向不冻结。**
+**Decision: GATE 2 CONDITIONAL LEAD — CP-13 已完成固定子样本的原始父交易与 witness 承诺核验，仍是首要候选；第二实现的完整语义证据和聚类传播效应未通过，最终方向不冻结。**
 
 2026-08-31 的独立审查确认 detector-v1 混淆了 witness 外形与签名语义。旧产物和旧代码保留在 `3573cec`，新结果使用 `cp13_pilot_v1_detector_v2.json`：同一组 24 区块、65,545 笔交易中，845 笔是字节形状候选，832 笔在支持的脚本路径中通过上下文检查，666 笔满足 Tier 1 结构条件。相对原始 662 笔，新增 4 笔、删除 0 笔；新增者均为旧代码误删的 `0xc0/0xc1` 前缀 Taproot key-path 签名。13 笔未通过当前上下文检查的候选不计入已验证 Tier 1。
 
 修正后，control 的 Tier 1 为 0；后三个时期分别为 494、145、27，覆盖全部 18 个后期样本区块。640/666（96.1%）因重复 output script 必然绕过所审查的 JoinMarket、Wasabi 与 Whirlpool 公开结构规则；103/666（15.5%）严格符合 `msigner` 默认模板。规模信号未因修正消失，但这是同样本排错，不是独立复制，更不是总体流行率估计。
 
-这仍不是论文结论。上下文检查目前支持 Taproot key path 与 native/nested P2WPKH；脚本路径未解释，prevout 元数据仍信任公开 API，未逐项由原始父交易复算。Tier 1 不证明资产类型、平台归属、不同现实所有人或真实 sale。Magic Eden activity API 返回 HTTP 503，ordinals.com 单点只读请求返回 HTTP 403，均不能解释为“无资产转移”。至少两个公开实现的可审计 Tier 2 语义、独立 prevout 核验和非平凡 component/union 传播效应完成后，才请求用户冻结主方向。
+固定语义子样本现已补强：按时间层与模板兼容性预先选出的 11 笔交易，涉及 43 笔原始父交易，11 个匹配输入的 value/script 均与原始 outpoint 一致。其中 7 笔可按限定的直接 reveal 规则追踪内容承载首 sat，均移至 output 1，且目标脚本不同于卖方输入脚本；内容为 6 条 BRC-20 transfer 声明和 1 个 image/webp payload。全部七个 reveal 的 witness 已匹配到独立主链 hash 锚定的区块，并通过 txid Merkle root 与 BIP141 witness commitment 检查。其余 4 笔为未决，不是无 inscription；11 笔不是总体 precision 或市场成交率估计。
+
+这仍不是论文结论。完整 666 笔的 prevout 尚未全部原始核验；BRC-20 声明不证明余额或有效 token transfer；脚本变化不证明不同现实所有者或平台归属。另发现明确覆盖缺口：[ORD.NET 官方 sale construction](https://docs.ord.net/technicals/sale-psbt-construction/) 的示例使用 2-of-2 Taproot script path，且资产输入与卖方收款脚本不同，当前 key-path、同脚本 Tier 1 必然漏检。24 区块的 845 个形状候选没有匹配该官方平台公钥模板；这不能解释为该市场没有活动，也不能据此临时放宽规则并声称跨实现验证通过。Magic Eden HTTP 503、ordinals.com HTTP 403 和 Undermind transport error 均作为访问失败保留。至少两个公开实现的可审计语义及非平凡 component/union 传播效应完成后，才请求用户冻结主方向。
 
 BlackSuit/Royal 的精确链上 target-construction 子测试成功：原定 UTC 日内 1,182,309 个输出只有一个等额 candidate，±1 日三日合计 3,154,828 个输出仍只有该候选；两个冻结 `c` 前 registry 均不包含它。但 DOJ 公开材料遮盖 txid/address，日期按 `on or about` 理解，CS-1 和商业工具上游不可审计。独立 Devil's Advocate 因 construct validity、来源独立性 unknown、永久 artifact 与伦理风险判定完整 pilot No-Go，Research Director 接受该反证。详见 `gate2-prospective-attribution/phase6_decision/black-suit-pilot/pilot-result.md`。
 

@@ -61,7 +61,7 @@ def take(data: bytes, pos: int, size: int) -> int:
     return end
 
 
-def parse_transaction(data: bytes, pos: int) -> tuple[dict[str, object], int]:
+def parse_transaction(data: bytes, pos: int, retain_witnesses: bool = False) -> tuple[dict[str, object], int]:
     version_start = pos
     pos = take(data, pos, 4)
     version = data[version_start:pos]
@@ -99,6 +99,7 @@ def parse_transaction(data: bytes, pos: int) -> tuple[dict[str, object], int]:
 
     matches: list[dict[str, object]] = []
     candidate_witnesses = {}
+    all_witnesses = []
     if has_witness:
         for input_index in range(input_count):
             item_count, pos = read_compact_size(data, pos)
@@ -108,6 +109,9 @@ def parse_transaction(data: bytes, pos: int) -> tuple[dict[str, object], int]:
                 end = take(data, pos, item_len)
                 items.append(data[pos:end])
                 pos = end
+
+            if retain_witnesses:
+                all_witnesses.append([item.hex() for item in items])
 
             for item_index, item in enumerate(items):
                 kind = signature_kind(item)
@@ -129,7 +133,7 @@ def parse_transaction(data: bytes, pos: int) -> tuple[dict[str, object], int]:
     locktime = data[locktime_start:pos]
     stripped = version + data[vin_start:vin_end] + data[vout_start:vout_end] + locktime
     txid = hashlib.sha256(hashlib.sha256(stripped).digest()).digest()[::-1].hex()
-    return {
+    result = {
         "txid": txid,
         "input_count": input_count,
         "output_count": output_count,
@@ -137,7 +141,10 @@ def parse_transaction(data: bytes, pos: int) -> tuple[dict[str, object], int]:
         "matches": matches,
         "candidate_witnesses": candidate_witnesses,
         "outputs": outputs,
-    }, pos
+    }
+    if retain_witnesses:
+        result["witnesses"] = all_witnesses
+    return result, pos
 
 
 def scan_block(data: bytes) -> dict[str, object]:

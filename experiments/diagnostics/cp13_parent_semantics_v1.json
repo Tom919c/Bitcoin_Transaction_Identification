@@ -1,0 +1,563 @@
+{
+  "protocol": {
+    "sample_rule": "two lowest SHA256(CP13-semantic-v1|txid) per stratum x msigner-compatible cell; no replacement",
+    "pilot_sha256": "3f517032cf15d35e56f28a5e5f0a2ae4184bdcc437b3334403a5e9fde96a779f",
+    "selected": [
+      {
+        "txid": "37e2e88eb36c2f8980842f1bdbc2b07cdf37ea4d204dc4bea537c57dc0217418",
+        "stratum": "early_marketplace",
+        "msigner_compatible": false
+      },
+      {
+        "txid": "8ccda354b03154589b1a9cb02ff5a079f5b49b9d585e19522bcfa47a2d5713a6",
+        "stratum": "early_marketplace",
+        "msigner_compatible": false
+      },
+      {
+        "txid": "bec8cdbfc25fbec5b49be7036037c51bd774918e3adef4b490d3086450a8aa45",
+        "stratum": "early_marketplace",
+        "msigner_compatible": true
+      },
+      {
+        "txid": "5c12909acf5ad44af4f3ce4e1def605f2619559b64cf9706f84c937ba753831e",
+        "stratum": "early_marketplace",
+        "msigner_compatible": true
+      },
+      {
+        "txid": "fbd7cd5b7bd27b4506444dd1a878713cbc28d27ab2ff4ef835d3b021af4c95f6",
+        "stratum": "post_runes",
+        "msigner_compatible": false
+      },
+      {
+        "txid": "e81d86569ae8fe0ebbd9b3dfb01d7f42e16b21d529df23c9714102fe77ce49fb",
+        "stratum": "post_runes",
+        "msigner_compatible": false
+      },
+      {
+        "txid": "282d36de3ce06ec5f937bf644e65c1df54c565f7c217713ee8c1a90eb237093d",
+        "stratum": "post_runes",
+        "msigner_compatible": true
+      },
+      {
+        "txid": "2cc9871d10219e81dba163fd68acd948c0c0571ee05e21886c912ab4252dd3c8",
+        "stratum": "post_runes",
+        "msigner_compatible": true
+      },
+      {
+        "txid": "077bc72a40e3ff96e144ac99e964ce83b0164ac2edf43199dbb299c73ee0691c",
+        "stratum": "recent",
+        "msigner_compatible": false
+      },
+      {
+        "txid": "006835a8095450a8c2a932d06602a05ca93912bfd0cd43b76cda7f196b5a0ef4",
+        "stratum": "recent",
+        "msigner_compatible": false
+      },
+      {
+        "txid": "307b06b3626fd256e7d6c6bfc0ef0b81b0c145b71e5c33e3acbc80aa8bb8c96b",
+        "stratum": "recent",
+        "msigner_compatible": true
+      }
+    ],
+    "unique_direct_parents": 36
+  },
+  "summary": {
+    "sample_transactions": 11,
+    "raw_parent_transactions": 43,
+    "matched_inputs_verified": 11,
+    "transactions_with_direct_simple_reveal": 7
+  },
+  "limitations": [
+    "targeted feasibility sample, not prevalence or detector precision estimate",
+    "same source raw serialization and API metadata; txids independently recomputed, witness commitments not revalidated",
+    "simple direct reveals only; no full Ordinals or BRC-20 validity/indexing",
+    "asset movement does not prove marketplace attribution or different real-world owners"
+  ],
+  "code_sha256": {
+    "audit": "52387d759ac914092c6486e6a00661b7c0884323e861880787a9611e63c3ca14",
+    "parser": "024e3f457631cb582685df046575e69900203cada66d4e1cd1fd40282723ded7"
+  },
+  "parent_manifest": [
+    {
+      "txid": "09d09889b1ceb4683aea56a44e88cff9e81b06ad769847ec3160db39f8941650",
+      "url": "https://blockchain.info/rawtx/09d09889b1ceb4683aea56a44e88cff9e81b06ad769847ec3160db39f8941650?format=hex",
+      "raw_sha256": "86bfa13321176d87209afbe655d562ef9c189e729b5ecd46e30a81a3a4d29271"
+    },
+    {
+      "txid": "0a6634e187835bd51aa1124ab012b295e3de4f8db9aec3e54130c17ddef3e7cd",
+      "url": "https://blockchain.info/rawtx/0a6634e187835bd51aa1124ab012b295e3de4f8db9aec3e54130c17ddef3e7cd?format=hex",
+      "raw_sha256": "6887b5b243710d6d8e61257c35adb1563c8aec9b299e822c1b013afa225588ae"
+    },
+    {
+      "txid": "119124a73f90c7f9bb4a121edeb2052d46232f3a749a967c9fa4773eab41f1b5",
+      "url": "https://blockchain.info/rawtx/119124a73f90c7f9bb4a121edeb2052d46232f3a749a967c9fa4773eab41f1b5?format=hex",
+      "raw_sha256": "005221c6c1a4748d40a01bb3acca144eb43934eeaef8340c7db6c747426abdb3"
+    },
+    {
+      "txid": "142eee67f3f99d6c7e798dad1c85cf75dfc6a8f6d5e07df18e3ee246e24f61ee",
+      "url": "https://blockchain.info/rawtx/142eee67f3f99d6c7e798dad1c85cf75dfc6a8f6d5e07df18e3ee246e24f61ee?format=hex",
+      "raw_sha256": "069b0c6e32325b079970a3715b50a31b63913dbc1a5577edad137041523e8fe1"
+    },
+    {
+      "txid": "1593e30ddaae90a3b72d33fb60642a2743679d015a56c1a28f2e1281a4d144d2",
+      "url": "https://blockchain.info/rawtx/1593e30ddaae90a3b72d33fb60642a2743679d015a56c1a28f2e1281a4d144d2?format=hex",
+      "raw_sha256": "6e3940d7ec261120e9030268f6c0098b4d3071821107afa9005715682d0c7839"
+    },
+    {
+      "txid": "16d9465013db11a8de69db6f420f70d0d50d2dc868181e50407049e178a53447",
+      "url": "https://blockchain.info/rawtx/16d9465013db11a8de69db6f420f70d0d50d2dc868181e50407049e178a53447?format=hex",
+      "raw_sha256": "0b0ef6466e8baccfd6268ef73d3aa87854002a7095bbbf4002055d165b05f901"
+    },
+    {
+      "txid": "1ef61dada046d8e7f67a1fc4baed621dd02f8377edc5926a98b4fd09c454224e",
+      "url": "https://blockchain.info/rawtx/1ef61dada046d8e7f67a1fc4baed621dd02f8377edc5926a98b4fd09c454224e?format=hex",
+      "raw_sha256": "e85ce8760b6e9b2fb62f5270823f88b4b8ee2a397724cc3c3af509aa4b9cc354"
+    },
+    {
+      "txid": "261688e707442ffa5b9cbcb228d055fab002de7913a1ba0dc22d5878738361e0",
+      "url": "https://blockchain.info/rawtx/261688e707442ffa5b9cbcb228d055fab002de7913a1ba0dc22d5878738361e0?format=hex",
+      "raw_sha256": "5aa21ebda78b24bc216070bc193e9d84729a2696d6b20cac172c939efc45e38e"
+    },
+    {
+      "txid": "39b39090e07c9fce091070809585a5cb47a890d8dcb605c1ea4a8e0042cb6b5c",
+      "url": "https://blockchain.info/rawtx/39b39090e07c9fce091070809585a5cb47a890d8dcb605c1ea4a8e0042cb6b5c?format=hex",
+      "raw_sha256": "25a79a9aeecb7f3515063359efa45cc4a6ba4147fefa5b434ecc580424d29fdb"
+    },
+    {
+      "txid": "478c71ffe9415ae9f51418d4723618c66d53bbfa1552f4c30066ef30e0ead7c9",
+      "url": "https://blockchain.info/rawtx/478c71ffe9415ae9f51418d4723618c66d53bbfa1552f4c30066ef30e0ead7c9?format=hex",
+      "raw_sha256": "25066dc1645cfd539e08bb230f29077882c9d66c54ea7267e498bb7bc37ffb43"
+    },
+    {
+      "txid": "4f222cc82b46fec15c8dec8a60566a98cf4b265ad121aaab55565b82036eb60b",
+      "url": "https://blockchain.info/rawtx/4f222cc82b46fec15c8dec8a60566a98cf4b265ad121aaab55565b82036eb60b?format=hex",
+      "raw_sha256": "cef15ce4af91678ee93d622427f14362f6f2da2a7b63e739d45b558bc9f61c82"
+    },
+    {
+      "txid": "552ef26458fef2abaeabdf0390ff3f36c9e39fa6ffcb4f5ef23ec85b6e3f03fc",
+      "url": "https://blockchain.info/rawtx/552ef26458fef2abaeabdf0390ff3f36c9e39fa6ffcb4f5ef23ec85b6e3f03fc?format=hex",
+      "raw_sha256": "3471d99f63c784dcabb179518262b4f1db68b8d3f7c281b8b02d23fb9f20ab87"
+    },
+    {
+      "txid": "632c4be8f06cf670bc161249c56ebea3a62a401478e4935f6a98ecf56ceb63d7",
+      "url": "https://blockchain.info/rawtx/632c4be8f06cf670bc161249c56ebea3a62a401478e4935f6a98ecf56ceb63d7?format=hex",
+      "raw_sha256": "b32fc09caadb3674af19fda6af9f1c5236bee6bfd41e78c450fb2ccf3cb2486f"
+    },
+    {
+      "txid": "6b1ba744559e1f3c5db90cbd71fdfe3e6967961b142e712aea939a488a72d003",
+      "url": "https://blockchain.info/rawtx/6b1ba744559e1f3c5db90cbd71fdfe3e6967961b142e712aea939a488a72d003?format=hex",
+      "raw_sha256": "17cf372192149504e786144ceb369de0c2604cdf1a7b9cd3a02bf8a3473f3468"
+    },
+    {
+      "txid": "6c2448e81d0051c9061c7c289dd15f3384a29048d1543aca53d2803fc283163e",
+      "url": "https://blockchain.info/rawtx/6c2448e81d0051c9061c7c289dd15f3384a29048d1543aca53d2803fc283163e?format=hex",
+      "raw_sha256": "efa46291e38df1f3bd3241cc6359abe42cc31a1426093586944a26fb9e2bc8d3"
+    },
+    {
+      "txid": "759ad2250fd5598c2cd03fd53ebdb029a4dc9de40640b4d6a4681aeb47b03c53",
+      "url": "https://blockchain.info/rawtx/759ad2250fd5598c2cd03fd53ebdb029a4dc9de40640b4d6a4681aeb47b03c53?format=hex",
+      "raw_sha256": "1cfc8cb0027a325a660a7972b311f97f64dfef389670fbddc611b356eb44f304"
+    },
+    {
+      "txid": "780498802b2e507cca665ee9d91982a4cb70d39abdc1e39bed71b23c0b9e48f4",
+      "url": "https://blockchain.info/rawtx/780498802b2e507cca665ee9d91982a4cb70d39abdc1e39bed71b23c0b9e48f4?format=hex",
+      "raw_sha256": "851c92628086c413f9f707f8a19190a23121a3c27879b277734456cc6223e47e"
+    },
+    {
+      "txid": "8043931556d1cacafe09e00780b93af895cafdb4f4017a109b9e8171133c14d1",
+      "url": "https://blockchain.info/rawtx/8043931556d1cacafe09e00780b93af895cafdb4f4017a109b9e8171133c14d1?format=hex",
+      "raw_sha256": "f81124fa0013677a6f3cd39457282b498202914b808be51dc4ca19491753b057"
+    },
+    {
+      "txid": "874aca730b81446e791cd65007efe79c351cdeec5038af23ade6c4d73d14dc2f",
+      "url": "https://blockchain.info/rawtx/874aca730b81446e791cd65007efe79c351cdeec5038af23ade6c4d73d14dc2f?format=hex",
+      "raw_sha256": "cade8c488956119220a98fbd63b1f046d0e9635b82184072476acb8ccba7a27c"
+    },
+    {
+      "txid": "8a4d2c2a956a2d44a9ab55fc37b5c8466226abed7e1d8e40eb5d9c566446d8cc",
+      "url": "https://blockchain.info/rawtx/8a4d2c2a956a2d44a9ab55fc37b5c8466226abed7e1d8e40eb5d9c566446d8cc?format=hex",
+      "raw_sha256": "8dfbddaa259578248e3fec370d93782afe66f81fa1630a73ed7ca060a0689f41"
+    },
+    {
+      "txid": "90c1128e44062c6b6f02e22790dc843e25bda04a838c28fc3aaa1cfd82653219",
+      "url": "https://blockchain.info/rawtx/90c1128e44062c6b6f02e22790dc843e25bda04a838c28fc3aaa1cfd82653219?format=hex",
+      "raw_sha256": "2e72adfd99dea082d97e6368abf3c0c07becedacec29a73bb03d0d3ccea41439"
+    },
+    {
+      "txid": "9162c811ed69d92ab3b470632a2e8e3aff0c1251c8cbdee112749e9a420dea30",
+      "url": "https://blockchain.info/rawtx/9162c811ed69d92ab3b470632a2e8e3aff0c1251c8cbdee112749e9a420dea30?format=hex",
+      "raw_sha256": "d5762e681cafad4a24ee415125a0f4a2aa21f68b489a976ae4c1272ec035bf4b"
+    },
+    {
+      "txid": "9f41b48b6b8c7bb9bbbd352f0bc8f72bfb5337f3df6cb06eb5bfee7a57a415d1",
+      "url": "https://blockchain.info/rawtx/9f41b48b6b8c7bb9bbbd352f0bc8f72bfb5337f3df6cb06eb5bfee7a57a415d1?format=hex",
+      "raw_sha256": "08b82bd148fbdcc285a624a605b15b7b82fcf3c1a4b6c59da398080d4d5cfa5c"
+    },
+    {
+      "txid": "a1315bfd1e7b0a9223bbee9ed3f6ea823b76c0a99ec303667ad1d51646bea0d2",
+      "url": "https://blockchain.info/rawtx/a1315bfd1e7b0a9223bbee9ed3f6ea823b76c0a99ec303667ad1d51646bea0d2?format=hex",
+      "raw_sha256": "4c6d3773a50f4bbd048d652d39e03be02255d75346ebd08db52686afe58840c1"
+    },
+    {
+      "txid": "a364611d7190cc49b5cb7840f612fc395dc5defec486de70c250d315a5754b19",
+      "url": "https://blockchain.info/rawtx/a364611d7190cc49b5cb7840f612fc395dc5defec486de70c250d315a5754b19?format=hex",
+      "raw_sha256": "247affb1c395a7448e21aa50e3b36c3758a19b21b1ed4ca4d2e0a4a203295bfb"
+    },
+    {
+      "txid": "a65a7c3aaa0b18881b491c8f471084556b214cb6ee07dc5e3bd26ebca84e19aa",
+      "url": "https://blockchain.info/rawtx/a65a7c3aaa0b18881b491c8f471084556b214cb6ee07dc5e3bd26ebca84e19aa?format=hex",
+      "raw_sha256": "596ec5a7a18b85dd5e2b28bef3391024ac96ba6fd39f055dac1370b6ecc5db9b"
+    },
+    {
+      "txid": "af5e2a474583acf6d8f0eb0053417d00f45d5627b4476924d6d01844ccaae403",
+      "url": "https://blockchain.info/rawtx/af5e2a474583acf6d8f0eb0053417d00f45d5627b4476924d6d01844ccaae403?format=hex",
+      "raw_sha256": "490117234f521687e75d5c27a04ace290901dd10189d7d7f000abf04c857783e"
+    },
+    {
+      "txid": "afab7e5031a55ca6c8a1ca7e334e4dd1637265366b8d4712e678d4b7aabb5e59",
+      "url": "https://blockchain.info/rawtx/afab7e5031a55ca6c8a1ca7e334e4dd1637265366b8d4712e678d4b7aabb5e59?format=hex",
+      "raw_sha256": "9ef26283dd4e16993cb759613e9de3628fc987d100aa52d2eaa8a37f13a81944"
+    },
+    {
+      "txid": "c5529fa87a6459f3fdd06a91636d3343de9feb82a6ef004a42006649aec53608",
+      "url": "https://blockchain.info/rawtx/c5529fa87a6459f3fdd06a91636d3343de9feb82a6ef004a42006649aec53608?format=hex",
+      "raw_sha256": "904eae7defd8a692bba87e13c8719cc351435f8e564ccefa9bd014649f3d4f7f"
+    },
+    {
+      "txid": "d973eba3feaa5df6cdbba5e0bfa82d7c1ba95b2f716326d38b8b6285512068d8",
+      "url": "https://blockchain.info/rawtx/d973eba3feaa5df6cdbba5e0bfa82d7c1ba95b2f716326d38b8b6285512068d8?format=hex",
+      "raw_sha256": "204d65ea991e082e52851bb2feaf4bbdda9c40caa056b3426fae3ae19811bf40"
+    },
+    {
+      "txid": "dd12d18041e7edaa1fbb8f8855af700f1080fd8e4bcef2139dc9790569ada9f5",
+      "url": "https://blockchain.info/rawtx/dd12d18041e7edaa1fbb8f8855af700f1080fd8e4bcef2139dc9790569ada9f5?format=hex",
+      "raw_sha256": "a2e74c65937f28acc6fb0834f07018ccf1bc2c801fa5f103e918495fdfa855ff"
+    },
+    {
+      "txid": "dfefd6205d6650fabd36c5fa6cf5aa9b02c55527df123f8f18756fb621408d24",
+      "url": "https://blockchain.info/rawtx/dfefd6205d6650fabd36c5fa6cf5aa9b02c55527df123f8f18756fb621408d24?format=hex",
+      "raw_sha256": "3da24630cf1637ec216de3d6a23162b1ac3ac7329e8a230433262378c2fb9c21"
+    },
+    {
+      "txid": "e55cb28255d65da9f4e1c234c0bbd9427ca60783e2930179ae2b323128657e4f",
+      "url": "https://blockchain.info/rawtx/e55cb28255d65da9f4e1c234c0bbd9427ca60783e2930179ae2b323128657e4f?format=hex",
+      "raw_sha256": "b61a6cb5212d36f7fa3ddb548fcef772159dddacd30f7a4ddfc0cb7cbbb5a355"
+    },
+    {
+      "txid": "ea93399a2b06893bad4bd9d7c999764340f6c1d7dbf0c141d431b084a1c950a3",
+      "url": "https://blockchain.info/rawtx/ea93399a2b06893bad4bd9d7c999764340f6c1d7dbf0c141d431b084a1c950a3?format=hex",
+      "raw_sha256": "a8cafd204b550dcc12f65d507641cef2426cc1f6dda9812fae59b9f045ac11b8"
+    },
+    {
+      "txid": "f671cd310a443ae8cc919377674816c9c3a1c5666fde9172a30a64293d0607ef",
+      "url": "https://blockchain.info/rawtx/f671cd310a443ae8cc919377674816c9c3a1c5666fde9172a30a64293d0607ef?format=hex",
+      "raw_sha256": "c685be2c5c61335aa71d0fa3a50ecb3f9b6d0aed3919ab5104bdd6d351ed1a8f"
+    },
+    {
+      "txid": "f7715b16a8be5c3f0f80189bf45cda6b8913d03472188a003b7df69ee61a8db1",
+      "url": "https://blockchain.info/rawtx/f7715b16a8be5c3f0f80189bf45cda6b8913d03472188a003b7df69ee61a8db1?format=hex",
+      "raw_sha256": "6f6d546bd4069b0a2490f191d86763b9cf13916b540d9a5270b6ee92ccdf927d"
+    },
+    {
+      "txid": "70ae8776710279880fd043697847cc320c1cd50ff750159b963473d35dc95d3a",
+      "url": "https://blockchain.info/rawtx/70ae8776710279880fd043697847cc320c1cd50ff750159b963473d35dc95d3a?format=hex",
+      "raw_sha256": "3d21b70f012315db70f723a56f95f12aece25107a789ee86886372b734dd5982"
+    },
+    {
+      "txid": "4e87a90883e0f484068c159dc9f11dbfbc93968263d3c061407fcf3113640021",
+      "url": "https://blockchain.info/rawtx/4e87a90883e0f484068c159dc9f11dbfbc93968263d3c061407fcf3113640021?format=hex",
+      "raw_sha256": "14e248ba6087b2d0d467dfa74fb48e39d071d2115a0d5185e4ab9767fbfa283d"
+    },
+    {
+      "txid": "476eb152048b35f59f1c7d76820001e354c69ec2d41548b7daf43b7b2d3ca9e8",
+      "url": "https://blockchain.info/rawtx/476eb152048b35f59f1c7d76820001e354c69ec2d41548b7daf43b7b2d3ca9e8?format=hex",
+      "raw_sha256": "ce8c9d689b246fe346fe15212400c1b3941c5f150c89072dcf213f99ca484ec7"
+    },
+    {
+      "txid": "8b27f8c1d199b1f9741e759ec9d98ff05ebb032e0091ebdcd3f284a13dc77196",
+      "url": "https://blockchain.info/rawtx/8b27f8c1d199b1f9741e759ec9d98ff05ebb032e0091ebdcd3f284a13dc77196?format=hex",
+      "raw_sha256": "b56d425907323a6dbf9306a313723dcf0756570f0a82ad9e96e6d1254b695f30"
+    },
+    {
+      "txid": "92dcca78882c7806d3f4d93407fd0686932eef7e7c292419ce571ecd82ac0b20",
+      "url": "https://blockchain.info/rawtx/92dcca78882c7806d3f4d93407fd0686932eef7e7c292419ce571ecd82ac0b20?format=hex",
+      "raw_sha256": "9c65808648c976bae0f9650fd9a2608f669b0b291011f530b0a494e007a65e67"
+    },
+    {
+      "txid": "a52fe3e8a31ec96b1aad27d10921fd94c7808701b7376d84d0e9fc806995e2ee",
+      "url": "https://blockchain.info/rawtx/a52fe3e8a31ec96b1aad27d10921fd94c7808701b7376d84d0e9fc806995e2ee?format=hex",
+      "raw_sha256": "c7f62caf3afe75d8c9dbf873b29da5602b3b6d98a000b4d227aa5282842386e2"
+    },
+    {
+      "txid": "d3e024e5a0ba056e33d2ee5cab1751bc32fb22dbeed60de9ed4382f9fbed48fb",
+      "url": "https://blockchain.info/rawtx/d3e024e5a0ba056e33d2ee5cab1751bc32fb22dbeed60de9ed4382f9fbed48fb?format=hex",
+      "raw_sha256": "a758481d13588d9109498c3a33763c8fa891ead8e525a481a8b158f8ed6c3bea"
+    }
+  ],
+  "records": [
+    {
+      "txid": "37e2e88eb36c2f8980842f1bdbc2b07cdf37ea4d204dc4bea537c57dc0217418",
+      "stratum": "early_marketplace",
+      "msigner_compatible": false,
+      "input_count": 4,
+      "raw_distinct_input_scripts": 2,
+      "matched_inputs": [
+        {
+          "input_index": 2,
+          "outpoint": "dfefd6205d6650fabd36c5fa6cf5aa9b02c55527df123f8f18756fb621408d24:0",
+          "raw_prevout_verified": true,
+          "direct_simple_reveal": {
+            "content_type": "text/plain;charset=utf-8",
+            "body_length": 58,
+            "body_sha256": "e809b2ea99ecd27c5e8791069f98c2685aa90a0b99e47e54be85ec0206eeba8f",
+            "sat_offset": 0,
+            "scope": "single-input single-output simple envelope; no pointer",
+            "brc20_declaration": {
+              "p": "brc-20",
+              "op": "transfer",
+              "tick": "biis",
+              "amt": "12000"
+            }
+          },
+          "commit_outpoint": "70ae8776710279880fd043697847cc320c1cd50ff750159b963473d35dc95d3a:0",
+          "asset_destination_vout": 1,
+          "asset_destination_differs_from_seller_script": true
+        }
+      ]
+    },
+    {
+      "txid": "8ccda354b03154589b1a9cb02ff5a079f5b49b9d585e19522bcfa47a2d5713a6",
+      "stratum": "early_marketplace",
+      "msigner_compatible": false,
+      "input_count": 4,
+      "raw_distinct_input_scripts": 2,
+      "matched_inputs": [
+        {
+          "input_index": 2,
+          "outpoint": "6b1ba744559e1f3c5db90cbd71fdfe3e6967961b142e712aea939a488a72d003:0",
+          "raw_prevout_verified": true,
+          "direct_simple_reveal": {
+            "content_type": "text/plain;charset=utf-8",
+            "body_length": 58,
+            "body_sha256": "6324749d6749ecb3ec5bbcd2985ecef243362b22aa5cf857c3d2a2f652e08743",
+            "sat_offset": 0,
+            "scope": "single-input single-output simple envelope; no pointer",
+            "brc20_declaration": {
+              "p": "brc-20",
+              "op": "transfer",
+              "tick": "ONFI",
+              "amt": "84113"
+            }
+          },
+          "commit_outpoint": "4e87a90883e0f484068c159dc9f11dbfbc93968263d3c061407fcf3113640021:0",
+          "asset_destination_vout": 1,
+          "asset_destination_differs_from_seller_script": true
+        }
+      ]
+    },
+    {
+      "txid": "bec8cdbfc25fbec5b49be7036037c51bd774918e3adef4b490d3086450a8aa45",
+      "stratum": "early_marketplace",
+      "msigner_compatible": true,
+      "input_count": 6,
+      "raw_distinct_input_scripts": 2,
+      "matched_inputs": [
+        {
+          "input_index": 2,
+          "outpoint": "1ef61dada046d8e7f67a1fc4baed621dd02f8377edc5926a98b4fd09c454224e:1",
+          "raw_prevout_verified": true,
+          "direct_simple_reveal": null
+        }
+      ]
+    },
+    {
+      "txid": "5c12909acf5ad44af4f3ce4e1def605f2619559b64cf9706f84c937ba753831e",
+      "stratum": "early_marketplace",
+      "msigner_compatible": true,
+      "input_count": 4,
+      "raw_distinct_input_scripts": 2,
+      "matched_inputs": [
+        {
+          "input_index": 2,
+          "outpoint": "261688e707442ffa5b9cbcb228d055fab002de7913a1ba0dc22d5878738361e0:0",
+          "raw_prevout_verified": true,
+          "direct_simple_reveal": null
+        }
+      ]
+    },
+    {
+      "txid": "fbd7cd5b7bd27b4506444dd1a878713cbc28d27ab2ff4ef835d3b021af4c95f6",
+      "stratum": "post_runes",
+      "msigner_compatible": false,
+      "input_count": 4,
+      "raw_distinct_input_scripts": 2,
+      "matched_inputs": [
+        {
+          "input_index": 2,
+          "outpoint": "a364611d7190cc49b5cb7840f612fc395dc5defec486de70c250d315a5754b19:0",
+          "raw_prevout_verified": true,
+          "direct_simple_reveal": {
+            "content_type": "text/plain;charset=utf-8",
+            "body_length": 65,
+            "body_sha256": "32c7a14a75ee1d072913a57edb25f489a0b04129965b6302ea4aa4d1b03c71a0",
+            "sat_offset": 0,
+            "scope": "single-input single-output simple envelope; no pointer",
+            "brc20_declaration": {
+              "p": "brc-20",
+              "op": "transfer",
+              "tick": "\ud835\udf2b",
+              "amt": "590000000000"
+            }
+          },
+          "commit_outpoint": "476eb152048b35f59f1c7d76820001e354c69ec2d41548b7daf43b7b2d3ca9e8:0",
+          "asset_destination_vout": 1,
+          "asset_destination_differs_from_seller_script": true
+        }
+      ]
+    },
+    {
+      "txid": "e81d86569ae8fe0ebbd9b3dfb01d7f42e16b21d529df23c9714102fe77ce49fb",
+      "stratum": "post_runes",
+      "msigner_compatible": false,
+      "input_count": 4,
+      "raw_distinct_input_scripts": 2,
+      "matched_inputs": [
+        {
+          "input_index": 2,
+          "outpoint": "c5529fa87a6459f3fdd06a91636d3343de9feb82a6ef004a42006649aec53608:0",
+          "raw_prevout_verified": true,
+          "direct_simple_reveal": {
+            "content_type": "text/plain;charset=utf-8",
+            "body_length": 55,
+            "body_sha256": "f8e53bf060984eaf9a6d18be36b37d6c6d17c6aa37d3418ed71b27158eca3ff6",
+            "sat_offset": 0,
+            "scope": "single-input single-output simple envelope; no pointer",
+            "brc20_declaration": {
+              "p": "brc-20",
+              "op": "transfer",
+              "tick": "beat",
+              "amt": "50"
+            }
+          },
+          "commit_outpoint": "8b27f8c1d199b1f9741e759ec9d98ff05ebb032e0091ebdcd3f284a13dc77196:0",
+          "asset_destination_vout": 1,
+          "asset_destination_differs_from_seller_script": true
+        }
+      ]
+    },
+    {
+      "txid": "282d36de3ce06ec5f937bf644e65c1df54c565f7c217713ee8c1a90eb237093d",
+      "stratum": "post_runes",
+      "msigner_compatible": true,
+      "input_count": 4,
+      "raw_distinct_input_scripts": 2,
+      "matched_inputs": [
+        {
+          "input_index": 2,
+          "outpoint": "f671cd310a443ae8cc919377674816c9c3a1c5666fde9172a30a64293d0607ef:0",
+          "raw_prevout_verified": true,
+          "direct_simple_reveal": {
+            "content_type": "image/webp",
+            "body_length": 532,
+            "body_sha256": "99c76a896a05453a856d5eac6da9a1d74c0658003e81838b302dd49df525833a",
+            "sat_offset": 0,
+            "scope": "single-input single-output simple envelope; no pointer"
+          },
+          "commit_outpoint": "92dcca78882c7806d3f4d93407fd0686932eef7e7c292419ce571ecd82ac0b20:0",
+          "asset_destination_vout": 1,
+          "asset_destination_differs_from_seller_script": true
+        }
+      ]
+    },
+    {
+      "txid": "2cc9871d10219e81dba163fd68acd948c0c0571ee05e21886c912ab4252dd3c8",
+      "stratum": "post_runes",
+      "msigner_compatible": true,
+      "input_count": 4,
+      "raw_distinct_input_scripts": 2,
+      "matched_inputs": [
+        {
+          "input_index": 2,
+          "outpoint": "8a4d2c2a956a2d44a9ab55fc37b5c8466226abed7e1d8e40eb5d9c566446d8cc:0",
+          "raw_prevout_verified": true,
+          "direct_simple_reveal": null
+        }
+      ]
+    },
+    {
+      "txid": "077bc72a40e3ff96e144ac99e964ce83b0164ac2edf43199dbb299c73ee0691c",
+      "stratum": "recent",
+      "msigner_compatible": false,
+      "input_count": 4,
+      "raw_distinct_input_scripts": 2,
+      "matched_inputs": [
+        {
+          "input_index": 2,
+          "outpoint": "632c4be8f06cf670bc161249c56ebea3a62a401478e4935f6a98ecf56ceb63d7:0",
+          "raw_prevout_verified": true,
+          "direct_simple_reveal": {
+            "content_type": "text/plain;charset=utf-8",
+            "body_length": 64,
+            "body_sha256": "f2129bd604c4d2b97f88a62d5de5eb393e6f81fc6ad8eaa3d17a22e27cb8b9fe",
+            "sat_offset": 0,
+            "scope": "single-input single-output simple envelope; no pointer",
+            "brc20_declaration": {
+              "p": "brc-20",
+              "op": "transfer",
+              "tick": "\ud835\uded1",
+              "amt": "15000000000"
+            }
+          },
+          "commit_outpoint": "a52fe3e8a31ec96b1aad27d10921fd94c7808701b7376d84d0e9fc806995e2ee:0",
+          "asset_destination_vout": 1,
+          "asset_destination_differs_from_seller_script": true
+        }
+      ]
+    },
+    {
+      "txid": "006835a8095450a8c2a932d06602a05ca93912bfd0cd43b76cda7f196b5a0ef4",
+      "stratum": "recent",
+      "msigner_compatible": false,
+      "input_count": 4,
+      "raw_distinct_input_scripts": 2,
+      "matched_inputs": [
+        {
+          "input_index": 2,
+          "outpoint": "759ad2250fd5598c2cd03fd53ebdb029a4dc9de40640b4d6a4681aeb47b03c53:0",
+          "raw_prevout_verified": true,
+          "direct_simple_reveal": {
+            "content_type": "text/plain;charset=utf-8",
+            "body_length": 63,
+            "body_sha256": "3ac6874e55f51f212f4d76c3d03c42cd82ddc7b5079acdf4a4ed413b4e0fb427",
+            "sat_offset": 0,
+            "scope": "single-input single-output simple envelope; no pointer",
+            "brc20_declaration": {
+              "p": "brc-20",
+              "op": "transfer",
+              "tick": "\ud835\uded1",
+              "amt": "9000000000"
+            }
+          },
+          "commit_outpoint": "d3e024e5a0ba056e33d2ee5cab1751bc32fb22dbeed60de9ed4382f9fbed48fb:0",
+          "asset_destination_vout": 1,
+          "asset_destination_differs_from_seller_script": true
+        }
+      ]
+    },
+    {
+      "txid": "307b06b3626fd256e7d6c6bfc0ef0b81b0c145b71e5c33e3acbc80aa8bb8c96b",
+      "stratum": "recent",
+      "msigner_compatible": true,
+      "input_count": 6,
+      "raw_distinct_input_scripts": 2,
+      "matched_inputs": [
+        {
+          "input_index": 2,
+          "outpoint": "478c71ffe9415ae9f51418d4723618c66d53bbfa1552f4c30066ef30e0ead7c9:3",
+          "raw_prevout_verified": true,
+          "direct_simple_reveal": null
+        }
+      ]
+    }
+  ]
+}
