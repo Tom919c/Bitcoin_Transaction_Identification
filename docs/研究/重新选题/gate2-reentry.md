@@ -2,7 +2,7 @@
 
 ## 决策目标
 
-最新状态（2026-08-31）：CP-13 有界第二实现取证未通过，暂停主线晋级；当前没有满足全部硬门的主方向。下文保留各阶段历史判断，最新依据见文末“第二实现证据包结果”。
+最新状态（2026-08-31）：CP-13 有界第二实现取证未通过，暂停主线晋级；当前没有满足全部硬门的主方向。新增数据优先轮次保留 U1“预测式 UTXO 状态管理的端到端净效用”进入全文与原生实现核验，不批准实验。找零识别 I1 与新 mempool 数据均未补齐当前硬门。下文保留历史判断，最新比较见文末。
 
 在不继承旧 EGS/GNN 叙事、也不复活已被反证方向的前提下，重新生成并比较可由现有资产或可合法获得的新数据直接证伪的研究问题。最终仍只输出一个主方向、两个替代方向和一个低风险 fallback；用户确认前不进入协议冻结或模型开发。
 
@@ -351,3 +351,56 @@ uv --cache-dir .uv-cache run --no-sync python scripts/scan_block_sighash.py --se
 独立只读复审再次重算得到相同的 103/49/54 分组，核对源码构造与验证侧常量，确认旧“严格默认模板”措辞过强。审查支持暂停裁决，同时明确不否定已经核验的结构与 witness 证据。历史文字中的模板解释已作显式更正，旧计数及冻结 JSON 不变。
 
 **Research Director 裁决**：有界材料包没有补齐预定的第二实现闭合主网语义链，触发停止条件。CP-13 改为 `parked pending semantic ground truth`；保留机制、666 个结构候选、7 个已锚定 reveal 和反例证据，停止扩大样本、过滤器工程和 component 效应实验。该决定是当前证据/资源条件下的选择，不是证明机制无价值、没有市场活动或文献已经完全解决问题。若未来出现可直接连接的第二实现官方工件或可审计历史资产索引，才重开；否则继续比较其他数据已可用的候选，不因已有投入降低门槛。
+
+## 数据优先候选轮次（2026-08-31）
+
+本轮从可直接观测的链上结果出发，先独立生成问题，再核对数据和最近邻。使用 ARS deep-research 的问题与来源核验路由；两个独立研究子任务分别检查 Bitcoin 原始链和相邻链任务，另由独立反方复核最有希望的候选。主代理重新核对决定性原文，不直接采用子代理建议。Skill inventory 检查提示过期，但清单已有用户修改，未覆盖；以运行时目录与现有清单交叉路由。本轮没有新增依赖、模型或正式实验。
+
+### 两条检索链与核验边界
+
+Undermind 的 [Bitcoin UTXO State Prediction and Systems Utility](https://app.undermind.ai/projects/a2287a58-4e9b-40b0-92fb-3ab66d3ea426?path=%2F01%20Discovery%2FBitcoin%20UTXO%20State%20Prediction%20and%20Systems%20Utility) 已完成，返回 45 条记录，已查看全部标题并对关键近邻取元数据。45 是该搜索返回数，不是去重后的新增论文数，更不是全文核验数。搜索目标是理解 UTXO 未来花费预测、节点缓存与验证效用，区分可由公开链重建的任务和依赖未记录 mempool 的任务；没有把“图特征一定有用”写成前提。
+
+独立链查询包括 `Bitcoin UTXO lifespan prediction caching`、`Predictive Caching for Bitcoin Core pdf`、`Gorka Pineda UTXO github`、`Bitcoin mempool raw transaction dataset first seen`、`change clustering Bitcoin time Möser`。优先作者机构、论文原文、官方仓库和数据卡；搜索摘要只作定位。两条链命中同一论文不算独立实验证据。未达到主题饱和，不宣布“首次”。
+
+### U1：预测式 UTXO 状态管理的端到端净效用
+
+- **RQ**：固定总内存与验证正确性时，预测式 UTXO 驻留策略在哪些实际工作负载下仍能降低节点的端到端验证成本？将预测/重训练、写缓冲挤占、批量刷盘和底层存储缓存计入后，策略收益或排序是否改变？这是待检验问题，不是已观察到的失败。
+- **直接近邻**：[Burgueño–Pérez-Solà, BCCA 2025](https://doi.org/10.1109/BCCA66705.2025.11229802)，机构元数据与摘要已核对；期刊会议全文尚未取得。作者在 [研究组说明](https://www.discrypt.cat/predictive-caching-for-bitcoin-core-enhancing-utxo-set-management-with-machine-learning/) 的 `Simulation Performance` 与 `Looking Ahead` 中描述决策树、200 MB 预测缓存加 250 MB 写缓存、60 万区块模拟及周期重训练，并将实际 Bitcoin Core 部署列作未来工作。该说明是作者一手解释，不替代论文全文，不能据此断言论文漏算了某项成本。
+- **另外两类近邻**：Niu et al. 2021，DOI `10.1109/GLOBECOM46510.2021.9685843`，目前仅元数据/摘要级，涉及未确认交易同步与预取；[Attar et al. 2025](https://arxiv.org/abs/2506.01614)，预印本，全文 §III.D/IV/V 明确使用 BSV 数据与分片分配指标，不能当作 BTC Core 缓存实测。后者使“利用花费关系做系统优化”不是空白，但不直接回答本 RQ。
+- **原生实现参照**：Bitcoin Core 官方 [coins.h](https://github.com/bitcoin/bitcoin/blob/master/src/coins.h) 的 DIRTY/FRESH 语义与 [tracing.md](https://github.com/bitcoin/bitcoin/blob/master/doc/tracing.md) 的 UTXO tracepoints 提示，不能把每次逻辑 lookup 都算成一次物理磁盘 I/O。这些为动态链接，尚未固定代码 revision 或完成端到端调用链审计。
+- **数据与场景**：创建、消费、金额、脚本和区块顺序可由已确认链重建，不需非法标签。初始同步/重放与在线 steady-state 必须分开；历史区块不能补出当时的未确认、无效或被替换交易流。原 252M entity graph 不足以直接重放 UTXO 缓存。
+- **最小下一步**：先取得关键论文全文/公开工件，并固定 Bitcoin Core revision，核对加载、消费、刷盘与内存记账的真实调用链；列出既有强基线和最小可重放窗口的存储需求。在此之前不写缓存模拟器，不下载全链，不训练模型。
+- **后续判别框架（未冻结、未执行）**：若文献与实现门通过，再比较原生策略、廉价年龄/近期规则与论文策略；在等内存下报告实际 wall time、CPU、读写字节和峰值内存，解释收益变化机制。只改变模型或重复旧 I/O 命中率曲线不构成贡献。
+- **理论边界**：预测收益减去计算与额外写盘成本只是记账恒等式，不是新定理。只有出现非平凡的可证条件、策略界或反例机制，并有真实工作负载支撑，才建立理论性质卡。
+- **停止条件**：最近邻已给出等价的完整成本边界；无法取得可审计基线；效应只是旧默认配置导致；或问题最终只剩“用新模型替换决策树”。当前仅批准证据核验，不认定具备顶会主贡献。
+
+### I1：带信息截止期的找零识别，暂不晋级
+
+独立候选提出比较确认高度 `h` 后不同 `Δ` 的找零识别能力。主代理核对 [Möser–Narayanan FC 2022](https://fc22.ifca.ai/preproceedings/87.pdf) §2、§3.3、附录 A/E：作者明确研究静态快照，按 base cluster 隔离切分，并已有不含未来花费指纹的 RF-2。不能把其回溯任务指责为偷偷使用未来信息；单独删除未来特征也不是新贡献。标签来自未来共花费启发式且样本有选择性，不等于独立所有权真值。
+
+公开 [数据仓库](https://github.com/maltemoeser/address-clustering-data) 只有 README 与 Drive 下载链接，未见显式数据许可。两个独立只读检查均获得 HTTP 206；主代理请求前 8,192 bytes，响应总长为 2,362,247,701 bytes。CSV 表头仅为 `txhash,change_output_idx`，不含高度、揭示时点、揭示交易或特征。没有下载完整文件或执行任何内容。该工件可定位标签，但不直接支持原先建议的“一天内分时间窗实验”；必须另行补链上时间与揭示事件。
+
+接受反方的标签循环、删失和总体外推风险，但修正一个术语：**预测覆盖率**（作出判断的交易数/全部合格交易数）本身可观测；未知真值妨碍的是总体 precision、recall 和正确覆盖，而非所有名为 coverage 的指标。即使把裁定时点放在 `h+Δ` 之后，也不会自动消除标签来源偏差。仅套用标准部分识别理论不满足创新要求。I1 暂不晋级；I2“未来实体闭包影响”并入既有 CP-02/CP-12 支撑审计，不换名重开。
+
+### 公开 mempool 数据：存在不等于足够
+
+主代理完整核对两个 DataForge 固定版本 README；Parquet 精确 schema 尚未核验，以下描述不得当作行级复现结果。
+
+| 工件 | 已核验来源与边界 | 对 M1 的作用 |
+|---|---|---|
+| [bitcoin-mempool-lifecycle](https://huggingface.co/datasets/dataforge-labs/bitcoin-mempool-lifecycle/tree/89fce77667edaf1712c7f47ba8c009b7fa860356) | ODC-BY；固定短窗口；e8 为交易生命周期，e9 为 pending-set 集合级比较。README 记录早期 dropped 采集缺陷及非平稳费率缺失；package 特征仅为一个节点的首次观测 | 未提供完整逐交易多独立观察者状态，不能补齐 M1 |
+| [bitcoin-network-propagation](https://huggingface.co/datasets/dataforge-labs/bitcoin-network-propagation/tree/95822ddd5e1751168f8f960a8a8d2b4439b8ef1b) | ODC-BY；约 120 个邻居的抽样 INV 到达事件，约 1/64 txid 抽样；不请求交易 body。目录窗口边界由子代理检查，尚未独立复算 | 邻居宣告不是各邻居完整 mempool；缺席不等于未持有。与 e8 能否按同一 key 连接尚未核验 |
+| [KIT Bitcoin 数据](https://www.dsn.kastel.kit.edu/bitcoin/data.html) | 官方公开 schema 为节点快照与传播汇总，CC-BY-4.0 | 不等于逐交易原始 mempool 档案 |
+| [anax32/bitcoin-mempool-data](https://github.com/anax32/bitcoin-mempool-data) | README 描述 ZMQ rawtx 记录、两份大日志与第二份额外时间字段；下载完整性与许可未核验 | 单点历史日志，不能直接当多独立视图或真实入池事件 |
+
+数据卡中的“某 peer 不转发就永远到不了矿工”与“祖先费率决定所有入块”均不能作为通用协议事实。不存在的交易 body、替换 lineage 或历史观察者不能用已确认链补齐；不同窗口采集缺陷也不能被解释为行为漂移。M1 保留原条件状态，不晋级。
+
+### 本轮排序与研究决定
+
+这里排序的是**下一份证据的获取优先级**，不是投稿问题排行榜：U1 优先全文/原生实现核验；I1 保留有界备选但暂不做实验；M1 等待满足逐交易观测条件的真实数据。CP-13 继续暂停；其已完成字节与 witness 工作不影响本轮排序。Ethereum 专属问题未被选为主方向，不静默改变 Bitcoin 核心边界。
+
+独立反方审查同意只让 U1 进入这道窄门，并要求将原生预取、写缓存与预测开销一并纳入，而不是与抽象 LRU 或过时默认配置比较。主代理接受此限制；具体当前预取实现、可插拔性和 tracepoint 归因尚待固定 revision 后亲自核验，不把子代理的动态源码观察写成已完成调用链审计。I1 反方意见中的 coverage 术语问题已按上文修正，体现独立审查同样需要复核。
+
+Undermind 定位映射：`Bur25` 对应 DOI `10.1109/BCCA66705.2025.11229802`；`Niu21` 对应 `10.1109/GLOBECOM46510.2021.9685843`；`Att25` 对应 `10.48550/arXiv.2506.01614`；`Lv22` 对应 `10.1109/ICBC54727.2022.9805558`。这些 cite keys 是发现/核验入口，不自动成为已核验 BibTeX 条目。本轮没有改变已有脏 `references.bib`，没有星标整批记录；运行时未发现可调用 Zotero connector，未声称已入本地文库。
+
+本轮结论没有给出一个已经通过创新、数据和判别实验门的主问题。下一步只关闭 U1 的关键近邻全文与真实系统语义缺口；若不能提出超越复现/配置比较的非平凡问题，则停止 U1，不为它搭建系统。工作继续处于 Gate 2，用户确认与 Gate 3A 均未发生。

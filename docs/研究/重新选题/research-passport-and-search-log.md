@@ -81,6 +81,8 @@
 
 | 日期 | 检索 | 状态 | 返回规模 | 用途 | 说明 |
 |---|---|---:|---:|---|---|
+| 2026-08-31 | Bitcoin UTXO State Prediction and Systems Utility | completed | 45 条发现记录 | 数据可重建的状态预测与真实节点效用 | 全部标题已查看；关键近邻取 DOI。不是 45 篇新增或全文已核验。独立链核对 BCCA 2025 作者机构和研究组说明；Attar 2025 原文数据为 BSV，不是 BTC Core 缓存实验 |
+| 2026-08-31 | Data-first change detection and mempool audit | bounded source audit completed | FC 2022 原文、8 KB CSV 表头、2 个固定 HF README、KIT 与旧日志说明 | 检验数据是否真能支持候选判别 | 找零 CSV 仅 `txhash,change_output_idx`，无显式许可；未来共花费标签不是独立真值。HF 仅短窗局部生命周期/INV，未补齐 M1。完整证据位置与反方修正见 gate2-reentry.md 文末 |
 | 2026-08-19 | Crypto Transaction Graph Research Problems | completed | 147 | 广域发现池 | 已移入 `/01 Discovery/`；摘要推荐尚未独立核验 |
 | 2026-08-19 | Dataset Label Task Validity | completed | 113 | 数据集、标签与任务有效性 | Undermind 深检；待逐篇核验 |
 | 2026-08-19 | Temporal Leakage Deployment Evaluation | completed | 112 | 时间评测、泄漏与跨域泛化 | Undermind 深检；待逐篇核验 |
@@ -136,6 +138,8 @@ CP-13 detector-v2 产物 SHA-256：`experiments/diagnostics/cp13_pilot_v1_detect
 - 当前 Undermind 深检与 PDF 调用仍受配额限制；失败调用不计入完成数。独立全文索引可用于正文定位，但最终证据优先回到正式 PDF、出版社 HTML 或官方数据说明。
 
 ## Zotero 长期文献库规则
+
+2026-08-31 数据优先轮次工具状态：Undermind 新的 UTXO 检索已完成且 45 条结果可读；随后读取旧决策文件与写入 `/03 Candidate Problems/data-readiness-round-2026-08-31.md` 遇到 connector/transport 错误，未确认远端快照写入成功。当前以本地 `gate2-reentry.md` 和 `decision-memo.md` 为准，恢复后先检查同名文件再重试，不重复创建深检。运行时工具发现没有返回可调用的 Zotero connector，本轮未导入；这不代表本机 Zotero 一定未运行。已有 `references.bib` 与技能清单的用户修改保持不动。
 
 目标顶层 collection：`Bitcoin Transaction Graph Research`。
 
