@@ -442,3 +442,55 @@
   url = {https://www.usenix.org/conference/usenixsecurity22/presentation/kappos},
   note = {Official metadata and full PDF sections 4, 4.1, 6, 7.2 and 8 checked 2026-09-01. Chainalysis supplied service-confirmed positive clusters and CoinJoin negative clusters; the paper evaluates cluster validation and change/peel expansion with wallet-behavior features. Private service truth is unavailable to this project, positives exclude individual users, and CoinJoin negatives do not by themselves evaluate protocol-valid Payjoin across implementations. No result reproduction or complete-paper reading claimed. Undermind mapping pending.}
 }
+
+@inproceedings{gavenda2025coinjoin_mappings,
+  title = {Analysis of Input-Output Mappings in Coinjoin Transactions with Arbitrary Values},
+  author = {Gavenda, Jiří and Svenda, Petr and Boboň, Stanislav and Sedlacek, Vladimir},
+  booktitle = {Computer Security -- ESORICS 2025},
+  pages = {126--146},
+  publisher = {Springer Nature Switzerland},
+  year = {2025},
+  doi = {10.1007/978-3-032-07901-5_7},
+  url = {https://arxiv.org/abs/2510.17284},
+  note = {Checked 2026-09-01: full-text sections 1, 2.1, 4 and 5.1-5.2. Formalizes fee-aware CoinJoin input-output mappings with implementation constraints and wallet behavior; validates enumerated coverage on 220 emulated transactions with known mappings. Direct prior for amount/role-mapping candidate N2. Selected-section reading only; no result reproduction. Undermind mapping pending.}
+}
+
+@inproceedings{maurer2017anonymous_coinjoin,
+  title = {Anonymous CoinJoin Transactions with Arbitrary Values},
+  author = {Maurer, Felix Konstantin and Neudecker, Till and Florian, Martin},
+  booktitle = {2017 IEEE Trustcom/BigDataSE/ICESS},
+  pages = {522--529},
+  publisher = {IEEE},
+  year = {2017},
+  doi = {10.1109/Trustcom/BigDataSE/ICESS.2017.280},
+  url = {https://publikationen.bibliothek.kit.edu/1000076291},
+  note = {Institutional metadata, author-hosted PDF abstract and section 1 checked 2026-09-01. Studies linkability, mapping enumeration and output splitting for arbitrary-value CoinJoin. Direct predecessor of later input-output mapping methods; selected-part reading only and no experiment reproduction. Undermind mapping pending.}
+}
+
+@misc{payjoin2026tx_indexer,
+  title = {tx-indexer: Transaction Indexing and Privacy Analysis Framework},
+  author = {{Payjoin Development Team}},
+  year = {2026},
+  url = {https://github.com/payjoin/tx-indexer/tree/b0ccf7a47e08a7fb9e04f6408364da9f8cd0c4ca},
+  note = {Public MIT-licensed software inspected at fixed commit b0ccf7a47e08a7fb9e04f6408364da9f8cd0c4ca on 2026-09-01. README, LICENSE, btsim wallet/action/economic-graph/metrics code, heuristic implementations and partitions code checked. Contains wallet ownership and payment-obligation state, collaborative transaction roles, common-input/change heuristics, fingerprints, input-output partitions and privacy metrics. No published accuracy result or independent real-wallet truth is inferred from code presence.}
+}
+
+@misc{lin2025risktagger,
+  title = {{RISKTAGGER}: Evidence-Guided {LLM} Agent for Post-Incident Forensic Analysis of Money Laundering in {Web3}},
+  author = {Lin, Dan and Ding, Yanli and Zou, Weipeng and Wu, Jiajing and Wu, Zhiyin and Chen, Jiachi and Luo, Xiapu and Zheng, Zibin},
+  year = {2025},
+  eprint = {2510.17848},
+  archivePrefix = {arXiv},
+  url = {https://arxiv.org/abs/2510.17848},
+  note = {ArXiv version 2 revised 2026-07-11; current title, author list and version history checked 2026-09-01. Full-text sections 4.1, 4.3 and 5.3-5.4 checked. Extracts incident clues, traces multichain flows and generates evidence-organized reports. It does not define a Bitcoin atomic-claim three-way verification benchmark or an independent replay certificate. No result reproduction. Undermind mapping pending.}
+}
+
+@inproceedings{xu2019vchain,
+  title = {vChain: Enabling Verifiable Boolean Range Queries over Blockchain Databases},
+  author = {Xu, Cheng and Zhang, Ce and Xu, Jianliang},
+  booktitle = {Proceedings of the 2019 International Conference on Management of Data},
+  year = {2019},
+  pages = {141--158},
+  url = {https://arxiv.org/abs/1812.02386},
+  note = {Full-text sections 1 and 3 plus security/evaluation conclusions checked 2026-09-01. Provides authenticated-data-structure verification objects for outsourced blockchain Boolean range queries. It verifies query integrity, not the semantic scope or external truth of a natural-language Bitcoin investigation claim. DOI pending primary metadata check; no result reproduction. Undermind mapping pending.}
+}
