@@ -502,3 +502,98 @@
   url = {https://github.com/payjoin/rust-payjoin/issues/1597},
   note = {Project implementation issue opened 2026-06-02 and inspected 2026-09-01; closed at inspection time. Compares six integrations, reports five converging on nSequence 0xFFFFFFFD and a known Cake Wallet sequence behavior, and discusses conformance policies, sender validation and the limit that pre-broadcast checks cannot remove fingerprints already present in input histories. It is not peer-reviewed and does not provide the held-out multi-attribute privacy-effect benchmark proposed as conditional candidate M'.}
 }
+
+@misc{payjoin2026relay_fingerprint_issue,
+  title = {Relay-Observable Behavioral Fingerprinting Across Payjoin Integrations},
+  author = {{Payjoin Development Team}},
+  year = {2026},
+  url = {https://github.com/payjoin/rust-payjoin/issues/1586},
+  note = {Project implementation issue inspected 2026-09-01. Audits poll cadence, relay selection, retry policy and key-fetch frequency across six integrations and proposes shared policy functions. It is not peer-reviewed and does not itself provide the held-out privacy-utility benchmark considered here.}
+}
+
+@misc{payjoin2026locktime_issue,
+  title = {Anti-Fee-Sniping nLockTime Diverges Across Payjoin Integrations},
+  author = {{Payjoin Development Team}},
+  year = {2026},
+  url = {https://github.com/payjoin/rust-payjoin/issues/1676},
+  note = {Project implementation issue inspected 2026-09-01. Compares nLockTime behavior across Core/Electrum, Liana, payjoin-cli/ldk-node/NDK, Cake and Boltz and discusses target anonymity sets and fixes. Open issue status is time-sensitive; no independent empirical privacy result is inferred.}
+}
+
+@article{he2026mbal,
+  title = {{MBAL}: A 10-Million Annotated Crypto Address Dataset Across Leading Blockchains},
+  author = {He, Jiahao and Yang, Sen and Dong, Yi and Jiang, Ruiying and Pan, Ziling and Chen, Ting and Song, Shuwei and Luo, Xiapu and Chen, Jiachi and Zhang, Yi},
+  journal = {Blockchain: Research and Applications},
+  year = {2026},
+  pages = {100555},
+  doi = {10.1016/j.bcra.2026.100555},
+  url = {https://doi.org/10.1016/j.bcra.2026.100555},
+  note = {Publisher abstract source-verified 2026-09-01. Kaggle version 1 metadata and the master/Bitcoin experiment files were downloaded under CC0 and audited at fixed SHA-256 values recorded in the candidate memo. Two independent parsers found 413 non-empty entity strings in the public master table; this is an artifact count and is not asserted to refute the paper's 933-entity statistic without resolving version and counting semantics. Undermind mapping pending.}
+}
+
+@inproceedings{lin2019address_entity,
+  title = {An Evaluation of Bitcoin Address Classification Based on Transaction History Summarization},
+  author = {Lin, Yu-Jing and Wu, Po-Wen and Hsu, Chih-Hung and Tu, I-Ping and Liao, Shih-Wei},
+  booktitle = {2019 IEEE International Conference on Blockchain and Cryptocurrency (ICBC)},
+  pages = {302--310},
+  year = {2019},
+  doi = {10.1109/BLOC.2019.8751410},
+  url = {https://doi.org/10.1109/BLOC.2019.8751410},
+  note = {Undermind full PDF sections V-VI and Tables II/IV checked 2026-09-01. Address and entity prediction are separate ten-fold tasks; the address task does not report an entity-disjoint split. No result reproduction. Undermind Lin19.}
+}
+
+@article{zola2022entity,
+  title = {Attacking Bitcoin Anonymity: Generative Adversarial Networks for Improving Bitcoin Entity Classification},
+  author = {Zola, Francesco and Segurola-Gil, Lander and Bruse, Jan L. and Galar, Mikel and Orduna-Urrutia, Raul},
+  journal = {Applied Intelligence},
+  volume = {52},
+  pages = {17289--17314},
+  year = {2022},
+  doi = {10.1007/s10489-022-03378-7},
+  url = {https://doi.org/10.1007/s10489-022-03378-7},
+  note = {Undermind full PDF sections 4.1-4.2 and Figures 4/9 checked 2026-09-01. The address dataframe is split 50/50 with class stratification; no entity-disjoint evaluation is reported. GAN resampling is fitted on training data. No result reproduction. Undermind Zol22.}
+}
+
+@article{arnold2024motifs,
+  title = {Insights and Caveats from Mining Local and Global Temporal Motifs in Cryptocurrency Transaction Networks},
+  author = {Arnold, Naomi A. and Zhong, Peijie and Ba, Cheick Tidiane and Steer, Ben and Mondragon, Raul and Cuadrado, Felix and Lambiotte, Renaud and Clegg, Richard G.},
+  journal = {Scientific Reports},
+  volume = {14},
+  pages = {26569},
+  year = {2024},
+  doi = {10.1038/s41598-024-75348-7},
+  url = {https://doi.org/10.1038/s41598-024-75348-7},
+  note = {Full-text result inherited from the separately audited research corpus: same-block order is randomized subject to UTXO dependencies and motif-count sensitivity is measured. Direct counterevidence to a broad within-block-order novelty claim; model ranking remains a narrower unverified residual.}
+}
+
+@inproceedings{niu2021utxo_cache,
+  title = {Prediction-Based UTXO Cache Optimization for Bitcoin Lightweight Full Nodes},
+  author = {Niu, Yukun and Li, Haixing and Zhang, Chi and Wei, Lingbo},
+  booktitle = {2021 IEEE Global Communications Conference (GLOBECOM)},
+  pages = {1--6},
+  year = {2021},
+  doi = {10.1109/GLOBECOM46510.2021.9685843},
+  url = {https://doi.org/10.1109/GLOBECOM46510.2021.9685843},
+  note = {Official metadata and abstract checked 2026-09-01; full text and artifact were not obtained. Uses unconfirmed-transaction synchronization and prediction-based UTXO preloading for lightweight full nodes. Undermind Niu21.}
+}
+
+@inproceedings{lv2022esum,
+  title = {{ESUM}: An Efficient UTXO Schedule Model},
+  author = {Lv, Meilin and Wei, Kang and Kao, Henry and Sun, Huiping and Chen, Zhong},
+  booktitle = {2022 IEEE International Conference on Blockchain and Cryptocurrency (ICBC)},
+  pages = {1--3},
+  year = {2022},
+  doi = {10.1109/ICBC54727.2022.9805558},
+  url = {https://doi.org/10.1109/ICBC54727.2022.9805558},
+  note = {Official metadata and abstract checked 2026-09-01; full text and artifact were not obtained. Applies machine learning to UTXO scheduling and reports memory reduction; exact experimental boundary remains unverified. Undermind Lv22.}
+}
+
+@inproceedings{burgueno2025predictive_cache,
+  title = {Predictive Caching for Bitcoin Core: Enhancing UTXO Set Management with Machine Learning},
+  author = {Pineda Burgue{\~n}o, Gorka and P{\'e}rez-Sol{\`a}, Cristina},
+  booktitle = {2025 7th International Conference on Blockchain Computing and Applications (BCCA)},
+  pages = {53--58},
+  year = {2025},
+  doi = {10.1109/BCCA66705.2025.11229802},
+  url = {https://doi.org/10.1109/BCCA66705.2025.11229802},
+  note = {Institutional metadata, official abstract and author-group technical description checked 2026-09-01; full paper and code were not obtained. Reports an 18.62 percent average disk-access reduction in historical simulations. Whether the study covers real Bitcoin Core end-to-end cost under equal total memory remains unverified. Undermind Bur25.}
+}
