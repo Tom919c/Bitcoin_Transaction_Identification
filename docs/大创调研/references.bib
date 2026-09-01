@@ -351,3 +351,83 @@
   keywords = {innovation-project, threat-intelligence, source-verified},
   note = {Official publication metadata and PDF sections 3, 5 and 8 checked 2026-09-01. Studies source/vetting processes and longitudinal defensive interventions for a domain blocklist; reports collection gaps and reliance on scanner classifications. Does not supply Bitcoin attribution truth or prove that a later intervention was caused by publication. No experimental reproduction. Undermind mapping not yet assigned.}
 }
+
+@inproceedings{garg2022atc,
+  title = {Leveraging Unlabeled Data to Predict Out-of-Distribution Performance},
+  author = {Garg, Saurabh and Balakrishnan, Sivaraman and Lipton, Zachary C. and Neyshabur, Behnam and Sedghi, Hanie},
+  booktitle = {International Conference on Learning Representations},
+  year = {2022},
+  url = {https://arxiv.org/abs/2201.04234},
+  eprint = {2201.04234},
+  archivePrefix = {arXiv},
+  note = {Checked 2026-09-01: author PDF labeled ICLR 2022, sections 3.1 and 4 and Appendix A Proposition 1 proof. Accuracy-estimation identifiability statement concerns arbitrary classifiers, not a necessary condition for every single fixed classifier. ATC fits a source-validation confidence threshold; no universal shift guarantee. Target-label evaluation is not deployment-time label access. No experiment reproduction or complete-paper reading claimed. Undermind mapping pending.}
+}
+
+@inproceedings{lipton2018bbse,
+  title = {Detecting and Correcting for Label Shift with Black Box Predictors},
+  author = {Lipton, Zachary C. and Wang, Yu-Xiang and Smola, Alexander J.},
+  booktitle = {Proceedings of the 35th International Conference on Machine Learning},
+  series = {Proceedings of Machine Learning Research},
+  volume = {80},
+  pages = {3122--3130},
+  year = {2018},
+  url = {https://proceedings.mlr.press/v80/lipton18a.html},
+  note = {Official metadata and PDF section 3 assumptions A.1-A.3 and section 4 checked 2026-09-01. Requires unchanged class-conditional inputs, source coverage of target classes and an invertible confusion matrix for the stated estimator. Not a guarantee under arbitrary graph or concept shift. Selected-section reading only; no experiment reproduction. Undermind mapping pending.}
+}
+
+@article{han2026feature_gated,
+  title = {Illicit Bitcoin Transaction Detection via Feature-Gated Temporal Graph Learning},
+  author = {Han, Na and Zhang, Ruixian and Liu, Xiaoyun and Zhang, Haining},
+  journal = {Scientific Reports},
+  volume = {16},
+  pages = {22352},
+  year = {2026},
+  doi = {10.1038/s41598-026-53783-y},
+  url = {https://pmc.ncbi.nlm.nih.gov/articles/PMC13376432/},
+  note = {Published 2026-05-17. Checked 2026-09-01: introduction, model/training description and Figure 4 temporal drift discussion. Already combines residual attribute evidence with node-wise gated temporal graph evidence. PHT is applied to test-timestep illicit F1, which requires labels; not an unlabeled prospective warning experiment. No result reproduction or complete-paper reading claimed. Undermind Han26; DISC-106.}
+}
+
+@inproceedings{thorne2018fever,
+  title = {FEVER: a Large-scale Dataset for Fact Extraction and VERification},
+  author = {Thorne, James and Vlachos, Andreas and Christodoulopoulos, Christos and Mittal, Arpit},
+  booktitle = {Proceedings of NAACL-HLT 2018, Volume 1 (Long Papers)},
+  pages = {809--819},
+  year = {2018},
+  publisher = {Association for Computational Linguistics},
+  doi = {10.18653/v1/N18-1074},
+  url = {https://aclanthology.org/N18-1074/},
+  note = {Official metadata and PDF sections 3.2, 3.4 and 5.2 checked 2026-09-01. Three-way claim verification with evidence evaluation already exists. Wikipedia evidence semantics do not supply Bitcoin chain facts or real-world guilt labels. Selected-section reading only; no experiment reproduction. Undermind mapping pending.}
+}
+
+@article{darari2018completeness,
+  title = {Completeness Management for RDF Data Sources},
+  author = {Darari, Fariz and Nutt, Werner and Pirrò, Giuseppe and Razniewski, Simon},
+  journal = {ACM Transactions on the Web},
+  volume = {12},
+  number = {3},
+  pages = {18:1--18:53},
+  year = {2018},
+  doi = {10.1145/3196248},
+  url = {https://www.inf.unibz.it/~nutt/Publications/18-compl-tweb.pdf},
+  note = {Author-hosted full text, introduction and section 2 definitions 2.1-2.3 checked 2026-09-01. Query completeness and timestamped completeness statements are prior work; available-graph-subset-of-ideal-graph semantics assumes correctness of available facts. Does not verify a Bitcoin label source or provide an unconditional absence certificate. Selected-section reading only. Undermind mapping pending.}
+}
+
+@inproceedings{silva2026prioritization,
+  title = {Efficient Money Laundering Detection through Graph-Based Prioritization},
+  author = {Silva, André da Costa and Lima de Castro, Paulo André},
+  booktitle = {Proceedings of the 28th International Conference on Enterprise Information Systems, Volume 1},
+  pages = {662--672},
+  publisher = {SciTePress},
+  year = {2026},
+  doi = {10.5220/0014832100004018},
+  url = {https://doi.org/10.5220/0014832100004018},
+  note = {Publisher metadata and abstract checked 2026-09-01. Describes transaction ranking, top-budget connected cases and contextual induction evaluated on AMLSim. Full-text download presented CAPTCHA and was not bypassed; implementation details and results not interpretation-verified. Publisher pagination 662-672 used instead of conflicting author-index 660-670. Undermind Sil26; DISC-071.}
+}
+
+@misc{sabouri2026payjoin_fingerprints,
+  title = {How Wallet Fingerprints Damage Payjoin Privacy},
+  author = {Sabouri, Armin},
+  year = {2026},
+  url = {https://payjoin.org/blog/2026/03/25/wallet-fingerprints-payjoin-privacy},
+  note = {Project-author technical blog dated by site path and source filename 2026-03-25; not peer-reviewed. Entire extracted article read 2026-09-01, especially examples 1-3. Discusses wallet fingerprints, input/output partitions, inferred payment amounts and subsequent-spend evidence. Illustrations are not independently verified ownership ground truth; output-spend information is unavailable at transaction creation. Contains a potentially inconsistent role mapping in example 3, so its specific assignments are not adopted. No firstness or empirical reliability claim follows. Undermind mapping pending.}
+}
