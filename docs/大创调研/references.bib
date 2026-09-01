@@ -519,6 +519,61 @@
   note = {Project implementation issue inspected 2026-09-01. Compares nLockTime behavior across Core/Electrum, Liana, payjoin-cli/ldk-node/NDK, Cake and Boltz and discusses target anonymity sets and fixes. Open issue status is time-sensitive; no independent empirical privacy result is inferred.}
 }
 
+@inproceedings{albrecht2026mempool_auditing,
+  title = {On the Effectiveness of Mempool-based Transaction Auditing},
+  author = {Albrecht, Jannik and Karame, Ghassan O.},
+  booktitle = {Proceedings of the ACM Web Conference 2026},
+  pages = {2983--2994},
+  year = {2026},
+  doi = {10.1145/3774904.3792404},
+  url = {https://doi.org/10.1145/3774904.3792404},
+  note = {Official ACM metadata, full PDF sections 3-6 and artifact README checked 2026-09-01. Main Bitcoin campaign uses 16 geographic observers for about 196 hours. Released CC BY-NC 4.0 CSV contains transaction hashes and observer timestamps, not raw transactions, fee/package/conflict or local-acceptance fields. No result reproduction. Undermind: Alb26 and Albrecht26 refer to the same paper in separate searches.}
+}
+
+@inproceedings{yang2021fluffy,
+  title = {Finding Consensus Bugs in Ethereum via Multi-transaction Differential Fuzzing},
+  author = {Yang, Youngseok and Kim, Taesoo and Chun, Byung-Gon},
+  booktitle = {15th USENIX Symposium on Operating Systems Design and Implementation (OSDI 21)},
+  pages = {349--365},
+  publisher = {USENIX Association},
+  year = {2021},
+  url = {https://www.usenix.org/conference/osdi21/presentation/yang},
+  note = {Official USENIX metadata and abstract checked 2026-09-01. Fluffy differentially executes multi-transaction Ethereum cases across independent clients and released code. It is a methodological neighbor, not evidence of Bitcoin Core mempool-policy equivalence. Full method and results not re-audited in this round. Undermind: Yan21.}
+}
+
+@inproceedings{groce2022bitcoin_fuzzing,
+  title = {Looking for Lacunae in Bitcoin Core's Fuzzing Efforts},
+  author = {Groce, Alex},
+  booktitle = {2022 IEEE/ACM 44th International Conference on Software Engineering: Software Engineering in Practice (ICSE-SEIP)},
+  pages = {185--186},
+  year = {2022},
+  doi = {10.1145/3510457.3513072},
+  url = {https://doi.org/10.1145/3510457.3513072},
+  note = {DOI and publication metadata verified 2026-09-01. Retrieved evidence concerns Bitcoin Core fuzzing coverage, not a version/configuration/state transaction-acceptance matrix. Full text not obtained in this round. Undermind: Gro22.}
+}
+
+@inproceedings{kim2025forky,
+  title = {Fork State-Aware Differential Fuzzing for Blockchain Consensus Implementations},
+  author = {Kim, Wonhoi and Nam, Hocheol and Tran, Muoi and Jalilov, Amin and Liang, Zhenkai and Cha, Sang Kil and Kang, Min Suk},
+  booktitle = {2025 IEEE/ACM 47th International Conference on Software Engineering (ICSE)},
+  pages = {3048--3059},
+  year = {2025},
+  doi = {10.1109/ICSE55347.2025.00085},
+  url = {https://doi.org/10.1109/ICSE55347.2025.00085},
+  note = {DOI, title, complete author list, venue and pagination verified 2026-09-01 against the author-hosted full text and official proceedings metadata. Current evidence identifies fork-state consensus differential testing including Bitcoin as adjacent work; it does not study the proposed mempool-policy RPC/submission matrix. Undermind: Kim25d.}
+}
+
+@inproceedings{zheng2023bshunter,
+  title = {{BSHUNTER}: Detecting and Tracing Defects of Bitcoin Scripts},
+  author = {Zheng, Peilin and Luo, Xiapu and Zheng, Zibin},
+  booktitle = {2023 IEEE/ACM 45th International Conference on Software Engineering (ICSE)},
+  pages = {307--318},
+  year = {2023},
+  doi = {10.1109/ICSE48619.2023.00037},
+  url = {https://doi.org/10.1109/ICSE48619.2023.00037},
+  note = {Official DOI metadata and abstract checked 2026-09-01. BSHUNTER defines six Bitcoin Script defect classes, uses symbolic execution and traces historical exploitation. It directly covers generic script-defect discovery but not the proposed versioned mempool-policy acceptance matrix. Full text and artifact not obtained in this round. Undermind: Zhe23.}
+}
+
 @article{he2026mbal,
   title = {{MBAL}: A 10-Million Annotated Crypto Address Dataset Across Leading Blockchains},
   author = {He, Jiahao and Yang, Sen and Dong, Yi and Jiang, Ruiying and Pan, Ziling and Chen, Ting and Song, Shuwei and Luo, Xiapu and Chen, Jiachi and Zhang, Yi},
