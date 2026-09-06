@@ -1,0 +1,105 @@
+# 冲刺一预注册（冻结于任何训练运行之前）
+# 依据：docs/大创调研/bridge/result-20260906-01.md + adoption-20260906-01.md
+# 冻结时间：2026-09-06（本地时间）。冻结后修改本文件必须新增版本并说明原因。
+
+prereg:
+  id: sprint1-20260906
+  packet_id: btc-expcampaign-20260906-01
+  branch: experiment-campaign
+  written_before_any_training_run: true
+
+protocols:
+  primary: data/processed/protocols/temporal_balanced_no_temporal.pt
+  mechanism_auxiliary: data/processed/protocols/class_balanced_khop_no_temporal.pt
+  frozen_reference_note: >
+    历史冻结 temporal EGS=0.2565 来自 temporal_balanced.pt（含时间边特征），
+    与本冲刺主协议 temporal_balanced_no_temporal 不同；因此历史 0.2565 只作背景参考，
+    所有 delta 只相对本冲刺的 E0 匹配基线计算。
+
+frozen_training_config:   # 与既有 EGS 完全一致，不得更改
+  hidden_channels: 128
+  num_layers: 3
+  dropout: 0.3
+  edge_hidden: 64
+  use_direction: true
+  lr: 0.001
+  weight_decay: 0.0005
+  loss: weighted_ce
+  class_weight_power: 1.0
+  class_weight_cap: 10.0
+  grad_clip_norm: 1.0
+  epochs_full: 200
+  patience_full: 50
+  epochs_screen: 80        # 仅 A1/A2/A3 快筛
+  patience_screen: 20
+  epochs_smoke: 2
+  seeds: [42, 3407, 1234]
+  device_default: cpu
+
+environment_split:        # 仅 A3；只用 train 内 labeled 节点
+  time_field: node_time
+  n_envs: 3
+  boundaries: labeled_train_quantiles_[0.3333, 0.6667]
+  val_test_participate: false
+  edge_index_modified: false
+
+vrex:
+  lambda_candidates: [0.1, 0.3, 1.0]
+  selection: val_only_seed42_screen80
+  variance: population_unbiased_false
+
+model_variants:
+  A0_egs: 现有 EdgeGatedSAGE（registry），h=g
+  A1_resegs: h = LN(s + g)，s 为 node-only self branch
+  A2_resegs: h = LN(s + alpha_i * g)，alpha 为节点级标量门控（输入仅 LN(s),LN(g),|LN(s)-LN(g)|）
+  A3_dg_resegs: A2 + 三环境 V-REx
+  E1_dir_sage: 入/出分离均值聚合，无边特征无边门控，层数=3 与 EGS 一致
+
+primary_metric: macro_f1
+secondary_metrics: [weighted_f1, per_class_f1, conservative_AUPRC, conservative_AUROC, conservative_recall_at_1pct, conservative_recall_at_5pct]
+temporal_watch_classes: [GAMBLING, EXCHANGE, MARKETPLACE, BRIDGE]
+
+decision_rules:
+  screen_no_go: 某阶段 seed42 val Macro-F1 相对 epoch-matched A0 下降超过 0.01 → 该结构淘汰
+  stability_warning: E0 三 seed val Macro-F1 标准差 > 0.03 → 后续 < +0.03 的改进不得解释为可靠结构增益
+  dg_go_val:
+    mean_delta_val_macro_f1: ">= +0.020"
+    positive_seeds: ">= 2/3"
+    watch_class_guard: GAMBLING/EXCHANGE/MARKETPLACE/BRIDGE 中 F1 相对下降 >0.05 的类别数 <= 1
+    conservative_guard: Conservative AUPRC 下降 <= 0.02
+  headline_claim_test:
+    mean_delta_test_macro_f1: ">= +0.03 相对本冲刺 E0 三种子匹配基线"
+  temporal_robustness_claim:
+    delta_f1_latest_slice: "> 0"
+    positive_slices: ">= 2/3"
+  calibration_go:
+    ece_relative_drop: ">= 20%"
+    or_brier_absolute_drop: ">= 0.005"
+    argmax_invariance: 温度缩放后 argmax 变化比例约 0（单调变换应不变，实测验证）
+    aurc_guard: 恶化 <= 0.002
+  dir_sage_interpretation:
+    beats_sage_by: "temporal val >= +0.03 → 方向建模跨协议有效（GO）"
+    within_egs_by: "<= 0.02 → EGS edge gating 不再作为核心创新主张"
+    egs_leads_by: "EGS 领先 Dir-SAGE >= 0.03 且 Dir-SAGE ≈ SAGE → EGS 增益不能由简单方向拆分解释"
+  gbdt_discrimination:
+    gbdt_ge_egs_by: "+0.03 → 暂停 DG 扩张，先查特征稳定性"
+    gbdt_le_egs_by: "-0.03 → 图结构仍有效，继续 DG-ResEGS"
+    within: "+/-0.03 → 继续但结论不得归因于纯拓扑"
+
+test_discipline:
+  development: 只记录 train/val；test 在 --final-test 分支才读取
+  final_test: 配置完全冻结后一次性运行，运行配置记录 final_test=true
+  mixer_claims: 单类结论必须带 bootstrap CI
+  headline_seeds: ">= 3"
+
+mixer_bootstrap:
+  n_resamples: 2000
+  confidence: 0.95
+  unit: test 节点有放回重采样
+
+deliverables:
+  - experiments/campaign/runs/ 下逐 run 产物（config/history/predictions/metrics）
+  - experiments/campaign/registry_addendum.csv 实验登记补充
+  - scripts/temporal_diagnostics.py 的 E4 报告
+  - scripts/evaluate_calibration.py 的校准/拒判报告
+  - 答辩三表三图（表1 性能、表2 可信度、图1 reliability、图2 risk-coverage、图3 temporal slices）

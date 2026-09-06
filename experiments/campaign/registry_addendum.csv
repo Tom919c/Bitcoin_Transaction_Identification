@@ -1,0 +1,7 @@
+run_id,question,protocol_version,data,split,feature_cutoff,model,baseline,seeds,budget,metrics,prereg,expected_discrimination_condition,status,commit
+sprint1-E0,建立temporal协议下EGS三种子匹配锚点（no_temporal变体）,sprint1-20260906,temporal_balanced_no_temporal.pt,protocol classwise_temporal,同协议,sprint1_prereg.yaml;三种子42/3407/1234;200ep;patience50;weighted_ce,无（锚点本身）,val-first;final-test一次性,待运行
+sprint1-E1,Dir-SAGE方向基线：EGS增益来自方向分离还是边门控,sprint1-20260906,temporal_balanced_no_temporal.pt,protocol classwise_temporal,同协议,src/btcaml/ext/dir_sage.py;3层;无边特征;200ep,mlp/sage冻结结果;EGS(E0),三种子42/3407/1234,val-first;final-test一次性,待运行
+sprint1-E2,GBDT节点特征诊断：temporal崩溃是否特征漂移主导,sprint1-20260906,temporal_balanced_no_temporal.pt,protocol classwise_temporal,同节点27维特征,scripts/run_tabular_baseline.py;LightGBM冻结超参,EGS(E0)与SAGE冻结结果,三种子42/3407/1234,val-first;final-test一次性,待运行
+sprint1-E3,DG-ResEGS消融链A0-A3：self残差/门控/三环境V-REx,sprint1-20260906,temporal_balanced_no_temporal.pt,protocol classwise_temporal,同协议,src/btcaml/ext/dg_resegs.py;V-REx lambda∈{0.1,0.3,1.0},A0=EGS匹配基线,快筛seed42×80ep;晋级三种子×200ep,val-first;final-test一次性,待运行
+sprint1-E4,val三时间slice鲁棒性诊断（ΔF1_latest>0且≥2/3 slice为正才可称时间鲁棒）,sprint1-20260906,val split only,node_time排序,无训练,scripts/temporal_diagnostics.py,EGS vs DG winner,复用已训模型,val-only,待运行
+sprint1-E5,校准与拒判（单一全局温度val-only;ECE/classwise-ECE/Brier/AURC;risk≤5/10/20%阈值）,sprint1-20260906,val+guarded test,best.pt重载,无训练,scripts/evaluate_calibration.py,raw vs calibrated;EGS vs DG winner,复用已训模型,val-first;test一次性,待运行
