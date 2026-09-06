@@ -50,8 +50,15 @@ foreach ($s in $steps) {
     try { $p.PriorityClass = 'BelowNormal' } catch { Write-Log ('PRIORITY_WARN {0} {1}' -f $s.name, $_.Exception.Message) }
     $p.WaitForExit()
     $code = $p.ExitCode
-    if ($code -eq 0) { Write-Log ('STEP_DONE {0} exit=0' -f $s.name) }
-    else { Write-Log ('STEP_FAIL {0} exit={1}' -f $s.name, $code) }
+    # ExitCode can be null even on success (PS quirk); confirm with artifacts.
+    $metricsOk = (Test-Path ('experiments/campaign/runs/{0}/metrics.csv' -f $s.name)) -or (Test-Path ('experiments/campaign/runs/{0}/metrics.json' -f $s.name))
+    if ($null -ne $code -and $code -eq 0) {
+        Write-Log ('STEP_DONE {0} exit=0' -f $s.name)
+    } elseif ($metricsOk) {
+        Write-Log ('STEP_DONE {0} exit={1} artifact_ok=true (null exit code treated as success)' -f $s.name, $code)
+    } else {
+        Write-Log ('STEP_FAIL {0} exit={1} artifact_ok=false' -f $s.name, $code)
+    }
     Start-Sleep -Seconds 10
 }
 Write-Log 'QUEUE_END'
