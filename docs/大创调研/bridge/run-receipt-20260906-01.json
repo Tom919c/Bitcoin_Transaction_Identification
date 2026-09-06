@@ -1,0 +1,77 @@
+{
+  "schema_version": 2,
+  "packet_id": "btc-expcampaign-20260906-01",
+  "artifacts": {
+    "packet": {
+      "path": "docs/大创调研/bridge/packet-20260906-01.md",
+      "sha256": "323eb52616bf7be630c8cab1bf80b889a1a6add367b9a752c9f892767003370f",
+      "approximate_tokens": 1550
+    },
+    "result": {
+      "path": "docs/大创调研/bridge/result-20260906-01.md",
+      "sha256": "02b51e32a00ea5814374dd852a585ce6ae3432a059bf226c3dabdcc7da4bc2e5"
+    },
+    "browser_evidence": {
+      "path": "docs/大创调研/bridge/browser-evidence-20260906-01.md",
+      "sha256": "ada9bf683268670fe2a1cb0ef65b7e017cca038f6bad3d9e9681ba6ddaba97b3"
+    }
+  },
+  "codex_model": {
+    "requested": "local ZCode main agent (executor; user-designated 四肢/执行者)",
+    "observed": "builtin:bigmodel-start-plan/GLM-5.3-Flash",
+    "status": "verified",
+    "evidence": "session runtime: the local agent itself performed all local actions (git, files, tests); no external executor involved"
+  },
+  "chatgpt_model": {
+    "requested": "GPT-5.6 Sol",
+    "observed": "GPT-5.6 Sol",
+    "status": "verified",
+    "evidence": "composer model menu a11y snapshot listed 'GPT-5.6 Sol' as checked before send and after completion; reasoning effort 高; see browser-evidence-20260906-01.md",
+    "preflight_visible": true,
+    "postflight_visible": true
+  },
+  "privacy_review": {
+    "scope_minimized": true,
+    "credentials_scan_passed": true,
+    "semantic_privacy_reviewed": true,
+    "raw_diff_excluded": true,
+    "unrelated_files_excluded": true
+  },
+  "browser_transport": "verified",
+  "packet_validation": "passed",
+  "result_validation": "passed",
+  "pair_validation": "passed",
+  "local_revalidation": "passed",
+  "adoption": {
+    "status": "passed",
+    "accepted": [
+      "sprint1 prereg + campaign runner + diagnostics entry (run_sprint1.py, temporal_diagnostics.py, sprint1_prereg.yaml)",
+      "E0 matched EGS 3-seed anchor on temporal_balanced_no_temporal (val-first, test-once)",
+      "E1 DirSAGE baseline in src/btcaml/ext/dir_sage.py (depth matched to EGS=3)",
+      "E2 frozen LightGBM node-feature baseline (run_tabular_baseline.py)",
+      "E3 DGResEGS A0-A3 chain with scalar gate and V-REx lambda {0.1,0.3,1.0} (src/btcaml/ext/dg_resegs.py)",
+      "E4 val temporal-slice robustness diagnostics",
+      "E5 calibration + selective prediction with val-only temperature and pre-frozen rejection thresholds"
+    ],
+    "rejected": [],
+    "deferred": [
+      "as-of union provenance rebuild -> design doc only (experiments/campaign/asof_graph_requirements.md)",
+      "GAT/GIN/GCN extra baselines -> back burner behind DirSAGE/GBDT",
+      "parameter-matched EGS control -> only if DG variant shows clear gain",
+      "chain B screens (A0-A3 x80ep) -> paused until chain A completes: 16GB RAM machine runs ONE trainer process at a time (watchdog caught freeRAM 0.08GB and an earlier 0xC0000005 crash under two concurrent trainers)"
+    ],
+    "local_evidence": [
+      "experiments/archive/runs/20260618_005109_temporal_egs/edge_gated_sage/model_config.json shows frozen temporal 0.2565 used temporal_balanced.pt (with temporal edge features)",
+      "torch.load keys of temporal_balanced(_no_temporal).pt include node_time; metadata split.type=classwise_temporal",
+      "src/btcaml/models/edge_sage.py:122-134 return_embeddings returns penultimate layer, so DGResEGS composes backbone layers for pre-classifier g",
+      "pyproject.toml already pins torch/torch-geometric/scikit-learn/lightgbm/xgboost; no new dependency added",
+      "pytest: 16 passed after new files added",
+      "2-epoch smoke for egs/dir_sage/resegs_a1/resegs_a2/resegs_a3 all produced train/val metrics + checkpoints with final_test=false"
+    ]
+  },
+  "local_changes": {
+    "status": "applied",
+    "reason": "12 new files on branch experiment-campaign (commit ebd0a70): src/btcaml/ext/{__init__,dir_sage,dg_resegs}.py; scripts/{run_sprint1,run_tabular_baseline,temporal_diagnostics,evaluate_calibration,campaign_eval_utils}.py; scripts/campaign_watchdog.ps1; experiments/campaign/{sprint1_prereg.yaml,asof_graph_requirements.md,registry_addendum.csv} (last three force-added, experiments/ is gitignored). No existing file modified; user dirty hunks untouched."
+  },
+  "tests": "passed"
+}
