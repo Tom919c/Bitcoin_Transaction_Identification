@@ -10,8 +10,7 @@ param(
 $ErrorActionPreference = 'Continue'
 $log = 'experiments/campaign/watchdog.log'
 $chainLogs = @(
-    'C:\Users\chenquan\.zcode\cli\exec\sess_753ece9e-2899-4f0e-acb0-502d1e92a54a\call_83432c85bdb843d6b66cf7bb-stdout.log',
-    'C:\Users\chenquan\.zcode\cli\exec\sess_753ece9e-2899-4f0e-acb0-502d1e92a54a\call_3ce32514b89c46a4ab23d405-stdout.log'
+    'experiments/campaign/queue.log'
 )
 
 function Write-Log([string]$msg) {
@@ -44,7 +43,8 @@ while ($true) {
         $stall = [math]::Round(((Get-Date) - $lastProgress).TotalMinutes, 1)
 
         $ckptInfo = if ($ckpt) { '{0}@{1}' -f $ckpt.Directory.Parent.Name, (Get-Date $ckpt.LastWriteTime -Format 'HH:mm:ss') } else { 'none' }
-        $msg = 'procs={0} cpuSum={1}s cpuDelta={2}s/interval freeRAM={3}GB newest_ckpt={4} stall={5}min' -f $nproc, $cpuSum, $cpuDelta, $freeGB, $ckptInfo, $stall
+        $queueLast = try { (Get-Content 'experiments/campaign/queue.log' -Tail 1 -ErrorAction Stop) } catch { 'queue.log missing' }
+        $msg = 'procs={0} cpuSum={1}s cpuDelta={2}s/interval freeRAM={3}GB newest_ckpt={4} stall={5}min queue=[{6}]' -f $nproc, $cpuSum, $cpuDelta, $freeGB, $ckptInfo, $stall, $queueLast
 
         if ($nproc -eq 0) {
             $msg = 'ALERT NO_PYTHON_PROC chains_may_have_finished_or_died ' + $msg

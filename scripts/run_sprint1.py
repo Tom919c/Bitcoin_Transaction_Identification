@@ -22,14 +22,15 @@ from typing import Any
 
 import pandas as pd
 import torch
+import torch.nn.functional as F
 
 import _bootstrap  # noqa: F401
 from btcaml.data.label_maps import UNKNOWN_LABEL
 from btcaml.evaluation.export import export_detailed_evaluation
 from btcaml.evaluation.metrics import classification_metrics
+from btcaml.models.edge_sage import EdgeGatedSAGE
 from btcaml.models.registry import build_model
 from btcaml.training.losses import build_loss
-from btcaml.training.trainer import Trainer
 from btcaml.utils.io import atomic_torch_save, save_json
 from btcaml.utils.seed import seed_everything
 from btcaml.ext import DGResEGS, DirSAGE
@@ -125,6 +126,125 @@ def env_masks(data, env_cfg: dict[str, Any]) -> list[torch.Tensor]:
     return masks
 
 
+def _forward_ckpt(model, data):
+    """Per-layer gradient-checkpointed training forward (math-identical).
+
+    Wrapping the whole model as one checkpoint segment does NOT help: the
+    backward recompute then materializes the full internal graph again (probe:
+    23GB commit). Per-layer segments recompute one layer at a time, so peak
+    memory stays near a single layer's forward (~6-8GB incl. allocator cache).
+    RNG state is preserved per segment, so dropout masks are identical and
+    results match the plain trainer bit-for-bit (verified via smoke).
+    """
+    from torch.utils.checkpoint import checkpoint as _cp
+
+    x = _get(data, 'x')
+    edge_index = _get(data, 'edge_index') if _has(data, 'edge_index') else None
+    edge_attr = _get(data, 'edge_attr') if _has(data, 'edge_attr') else None
+
+    if not model.training:
+        return model(x, edge_index=edge_index, edge_attr=edge_attr)
+
+    def ck(fn, h):
+        return _cp(fn, h, use_reentrant=False)
+
+    if isinstance(model, EdgeGatedSAGE):
+        h = x
+        for i, layer in enumerate(model.layers[:-1]):
+            h = ck(lambda h_, l=layer: l(h_, edge_index, edge_attr), h)
+            h = F.dropout(F.relu(model.norms[i](h)), p=model.dropout, training=True)
+        return ck(lambda h_: model.classifier(model.layers[-1](h_, edge_index, edge_attr)), h)
+    if isinstance(model, DirSAGE):
+        h = x
+        for i, layer in enumerate(model.layers[:-1]):
+            h = ck(lambda h_, l=layer: l(h_, edge_index), h)
+            h = F.dropout(F.relu(model.norms[i](h)), p=model.dropout, training=True)
+        return ck(lambda h_: model.classifier(model.layers[-1](h_, edge_index)), h)
+    if isinstance(model, DGResEGS):
+        gnn = model.backbone
+        h = x
+        for i, layer in enumerate(gnn.layers[:-1]):
+            h = ck(lambda h_, l=layer: l(h_, edge_index, edge_attr), h)
+            h = F.dropout(F.relu(gnn.norms[i](h)), p=gnn.dropout, training=True)
+        g = ck(lambda h_: gnn.layers[-1](h_, edge_index, edge_attr), h)
+        s = model.self_branch(x)
+        if model.variant == 'a1':
+            h_out = model.norm_out(s + g)
+        else:
+            u = torch.cat([model.norm_s(s), model.norm_g(g), (model.norm_s(s) - model.norm_g(g)).abs()], dim=-1)
+            alpha = torch.sigmoid(model.gate(u))
+            model.last_alpha = alpha.detach()
+            h_out = model.norm_out(s + alpha * g)
+        return model.head(h_out)
+    raise TypeError(f'No per-layer checkpoint path for {type(model).__name__}')
+
+
+def train_full_batch_lean(model, data, cfg: dict, labels: list[str]) -> list[dict[str, Any]]:
+    """Memory-lean mirror of Trainer.train_full_batch (identical semantics).
+
+    Same weighted_ce criterion with global class weights, Adam optimizer, grad
+    clip, per-epoch val macro_f1 evaluation, early stopping, checkpoint format
+    and history files. Only difference: the training forward is wrapped in
+    gradient checkpointing (see _forward_ckpt).
+    """
+    device = torch.device(cfg.get('device', 'cpu'))
+    model.to(device)
+    y = _get(data, 'y')
+    train_mask = _get(data, 'train_mask').bool() & (y != UNKNOWN_LABEL)
+    val_mask = _get(data, 'val_mask').bool() & (y != UNKNOWN_LABEL)
+    if int(train_mask.sum().item()) == 0:
+        raise ValueError('No supervised nodes in train_mask.')
+    criterion = build_loss(
+        cfg.get('loss', 'weighted_ce'),
+        y,
+        train_mask,
+        int(cfg['num_classes']),
+        cfg,
+        device=device,
+    )
+    optimizer = torch.optim.Adam(model.parameters(), lr=float(cfg.get('lr', 1e-3)), weight_decay=float(cfg.get('weight_decay', 5e-4)))
+    epochs = int(cfg.get('epochs', 200))
+    clip = float(cfg.get('grad_clip_norm', 0) or 0)
+    best_metric, best_epoch = -1.0, -1
+    best_path = Path(cfg['checkpoint_dir']) / 'best.pt'
+    best_path.parent.mkdir(parents=True, exist_ok=True)
+    history: list[dict[str, Any]] = []
+
+    for epoch in range(1, epochs + 1):
+        model.train()
+        optimizer.zero_grad()
+        logits = _forward_ckpt(model, data)
+        loss = criterion(logits[train_mask], y[train_mask])
+        loss.backward()
+        if clip > 0:
+            torch.nn.utils.clip_grad_norm_(model.parameters(), clip)
+        optimizer.step()
+
+        record: dict[str, Any] = {'epoch': epoch, 'loss': float(loss.item())}
+        with torch.no_grad():
+            model.eval()
+            val_logits = _forward_ckpt(model, data)
+            val_metrics = classification_metrics(val_logits.cpu(), y.cpu(), val_mask.cpu(), labels)
+        record.update({f'val_{k}': v for k, v in val_metrics.items()})
+        metric = float(val_metrics.get('macro_f1', 0.0))
+        if metric > best_metric:
+            best_metric, best_epoch = metric, epoch
+            atomic_torch_save(
+                {'model_state_dict': model.state_dict(), 'epoch': epoch, 'val_macro_f1': best_metric, 'config': cfg},
+                best_path,
+            )
+        history.append(record)
+        if epoch - best_epoch >= int(cfg.get('early_stopping_patience', 50)):
+            record['early_stop'] = True
+            break
+        if epoch == 1 or epoch % 10 == 0:
+            print(f"epoch {epoch:04d} | loss {loss.item():.4f} | val_macro {metric:.4f} | best {best_metric:.4f}")
+    save_json(history, Path(cfg['history_path']))
+    Path(cfg['history_path']).with_suffix('.csv').parent.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame(history).to_csv(Path(cfg['history_path']).with_suffix('.csv'), index=False)
+    return history
+
+
 def train_vrex(model, data, cfg: dict, labels: list[str], env_cfg: dict[str, Any]) -> list[dict[str, Any]]:
     """Mirror of Trainer.train_full_batch with the V-REx environment penalty.
 
@@ -156,7 +276,7 @@ def train_vrex(model, data, cfg: dict, labels: list[str], env_cfg: dict[str, Any
     history: list[dict[str, Any]] = []
 
     def forward_logits():
-        return model(_get(data, 'x'), edge_index=_get(data, 'edge_index'), edge_attr=_get(data, 'edge_attr'))
+        return _forward_ckpt(model, data)
 
     for epoch in range(1, epochs + 1):
         model.train()
@@ -290,10 +410,8 @@ def main():
         if model_name == 'resegs_a3':
             train_vrex(model, data, train_cfg, labels, env_cfg)
         else:
-            trainer = Trainer(model, data, train_cfg, labels=labels)
-            trainer.train_full_batch()
-            del trainer
-            gc.collect()
+            train_full_batch_lean(model, data, train_cfg, labels)
+        gc.collect()
 
         ckpt = torch.load(Path(train_cfg['checkpoint_dir']) / 'best.pt', map_location=args.device)
         model.load_state_dict(ckpt['model_state_dict'])
