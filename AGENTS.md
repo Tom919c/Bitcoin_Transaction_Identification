@@ -93,6 +93,16 @@ python scripts/update_skill_inventory.py   # 仅在清单过期时运行
 - Research Director 不得把未核验的子代理结论写入 Research Passport、协议、claim–evidence ledger 或论文。
 - 使用最小必要上下文的结构化 handoff；同阶段重复任务尽量复用同一代理，减少上下文与 token 浪费。
 
+### 4.1 Model routing policy
+
+- Root orchestrator 负责拆解任务、选择委派层级、维护上下文边界、整合子代理交付，并对最终结果承担完整责任；子代理不能改变研究目标、治理规则或验收标准。
+- 机械性任务优先委派给 `gpt-5.6-luna`，使用低推理强度（`low`）并设置 `fork_turns: none`。适用范围包括文件检索、元数据提取、去重、格式转换、日志解析、表格汇总、确定性检查及其他不需要科学判断的整理工作。
+- 普通且边界明确的实现任务委派给 `gpt-5.6-terra`，使用中等推理强度（`medium`）。输入、输出、验收标准和可修改文件必须在 handoff 中明确。
+- `gpt-5.6-sol` 保留架构决策、实验设计、科学方法、困难调试、安全相关工作、重大算法变更、结果解释、跨模块集成和最终验证；这些事项不得仅因成本原因下放。
+- 成本策略是优先使用满足要求的最低成本模型：能由 Luna 稳妥完成的机械任务不升级，普通实现优先 Terra；一旦任务涉及科学判断、不可逆风险、复杂推理或跨任务整合，立即由 Sol 接管或复核。
+- 子代理不得递归委派或继续创建子代理。每次 handoff 只携带完成任务所需的最小上下文、固定输入快照、明确产物格式、证据要求和验收标准。
+- Root orchestrator 必须审阅并最终整合所有交付，亲自完成与任务风险相称的最终验证；子代理的未核验结论不得直接进入 Research Passport、协议、claim–evidence ledger、论文或其他正式产物。
+
 ## 5. Ponytail 与 Caveman
 
 - 代码/基础设施任务使用 `ponytail:ponytail`，需要压缩沟通和 handoff 时使用 `caveman`；行动前完整阅读相应 Skill。若本会话已由系统完整加载并声明激活，则无需重复读取。
