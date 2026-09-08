@@ -1,0 +1,91 @@
+protocol_id: ssl_entity_graph_pilot_v1
+created_at: "2026-09-08"
+status: frozen_screen
+git_revision_at_freeze: a193f0da8f99396195705ad9fe66ff413fad2c29
+
+question: >-
+  On the existing Bitcoin entity graph, can label-free graph pretraining learn reusable
+  representations that improve 11-class entity-type recognition when only a small fraction
+  of the labeled training entities is available?
+
+scope:
+  purpose: feasibility_and_transfer_screen
+  allowed_claim: transductive representation-learning feasibility on the sampled entity graph
+  forbidden_claims:
+    - future-time generalization
+    - illicit-transaction detection
+    - AML risk identification
+    - full-graph scalability
+  test_split_policy: never_read_or_evaluate
+
+data:
+  path: data/processed/protocols/class_balanced_khop.pt
+  sha256: 5f2199907876b7e34a9b1656ce5695e58b9add1507e6f6508d94f236e69a32bf
+  size_bytes: 107942538
+  expected_nodes: 242226
+  expected_edges: 1237757
+  expected_labeled_nodes: 34098
+  label_semantics: "0..10 are entity types; -1 is unlabeled context"
+  ssl_visibility: all_nodes_and_edges_without_labels
+  limitation: >-
+    This first screen is transductive and uses aggregate full-history features. It is not a
+    leakage-safe temporal experiment and cannot support deployment or temporal-OOD claims.
+
+model:
+  encoder: sage
+  hidden_channels: 64
+  num_layers: 3
+  dropout: 0.2
+  reason: isolate pretraining-objective value with the fastest existing graph encoder
+
+methods:
+  - random_init
+  - dgi
+  - masked_feature
+  - flow_edge_reconstruction
+
+pretraining:
+  epochs: 10
+  learning_rate: 0.001
+  weight_decay: 0.0005
+  mask_ratio: 0.20
+  edge_sample_size: 200000
+  flow_edge_feature_names:
+    - total
+    - total_sent
+    - edge_duration
+    - avg_sent
+    - tx_frequency
+
+downstream:
+  train_label_fractions: [0.01, 0.05, 0.10]
+  sampling: classwise_deterministic_with_at_least_one_example_per_present_class
+  max_epochs: 30
+  early_stopping_patience: 8
+  learning_rate: 0.001
+  weight_decay: 0.0005
+  loss: weighted_cross_entropy
+  evaluation_split: validation_only
+  primary_metric: macro_f1
+  secondary_metrics:
+    - minority_macro_f1
+    - weighted_f1
+
+screen:
+  seed: 42
+  promotion_rule: >-
+    Promote an objective to a three-seed and temporal-prefix audit only if it improves validation
+    macro-F1 by at least 0.02 over random initialization at either 1% or 5% labels, without reducing
+    minority macro-F1 by more than 0.01. Treat smaller changes as inconclusive.
+  no_go_rule: >-
+    Stop generic pretraining if no objective reaches the promotion rule, pretraining loss does not
+    decrease, or gains appear only at 10% labels and vanish under matched initialization.
+
+artifacts:
+  output_root: experiments/self_supervised_pilot/runs
+  required:
+    - run_config.json
+    - pretrain_history.csv
+    - validation_results.csv
+    - validation_results.json
+    - notes.txt

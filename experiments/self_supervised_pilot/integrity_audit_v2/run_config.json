@@ -1,0 +1,95 @@
+{
+  "protocol": "configs\\experiment\\ssl_pilot_v2.yaml",
+  "data": "data\\processed\\protocols\\class_balanced_khop.pt",
+  "methods": [
+    "random_init",
+    "dgi",
+    "masked_feature"
+  ],
+  "fractions": [
+    0.01,
+    0.05
+  ],
+  "epochs": 10,
+  "finetune_epochs": 100,
+  "early_stopping_patience": 15,
+  "seed": 42,
+  "device": "cpu",
+  "out_root": "experiments\\self_supervised_pilot\\integrity_audit_v2",
+  "smoke": false,
+  "audit_only": true,
+  "model": {
+    "encoder": "sage",
+    "hidden_channels": 64,
+    "num_layers": 3,
+    "dropout": 0.2
+  },
+  "pretraining": {
+    "epochs": 10,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0005,
+    "mask_ratio": 0.2,
+    "edge_sample_size": 200000,
+    "flow_edge_feature_names": [
+      "total",
+      "total_sent",
+      "edge_duration",
+      "avg_sent",
+      "tx_frequency"
+    ]
+  },
+  "downstream": {
+    "train_label_fractions": [
+      0.01,
+      0.05
+    ],
+    "sampling": "classwise_deterministic_with_at_least_one_example_per_present_class",
+    "max_epochs": 100,
+    "early_stopping_patience": 15,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0005,
+    "loss": "weighted_cross_entropy",
+    "evaluation_split": "validation_only",
+    "primary_metric": "macro_f1",
+    "secondary_metrics": [
+      "minority_macro_f1",
+      "weighted_f1"
+    ]
+  },
+  "data_integrity": {
+    "sha256": "5f2199907876b7e34a9b1656ce5695e58b9add1507e6f6508d94f236e69a32bf",
+    "size_bytes": 107942538,
+    "nodes": 242226,
+    "edges": 1237757,
+    "labeled_nodes": 34098,
+    "x_shape": [
+      242226,
+      27
+    ],
+    "edge_index_shape": [
+      2,
+      1237757
+    ],
+    "edge_attr_shape": [
+      1237757,
+      11
+    ],
+    "y_shape": [
+      242226
+    ],
+    "split_counts": {
+      "train": 20458,
+      "val": 6820,
+      "test": 6820
+    },
+    "split_overlap": 0
+  },
+  "runtime": {
+    "python": "3.12.3",
+    "torch": "2.12.1+cpu",
+    "pyg": "2.8.0.post1",
+    "git_head": "a193f0da8f99396195705ad9fe66ff413fad2c29",
+    "git_dirty": true
+  },
+  "evaluation": "validation_only; test mask used only for split-integrity audit"
+}

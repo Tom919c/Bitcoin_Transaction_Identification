@@ -1,0 +1,24 @@
+{
+  "inputs": [
+    "experiments/self_supervised_pilot/runs/v2_seed42/validation_results.csv",
+    "experiments/self_supervised_pilot/runs/v2_seed3407/validation_results.csv",
+    "configs/experiment/ssl_pilot_v2.yaml"
+  ],
+  "promotion_rule": "delta macro_f1 >= 0.02 at 1% or 5% labels in both seeds, and mean minority delta >= -0.01",
+  "per_seed": [
+    {"method":"dgi","fraction":0.01,"seed":42,"delta_macro_f1":0.007069652570088292,"delta_minority_macro_f1":-0.013281204394484714,"delta_weighted_f1":0.004982648324135863},
+    {"method":"dgi","fraction":0.05,"seed":42,"delta_macro_f1":0.009060021339883706,"delta_minority_macro_f1":0.019376526433607988,"delta_weighted_f1":0.00180202953568398},
+    {"method":"masked_feature","fraction":0.01,"seed":42,"delta_macro_f1":-0.0210043297498258,"delta_minority_macro_f1":-0.02586166585545363,"delta_weighted_f1":-0.011141167022561516},
+    {"method":"masked_feature","fraction":0.05,"seed":42,"delta_macro_f1":-0.029351806346251397,"delta_minority_macro_f1":-0.03431202545913298,"delta_weighted_f1":-0.029387474030364347},
+    {"method":"dgi","fraction":0.01,"seed":3407,"delta_macro_f1":-0.04042761513982268,"delta_minority_macro_f1":-0.022723598787400323,"delta_weighted_f1":-0.11627786721340183},
+    {"method":"dgi","fraction":0.05,"seed":3407,"delta_macro_f1":0.004554642534023268,"delta_minority_macro_f1":-0.013295359697425513,"delta_weighted_f1":0.013325908680991039},
+    {"method":"masked_feature","fraction":0.01,"seed":3407,"delta_macro_f1":0.0058175947314864085,"delta_minority_macro_f1":-0.0038409421037995384,"delta_weighted_f1":0.015936440362399495},
+    {"method":"masked_feature","fraction":0.05,"seed":3407,"delta_macro_f1":0.008180298658639007,"delta_minority_macro_f1":-0.001319657017788467,"delta_weighted_f1":0.008878994220019587}
+  ],
+  "summary": [
+    {"method":"dgi","fraction":0.01,"mean_delta_macro_f1":-0.016678981284867195,"sample_sd_delta_macro_f1":0.03358564008551089,"mean_delta_minority_macro_f1":-0.01800240159094252,"sample_sd_delta_minority_macro_f1":0.006676781105868461,"mean_delta_weighted_f1":-0.055647609444632984,"sample_sd_delta_weighted_f1":0.08574413282676961,"passes_promotion_rule":false},
+    {"method":"dgi","fraction":0.05,"mean_delta_macro_f1":0.006807331936953487,"sample_sd_delta_macro_f1":0.003185783905438066,"mean_delta_minority_macro_f1":0.0030405833680912375,"sample_sd_delta_minority_macro_f1":0.0231025122374085,"mean_delta_weighted_f1":0.007563969108337509,"sample_sd_delta_weighted_f1":0.008148613089220857,"passes_promotion_rule":false},
+    {"method":"masked_feature","fraction":0.01,"mean_delta_macro_f1":-0.007593367509169696,"sample_sd_delta_macro_f1":0.018965964685209336,"mean_delta_minority_macro_f1":-0.014851303979626584,"sample_sd_delta_minority_macro_f1":0.01557100309143028,"mean_delta_weighted_f1":0.00239763666991899,"sample_sd_delta_weighted_f1":0.019146759800212867,"passes_promotion_rule":false},
+    {"method":"masked_feature","fraction":0.05,"mean_delta_macro_f1":-0.010585753843806195,"sample_sd_delta_macro_f1":0.026539205961163565,"mean_delta_minority_macro_f1":-0.017815841238460722,"sample_sd_delta_minority_macro_f1":0.02332912745227975,"mean_delta_weighted_f1":-0.01025423990517238,"sample_sd_delta_weighted_f1":0.0270584791919062,"passes_promotion_rule":false}
+  ]
+}

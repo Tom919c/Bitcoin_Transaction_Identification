@@ -1,0 +1,94 @@
+protocol_id: ssl_entity_graph_pilot_v2
+created_at: "2026-09-08"
+status: frozen_convergence_check
+parent_protocol: configs/experiment/ssl_pilot_v1.yaml
+change_reason: >-
+  In V1, 10 of 12 downstream runs selected their best validation result at the 30-epoch
+  ceiling, so the transfer comparison was not a valid convergence check. V2 extends only
+  downstream optimization and removes the clearly trailing flow-edge objective.
+git_revision_at_freeze: a193f0da8f99396195705ad9fe66ff413fad2c29
+
+question: >-
+  After adequate downstream optimization, do DGI or masked-feature pretraining improve
+  11-class Bitcoin entity-type recognition under 1% and 5% labeled-training budgets?
+
+scope:
+  purpose: convergence_checked_transfer_screen
+  allowed_claim: transductive representation-learning feasibility on the sampled entity graph
+  forbidden_claims:
+    - future-time generalization
+    - illicit-transaction detection
+    - AML risk identification
+    - full-graph scalability
+  test_split_policy: never_read_or_evaluate
+
+data:
+  path: data/processed/protocols/class_balanced_khop.pt
+  sha256: 5f2199907876b7e34a9b1656ce5695e58b9add1507e6f6508d94f236e69a32bf
+  size_bytes: 107942538
+  expected_nodes: 242226
+  expected_edges: 1237757
+  expected_labeled_nodes: 34098
+  label_semantics: "0..10 are entity types; -1 is unlabeled context"
+  ssl_visibility: all_nodes_and_edges_without_labels
+  limitation: >-
+    This remains a transductive screen using aggregate full-history features. It cannot
+    support temporal-OOD or deployment claims.
+
+model:
+  encoder: sage
+  hidden_channels: 64
+  num_layers: 3
+  dropout: 0.2
+
+methods:
+  - random_init
+  - dgi
+  - masked_feature
+
+pretraining:
+  epochs: 10
+  learning_rate: 0.001
+  weight_decay: 0.0005
+  mask_ratio: 0.20
+  edge_sample_size: 200000
+  flow_edge_feature_names:
+    - total
+    - total_sent
+    - edge_duration
+    - avg_sent
+    - tx_frequency
+
+downstream:
+  train_label_fractions: [0.01, 0.05]
+  sampling: classwise_deterministic_with_at_least_one_example_per_present_class
+  max_epochs: 100
+  early_stopping_patience: 15
+  learning_rate: 0.001
+  weight_decay: 0.0005
+  loss: weighted_cross_entropy
+  evaluation_split: validation_only
+  primary_metric: macro_f1
+  secondary_metrics:
+    - minority_macro_f1
+    - weighted_f1
+
+screen:
+  seed: 42
+  confirmation_seeds: [42, 3407]
+  promotion_rule: >-
+    Promote only if a pretraining objective improves validation macro-F1 over matched random
+    initialization by at least 0.02 at 1% or 5% labels in both seeds, while mean minority
+    macro-F1 does not decrease by more than 0.01.
+  no_go_rule: >-
+    Stop generic pretraining if neither objective reaches the promotion rule after convergence,
+    or if any apparent gain reverses across the two seeds.
+
+artifacts:
+  output_root: experiments/self_supervised_pilot/runs/v2
+  required:
+    - run_config.json
+    - pretrain_history.csv
+    - validation_results.csv
+    - validation_results.json
+    - notes.txt

@@ -1,0 +1,41 @@
+{
+  "protocol_data": {
+    "path": "data\\processed\\protocols\\class_balanced_khop.pt",
+    "sha256": "5f2199907876b7e34a9b1656ce5695e58b9add1507e6f6508d94f236e69a32bf",
+    "size_bytes": 107942538,
+    "expected_nodes": 242226,
+    "expected_edges": 1237757,
+    "expected_labeled_nodes": 34098,
+    "label_semantics": "0..10 are entity types; -1 is unlabeled context",
+    "ssl_visibility": "all_nodes_and_edges_without_labels",
+    "limitation": "This remains a transductive screen using aggregate full-history features. It cannot support temporal-OOD or deployment claims."
+  },
+  "actual": {
+    "sha256": "5f2199907876b7e34a9b1656ce5695e58b9add1507e6f6508d94f236e69a32bf",
+    "size_bytes": 107942538,
+    "nodes": 242226,
+    "edges": 1237757,
+    "labeled_nodes": 34098,
+    "x_shape": [
+      242226,
+      27
+    ],
+    "edge_index_shape": [
+      2,
+      1237757
+    ],
+    "edge_attr_shape": [
+      1237757,
+      11
+    ],
+    "y_shape": [
+      242226
+    ],
+    "split_counts": {
+      "train": 20458,
+      "val": 6820,
+      "test": 6820
+    },
+    "split_overlap": 0
+  }
+}
