@@ -1,0 +1,195 @@
+# Research Passport 与聚焦证据快照 v1.0
+
+日期：2026-09-08
+
+状态：Gate 0 条件未关闭；Gate 1 聚焦增量审计已完成第一轮，但仍有来源与数据工件待核验；Gate 3A 未冻结
+
+研究分支：`asof-entity-graph-pilot`
+
+本分支起点：`bc5703a650587643fca7140fc579310c6f09349e`
+
+启动提交：`734fd098fb53c6d07a0e584381ab7b1bed155097`
+
+## 1. 当前裁决
+
+项目方向保持为“严格按时可见实体图与可信识别”，但创新主张必须收紧：
+
+> 在固定原始链前缀、固定历史截止点和可审计标签口径下，受控量化 final-vintage 地址聚类相对 point-in-time/as-of 地址聚类对预测单位、实体图、实体类型模型比较、概率决策和有限人工审查队列的影响。
+
+本项目不再把“未来聚类知识会回写历史并产生 look-ahead bias”作为新发现。Glassnode 已在 2023 年的一手研究说明中明确描述该现象并给出 point-in-time 数据作为补救。当前未检出的是完整的学术端到端实验：固定历史信息集，只改变地址分区版本，再把差异传播到实体类型预测、校准、选择性预测和固定预算队列。
+
+2026 年 9 月 1 日公开的预印本 *Refining Heuristic-Based Bitcoin Address Clustering with Graph Neural Networks* 已直接覆盖“用 GNN 表征细化启发式聚类、发现可疑错误合并、给出候选拆分”这一方法空间。因此，启动章程中的条件 D 只能作为最近邻基线或敏感性条件，不能预设为本项目的新方法贡献。
+
+当前决策是：保留方向，停止宽泛的新颖性表述；先完成无模型、可重放的数据机制审计。Gate 3A 冻结前不训练新模型，不打开正式测试结果，不重建 2.52 亿节点全图。
+
+## 2. Research Passport
+
+### 2.1 研究问题与用途
+
+历史决策时钟以 Bitcoin 主链区块高度 `t` 表示。目标不是事后取证，而是模拟在 `t` 时可获得的信息下进行实体类型识别和人工复核排序。若研究问题改为事后归因，使用最终分区 `C_T` 可以是合法的 hindsight 信息，此时不能称为部署泄漏。
+
+预测标签为仓库已有的 11 类实体类型 `0–10`；`-1` 是未标注图上下文。实体类型不等于非法活动、欺诈或 AML 风险，任何二元风险任务都需要另行定义和取得可核验标签。
+
+### 2.2 形式对象
+
+- `X_{<=t}`：主链中区块高度不晚于 `t` 的原始交易、输入、输出和脚本记录。
+- `U_{<=t}`：只由 `X_{<=t}` 和版本冻结的启发式规则产生的地址/脚本合并事件；每个事件必须保留区块高度、区块内顺序、规则、版本和证据。
+- `V_t`：在 `X_{<=t}` 中已经出现的地址或脚本标识集合。
+- `C_t = DSU(U_{<=t})`：从空状态按确定顺序重放得到的 as-of 分区。
+- `C_T|V_t`：完整观察期 `T` 的最终分区限制到同一地址支持 `V_t`；不得把 `T` 后才出现的地址加入比较。
+- `G(C, X_{<=t})`：在相同交易前缀上用分区 `C` 聚合得到的实体图。
+- `L_{<=t}`：发现、公开或采集时间不晚于 `t` 的标签版本。若无法获得标签可得时间，标签只能作为回顾性评价或结构诊断，不能支撑历史部署主张。
+
+主要因果对照是 `G(C_T|V_t, X_{<=t})` 与 `G(C_t, X_{<=t})`。两者必须共享原始交易前缀、地址支持、过滤规则、标签规则和模型预算；否则差异不能归因于分区版本。
+
+### 2.3 当前数据与代码资产
+
+| 资产 | 已核验能力 | 当前限制 | 证据位置 |
+|---|---|---|---|
+| 本地 2.52 亿节点实体图接口 | 可流式读取 `node_features` 与 `transaction_edges`；节点含最终 `alias`、统计特征和实体类型标签，边含首次/末次出现区块及聚合金额 | 没有地址/脚本表、单笔交易输入分组、合并事件、规则版本和合并证据；不能逆推出 `C_t` | `src/btcaml/data/db.py`、`src/btcaml/data/schema.py`、`configs/data/raw_db.yaml` |
+| 协议数据构建 | 可从最终实体图生成处理数据；标准化在训练期拟合 | 继承最终 alias；不是 as-of 重放 | `scripts/build_protocol_dataset.py`、`src/btcaml/data/build_graph.py` |
+| 上游公开构图代码 | 能从 Bitcoin Core 原始块解析 TXO，逐区块运行多种启发式，并以 Union-Find 合并 | 只写最终 `Alias(node_id, alias)`；`UnionFind.union` 不记录时间、规则或证据；需审计每个启发式的未来可见性 | `hugoschnoering2/BTCGraphConstruction` 的 `steps/populate_alias.py`、`clustering/unionFind.py` |
+| 协作交易过滤 | 上游代码包含 JoinMarket、Wasabi、Samourai/Whirlpool 等 CoinJoin 检测并可在聚类中排除 | 是规则检测结果，不是真值；尚未核验规则版本、误差和 PayJoin 边界 | 上游 `steps/populate_coinjoin.py` |
+| 本地原始块解析片段 | 可解析部分原始块、交易和脚本结构 | 不是完整、已验证的全链索引与 prevout 管线 | `scripts/scan_block_sighash.py` |
+| 资金流证书代码 | 可检查局部 DAG 与价值守恒性质 | 与地址聚类重放不是同一任务，只可复用检查模式 | `src/btcaml/analysis/flow_certificate.py` |
+| 实验可追溯模式 | 历史 SSL manifest 提供版本、依赖和产物哈希范式 | 本分支未发现章程所述 `experiments/experiment_registry.csv`；正式运行前必须建立或恢复唯一登记入口 | 既有 SSL 产物与 `experiments/` |
+| 当前工作树数据 | `data/README.md` 存在 | `data/processed/` 和原始 `blk*.dat` 未在隔离工作树中发现；不能假设本机已有可运行数据 | 本地只读检查，2026-09-08 |
+
+`BITCOIN_DB_URL` 是外部敏感配置。本记录不保存连接串；任何诊断不得打印凭据。
+
+### 2.4 算力、环境与预算
+
+- 依赖真源为 `pyproject.toml` 与 `uv.lock`；新研究运行使用仓库级 `uv` 环境。
+- 当前隔离工作树未检测到可用的 `nvidia-smi`，不能宣称有 GPU。无模型数据 Gate 必须能在 CPU 和小窗口上完成。
+- 尚未核验可用内存、磁盘余量、Bitcoin Core 数据目录和 PostgreSQL 实例容量。
+- 不以工程工作量否决方向，但数据许可、可重放性、磁盘安全和可证伪性是硬门。
+
+### 2.5 行政、伦理与许可
+
+- 正式立项题名、任务书、项目编号、结题材料版本和成果承诺仍未进入当前分支的可核验输入，Gate 0 因此不能完全关闭。
+- 公开链数据不等于可以对真实主体作风险指控。演示系统只能展示“实体类型识别结果”“不确定结果”和“待复核对象”。
+- 现有标签含论坛、公开名单和外部来源，可能存在错误、时间漂移和选择偏差；没有发现/公开/采集时间时，不得用于严格历史部署训练。
+- 新预印本称其 Zenodo 数据集采用 CC BY 4.0；当前尚未独立取得该记录的文件清单、大小和哈希，因此不把它写成已可用本地数据。
+- 不向外部模型或服务上传数据库内容、私有标签、未发表手稿、连接信息或凭据。
+
+## 3. Gate 1 聚焦 decision corpus snapshot
+
+### 3.1 快照范围
+
+检索日期：2026-09-08。
+
+目标：寻找完整等价工作和反证，而不是扩大一般 Bitcoin AML 综述。纳入项必须至少触及下列一项：按时间更新的 Bitcoin 地址聚类、最终与历史分区差异、聚类误差真值、严格时间图评测、实体类型预测、概率校准或固定预算队列。
+
+排除或降级：只在随机切分上刷分、只删除未来边但不改变实体分区、只做静态聚类准确率、只研究通用动态图、只有搜索摘要、无法确认预测单位或数据来源的工作。
+
+### 3.2 两条独立检索链
+
+链 A 为 Undermind 增量深检，工作区 `quan's workspace`，搜索路径 `/01 Discovery/As of Bitcoin Entity Identity Leakage Incremental`。目标查询完整限定了 `C_t/C_T`、固定地址支持、union 时间与 provenance、下游模型排序/校准/队列，以及 decisive No-Go。搜索返回 16 篇相关工作；摘要级综合未发现完整等价论文。随后对 `Mos21`、`Sch24c`、`Mul26`、`Sch24`、`Mag26`、`Mal26` 和 `Kha26` 做了全文定向问答。旧搜索 `/01 Discovery/Temporal Entity Resolution Error Propagation` 与 `/01 Discovery/Provenance Preserving Bitcoin Benchmark Reconstruction` 仅作为历史独立发现池，不重复计数。
+
+链 B 由主负责人和一名不继承结论的反方审查者独立执行，查询包括：
+
+- `"temporal address clustering" Bitcoin entity resolution`
+- `"dynamic address clustering" Bitcoin`
+- `Bitcoin address clustering "as of" time`
+- `Bitcoin address clustering "look-ahead" bias`
+- `"future transactions" "address clustering" Bitcoin`
+- `Bitcoin entity type prediction address clusters supervised learning`
+- `temporal graph leakage future information evaluation`
+- `Bitcoin entity classification address clustering temporal evaluation`
+
+链 B 只把论文原文、出版社页面、作者/机构正式页面、官方数据仓库和官方代码作为主张证据。搜索摘要只用于发现。
+
+### 3.3 关键来源与碰撞表
+
+| 来源 | 状态 | 已核验事实 | 对当前方向的影响 |
+|---|---|---|---|
+| Glassnode, *Introducing Point-in-Time Data* (2023) | 官方全文，source-verified 与 interpretation-verified | 地址聚类知识会随时间扩展并触发历史指标重算；将可回写聚类指标用于机器学习会产生未来聚类知识的 look-ahead bias；PIT 数据冻结历史版本 | 对“发现泄漏现象”构成 Critical collision；不是同行评审论文，不能单独证明本项目的学术增量已被覆盖 |
+| Möser & Narayanan, *Resurrecting Address Clustering in Bitcoin*, FC 2022, DOI `10.1007/978-3-031-18283-9_19` | Undermind 全文核验 | 未来地址重用和多输入关系可揭示过去 change 输出；增强聚类使两项纵向分析发生约 11.9% 与 13.8% 的变化 | 证明未来交易可改变历史归并与下游统计；未做 `C_t/C_T` 实体类型预测、校准和队列审计 |
+| Schnoering et al., *Assessing the Efficacy...*, arXiv `2403.00523` | Undermind 全文核验 | 从平凡分区开始逐区块更新聚类，报告不同启发式聚类率的时间演化 | 已覆盖增量 `C_t` 构造和时间统计；未对照 final-vintage 分区，也未传播到下游预测 |
+| Schnoering & Vazirgiannis, *Bitcoin research with a transaction graph dataset*, DOI `10.1038/s41597-025-04684-8` | 出版社全文与 Undermind 全文核验 | 对前 700,000 个区块先形成约 2.52 亿最终 alias，再发布聚合节点/边；标签被投影到最终 cluster，冲突 cluster 不标注 | 现有图适合作为 final-vintage 条件，但公开聚合表不足以重建 `C_t` |
+| Müller et al., *How Reliable Is the MIH...*, arXiv `2607.07414` | Undermind 全文核验 | 受监管服务商真值上的静态评估显示，考虑完整 cluster 时 per-wallet precision/recall 约为 0.36/0.44，实体间差异大 | 强制将聚类误差和敏感性纳入协议；未做纵向或下游预测 |
+| Maganti, *When Graph Structure Becomes a Liability*, arXiv `2604.19514` | Undermind 全文核验；预印本 | 严格归纳设置只让编码器看到训练期子图；其主要差异来自未来测试节点/边和全图统计；报告 RF 与 GNN 排名差异并评估校准 | 证明严格时间协议可改变模型结论；预测单位是交易，不涉及实体分区版本 |
+| Khaleghpour & McKinney, *Leakage Safe Graph Features...*, arXiv `2603.06632` | Undermind 全文核验；预印本 | 用 `G_{<=t}` 计算因果图特征，评估 Brier/校准和 Precision@K | 校准与预算队列不是本项目可单独主张的新指标；仍未改变地址实体分区 |
+| Malik, *Do Transaction-Level and Actor-Level AML Queues Agree?*, arXiv `2604.23494` | Undermind 全文核验；预印本 | 固定 1% 预算比较交易级与地址级队列；文中 actor 明确定义为地址，不是真实解析实体 | 与队列粒度效应直接相邻；未研究聚类版本，要求本项目报告固定预算与单位映射 |
+| Zhong & Mueen, *BitLINK*, KDD 2024, DOI `10.1145/3637528.3672037` | 元数据/摘要核验，全文待补 | 使用时间签名跨时链接地址 cluster | 动态实体解析近邻；尚无证据表明它执行 final-vintage 对照和下游可信评测 |
+| Schnoering et al., *Refining Heuristic-Based Bitcoin Address Clustering with GNNs*, arXiv `2609.01942` | 官方 arXiv HTML 全文核验；预印本 | 以启发式 cluster 为训练标签，用对比式 GNN 表征和层次聚类检测可疑合并；训练/验证/测试来自不重叠区块区间；发布的地址图字段是聚合节点、边和 cluster 映射 | 对“聚类置信度/细化 GNN”构成直接方法碰撞；其非重叠交易切分不等于 cutoff-specific identity；正文所称代码仓库当前为空，复现性仍需核验 |
+| `BTCGraphConstruction` 官方代码 | 官方 GitHub 源码核验 | `populate_alias.py` 按区块收集合并并更新 `UnionFind`，最终只落 `node_id -> alias`；没有 union-event logger | 为小窗口重放提供最接近上游实现，但不能直接把其最终 alias 当作历史分区 |
+
+补充反证中，正式文献已经覆盖未来交易揭示过去 change、动态聚类、按日期截断数据和时间图严格评测等组成部分。当前结论只能写成“截至本快照未检出完整等价工作”，不能写成“全球首次”。
+
+### 3.4 新预印本的数据工件审计
+
+arXiv `2609.01942` 报告三个训练图、一个验证图和一个测试图来自不重叠区块区间，并声明 Zenodo DOI `10.5281/zenodo.22239038`、CC BY 4.0。附录公开字段包括节点、地址级聚合边和 cluster 映射；正文没有给出逐 union 事件日志。
+
+官方 `hugoschnoering2/btc-graph-hc` 仓库在 2026-09-08 的 GitHub 元数据显示大小为 0，虽有默认分支名，但当前没有可读取实现。`BTCGraphConstruction` 仓库可读，README 为空，源码保留原始块解析和最终 alias 构建。Zenodo 记录的文件清单、大小、哈希和实际 schema 尚未独立取得。因此该新数据只能列为候选外部基线，不能作为已就绪的 as-of 输入。
+
+## 4. 贡献边界与反方结论
+
+### 4.1 已被覆盖的主张
+
+- 地址聚类会随新增交易或标签知识改变。
+- 用后来修订的聚类数据回测过去可能形成 look-ahead bias。
+- 应使用 point-in-time/as-of 数据避免该偏差。
+- 未来边、全图消息传递或全图统计会破坏严格时间评测。
+- 地址聚类误差可能显著影响下游统计。
+- GNN 可以被用于细化启发式 cluster 或标记可疑合并。
+
+这些内容只能作为问题动机和最近邻，不作为本项目独立创新。
+
+### 4.2 尚可证伪的窄贡献
+
+在同一 Bitcoin 原始链前缀、同一地址支持、同一过滤与标签规则下，首次在本数据与任务上受控回答：
+
+1. final-vintage 分区相对 `C_t` 造成多少 partition drift、实体节点变化、边重写和标签投影变化；
+2. 这些变化是否跨窗口、跨合理 CoinJoin 过滤条件稳定，而不是某个启发式偶然性；
+3. 在完全相同的训练和调参预算下，模型排名、概率校准、选择性风险—覆盖率以及固定预算 top-k 队列是否发生可重复变化；
+4. 变化能否被分解为 partition drift、cluster-quality drift、label-vintage drift 和普通特征时间漂移。
+
+贡献上限是可复现 benchmark、数据 lineage、评测偏差归因和决策层实证。除非后续理论卡得到非平凡证明和反例审查，不预设理论贡献；除非条件 D 实质上超越 2026 新预印本，不预设新聚类模型贡献。
+
+### 4.3 最强反论与控制
+
+| 反论 | 必须控制 |
+|---|---|
+| `C_T` 对事后取证是合法信息 | 明确部署时钟；仅对当时可行动预测使用“泄漏”措辞 |
+| cluster 不是真实实体 | 同时报分区变化与聚类可靠性；加入保守/宽松过滤敏感性；不作真实所有权断言 |
+| 标签本身也会回写 | 冻结 `L_{<=t}`；若没有标签时间，则只作回顾性结构/评价，不作部署训练 |
+| B/C 支持集合不同造成伪差异 | 固定 `V_t`，将 `C_T` 限制到 `V_t`，所有交易和特征只来自 `X_{<=t}` |
+| 结构变化不必然改变模型或决策 | 将图、预测、校准、拒判和队列视为不同 estimand，分别预注册，不从一个结果外推另一个 |
+| 差异来自单一过滤器或 cluster collapse | 至少两种合理 CoinJoin 过滤；报告启发式与过滤条件交互；保留负结果 |
+
+## 5. Gate 状态与阻断项
+
+### Gate 0：条件未关闭
+
+已完成仓库资产、上游公开代码、环境和主要风险盘点。以下输入缺失：正式任务书/立项题名；可用 Bitcoin Core 数据目录或其他原始链入口；数据版本与哈希；磁盘、内存和数据库容量；外部标签的获取和许可记录。
+
+### Gate 1：第一轮聚焦快照完成，仍未完全关闭
+
+双链检索、关键全文核验和独立反方审查已经完成。关闭前仍需：
+
+1. 核验 Yin et al. 2019 实体类型监督论文全文的构图与时间口径；
+2. 核验 BitLINK 全文是否包含可重放 cluster lineage；
+3. 获取并核验 Zenodo `22239038` 文件 manifest 与实际 schema；
+4. 对 2026 新预印本的代码空仓状态和后续版本做一次冻结快照；
+5. 将最终纳入来源按 DOI/标题去重，保存稳定 BibTeX 与页码定位。
+
+### Gate 2：方向保持，创新叙事已修订
+
+用户对“严格按时可见实体图与可信识别系统”的方向确认继续有效；确认不等于批准宽泛的首创表述。核心创新从“发现未来聚类泄漏”改为“可审计、受控、可复现地测量其对实体类型预测与决策的影响”。
+
+### Gate 3A：禁止冻结
+
+除 Gate 0/1 阻断项外，还必须在查看 Pilot 结果前冻结：标识单位、主链和区块内顺序、启发式版本、过滤器、标签投影、cutoff、窗口选择规则、主次统计量、数值 Go/No-Go 阈值、重采样单位、调参预算和测试集打开规则。
+
+标签时间目前是最高风险阻断项。若无法形成 `L_{<=t}`，第一阶段 Go/No-Go 只能依据不使用标签的 partition/graph 指标；实体类型模型实验必须降级为回顾性敏感性分析，不能宣称历史部署可信度。
+
+## 6. 下一步验收顺序
+
+1. 补齐 Gate 1 的三项全文/工件核验并冻结去重后的聚焦来源表。
+2. 只读确认本机或获批来源中是否存在可用原始块/TXO 输入、版本、许可、哈希与容量。
+3. 使用 `research-planning`、`experiment-design` 和统计补充 Skill 形成 Gate 3A v1.0；先冻结阈值，再看数据。
+4. 协议冻结后，仅实现 union provenance logger、确定性 replay 和一个会失败的最小检查。
+5. 运行小窗口无模型数据 Gate，由 Research Director 根据预注册阈值作 Go/No-Go；只有 Go 才进入模型、校准、拒判和系统接入。
+
+本快照是决策证据，不是实验协议，不授权全量处理、模型训练或外部发布。

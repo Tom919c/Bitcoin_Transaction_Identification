@@ -3,6 +3,8 @@
 日期：2026-09-06。状态：设计说明（deferred，按 packet btc-expcampaign-20260906-01 第 9 项）。
 背景：2026-09-04 审计确认官方流水线 `populate_alias.py` 用 Union-Find 产出**最终** alias，不记录每次 union 的区块高度与规则来源；本地 252M 库无地址表与 union 历史，无法逆推 as-of 分区。
 
+> 2026-09-08 更新：本文件保留为历史数据需求。聚焦反证确认 point-in-time 聚类与 GNN 聚类细化均有直接近邻，条件 D 不再视为预设的新方法；当前正式边界以 `docs/大创调研/Research-Passport与聚焦证据快照-v1.0-20260908.md` 为准。
+
 ## 未来实施时必须记录的字段（union provenance logger）
 
 每次地址合并事件追加一行：
@@ -33,7 +35,7 @@
 | A | Final cluster | 全期 | 传统静态上界（非部署协议） |
 | B | Final cluster | 截止 t | 仍存在 identity 未来泄漏 |
 | C | As-of cluster | 截止 t | 严格历史可见构图 |
-| D | As-of cluster + cluster-confidence | 截止 t | 本项目新方法 |
+| D | As-of cluster + clustering refinement/confidence | 截止 t | 最近邻基线或候选扩展，不预设创新 |
 
 关键比较：B−C 的 F1/ECE/AUPRC 差与 TopKOverlap(B,C)（同预算下审查优先级变化）。
 
