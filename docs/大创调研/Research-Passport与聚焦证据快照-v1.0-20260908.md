@@ -53,17 +53,17 @@
 | 本地原始块解析片段 | 可解析部分原始块、交易和脚本结构 | 不是完整、已验证的全链索引与 prevout 管线 | `scripts/scan_block_sighash.py` |
 | 资金流证书代码 | 可检查局部 DAG 与价值守恒性质 | 与地址聚类重放不是同一任务，只可复用检查模式 | `src/btcaml/analysis/flow_certificate.py` |
 | 实验可追溯模式 | 历史 SSL manifest 提供版本、依赖和产物哈希范式 | 本分支未发现章程所述 `experiments/experiment_registry.csv`；正式运行前必须建立或恢复唯一登记入口 | 既有 SSL 产物与 `experiments/` |
-| 当前工作树数据 | `data/README.md` 存在 | `data/processed/` 和原始 `blk*.dat` 未在隔离工作树中发现；不能假设本机已有可运行数据 | 本地只读检查，2026-09-08 |
+| 当前工作树与本机原始链 | `data/README.md` 存在；已检查仓库与受控的 Windows 默认 Bitcoin Core 路径 | 仓库 `data/` 为空；未发现 `blk*.dat`、原始 TXO/manifest 或 Bitcoin Core datadir；当前进程也未设置数据连接变量 | 本地只读检查，2026-09-09 |
 
 `BITCOIN_DB_URL` 是外部敏感配置。本记录不保存连接串；任何诊断不得打印凭据。
 
-BigQuery `crypto_bitcoin` 当前仅是未核验候选：仓库内没有对应 ETL、实际 schema、快照 manifest 或 `spent_transaction_hash` 字段语义证据。现有 raw-block parser 也只是局部解析片段；两者都不能计为已满足 prevout locking-script 与主链重组硬门的数据资产。
+BigQuery `crypto_bitcoin` 仍是候选，但字段语义已得到更强的一手核验。[Google BigQuery 公共数据说明](https://docs.cloud.google.com/bigquery/public-data)、[GoogleCloudPlatform knowledge catalog](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/bundles/crypto_bitcoin/viz.html) 与 [Bitcoin ETL schema](https://github.com/blockchain-etl/bitcoin-etl/blob/master/README.md#schema) 一致确认：交易记录含区块哈希、高度、块内 index 与 coinbase 标志；input 含 `spent_transaction_hash` 和 `spent_output_index`；output 含金额与 locking `script_hex`。因此可用父交易键连接到 output 恢复 prevout script；input 自身的 `script_hex` 是 scriptSig，不能替代 locking script。尚未关闭的是实际表版本／快照、唯一主链与重组处理、缺失／重复率、许可适用、查询成本与导出 hash，故仍不能计为已满足数据硬门。现有 raw-block parser 也只是局部解析片段。
 
 ### 2.4 算力、环境与预算
 
 - 依赖真源为 `pyproject.toml` 与 `uv.lock`；新研究运行使用仓库级 `uv` 环境。
 - 当前隔离工作树未检测到可用的 `nvidia-smi`，不能宣称有 GPU。无模型数据 Gate 必须能在 CPU 和小窗口上完成。
-- 尚未核验可用内存、磁盘余量、Bitcoin Core 数据目录和 PostgreSQL 实例容量。
+- 本机 2026-09-09 只读容量快照：`C:` 可用约 131.5 GB，`D:` 可用约 145.9 GB；未发现 Bitcoin Core 数据目录。尚未核验可用内存和 PostgreSQL 实例容量，也不能据剩余空间推定任何全链方案可行。
 - 不以工程工作量否决方向，但数据许可、可重放性、磁盘安全和可证伪性是硬门。
 - 任何 BigQuery 或外部源试探都必须先取得项目与账单授权并预设扫描字节和费用上限；快照、schema、主链／重组语义与成本记录未齐备前，不发起付费或大规模查询、不冻结数据源、不运行正式 Pilot。
 
@@ -178,7 +178,7 @@ arXiv `2609.01942` 报告三个训练图、一个验证图和一个测试图来�
 
 ### Gate 0：条件未关闭
 
-已完成仓库资产、上游公开代码、环境和主要风险盘点。以下输入缺失：正式任务书/立项题名；可用 Bitcoin Core 数据目录或其他原始链入口；数据版本与哈希；磁盘、内存和数据库容量；外部标签的获取和许可记录。
+已完成仓库资产、上游公开代码、环境和主要风险盘点。本机受控路径没有可用 Bitcoin Core 数据目录，仓库没有原始链快照；BigQuery 只完成字段级资格核验，尚无项目／账单授权和可复现导出。以下输入仍缺失：正式任务书/立项题名；已选原始链入口；数据版本、tip 与哈希；内存和数据库容量；外部标签的获取和许可记录。
 
 ### Gate 1：第一轮聚焦快照完成，仍未完全关闭
 
@@ -199,7 +199,7 @@ BitLINK 的当前证据边界不是“完整等价已排除”，而是“风险
 
 ### Gate 3A：v0.1 待冻结
 
-已形成[严格按时可见实体图预注册协议 v0.1](Gate3A-严格按时可见实体图预注册协议-v0.1-20260908.md)，预先写定 S0/S1/S2 分层、脚本单位、共同输入 union 日志、四窗口选择算法、主要结构统计量、1% 最小实际差异、时间块 bootstrap、三态停止规则和 test-once 纪律。`F_pub` 的科学语义、固定 revision、函数与参数已裁决，但本地等价实现和诊断边界测试仍在完成中。协议仍不是 `v1.0`：原始链来源、完整 schema/hash、过滤器可执行快照、BitLINK 风险处置和标签路线未全部关闭，不能运行正式 Pilot。
+已形成[严格按时可见实体图预注册协议 v0.1](Gate3A-严格按时可见实体图预注册协议-v0.1-20260908.md)，预先写定 S0/S1/S2 分层、脚本单位、共同输入 union 日志、四窗口选择算法、主要结构统计量、1% 最小实际差异、时间块 bootstrap、三态停止规则和 test-once 纪律。`F_pub` 的科学语义、固定 revision、函数与参数已裁决；纯标准库本地实现已通过合成边界测试和固定种子 10,000 样本的上游函数差分核验。Ruff 与独立 smoke 为 exit 0；pytest 测试体打印至 100% 后仍存在旧环境结束阶段挂起，未虚报为干净 exit 0。协议仍不是 `v1.0`：原始链来源、完整 schema/hash、BitLINK 风险处置和标签路线未全部关闭，不能运行正式 Pilot。
 
 纯标准库参考实现 `src/btcaml/data/asof_replay.py` 已锁定事件规范排序、按位置 cutoff、确定性并查集、只从历史支持取代表、future-only 中介语义以及 `p_merge`/`p_rewrite`；8 项定向测试通过。该实现只消费合成的已提取事件和端点，不含 raw adapter、CoinJoin 过滤、bootstrap 或真实数据，因此只关闭实现语义的局部歧义，不关闭数据 Gate，也不构成实验结果。
 

@@ -52,7 +52,9 @@ S0 输入必须能提供或确定性恢复：主链 `block_hash` 与 `block_heig
 
 数据 manifest 必须在任何效应统计前记录：来源、许可、访问日期、完整区块范围、tip hash、schema、行数、字节数、原始文件或分片 SHA-256、缺块／重复／重组处理、生成代码 revision 和 dirty 状态。外部查询还要记录查询文本、扫描字节上限、导出文件哈希和费用上限。
 
-当前本地 2.52 亿节点聚合库、最终 alias 表和 Zenodo `10.5281/zenodo.22239038` 都未满足该硬门。Google BigQuery `bigquery-public-data.crypto_bitcoin` 只是候选入口；在取得项目授权、费用上限并核验 schema 前不得查询或写成已选数据源。
+当前本地 2.52 亿节点聚合库、最终 alias 表和 Zenodo `10.5281/zenodo.22239038` 都未满足该硬门。2026-09-09 的只读盘点未在仓库、Windows 默认 Bitcoin Core 目录或受控候选路径发现 `blk*.dat`、原始 TXO 快照或 manifest，也未发现当前进程已设置 `BITCOIN_DB_URL` 或 Bitcoin RPC/BigQuery 连接环境变量；本机源因此仍未满足。
+
+[Google BigQuery 公共数据说明](https://docs.cloud.google.com/bigquery/public-data)、[GoogleCloudPlatform knowledge catalog](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/bundles/crypto_bitcoin/viz.html) 和 [Bitcoin ETL schema](https://github.com/blockchain-etl/bitcoin-etl/blob/master/README.md#schema) 已确认：交易含 `block_hash`、`block_number`、块内 `index` 和 `is_coinbase`；input 含 `spent_transaction_hash` 与 `spent_output_index`；output 含作为 locking script 的 `script_hex`、金额和输出序号。字段层面可通过父交易哈希与输出序号连接 prevout locking script，而 input 自身的 `script_hex` 是 scriptSig，不能误用。该核验只把 BigQuery 提升为“schema 上可继续审计的候选”，不等于选定数据源；当前快照版本、唯一主链／重组语义、实际缺失率、许可适用、项目与账单授权、扫描字节和导出成本均未关闭，仍不得发起查询或写成已选数据源。
 
 候选源只有在实际 schema、主链／重组语义、快照可复现性和成本授权逐项核验后才可入选。即使存在名为 `spent_transaction_hash` 的字段，也必须以官方 schema 和固定样本核验它确为 `vin.prevout` 的父交易哈希，不能仅凭列名推断。BigQuery 适配还必须保存查询文本、项目与账单授权、最大扫描字节、费用上限、查询时点和导出分片哈希；这些条件未关闭前不得发起付费或大规模查询。
 
@@ -94,7 +96,7 @@ PayJoin 与未被规则识别的协作交易记为“未判定”，不能当作
 
 ### 5.1 `F_pub` 固定实现清单
 
-以下函数名、默认参数与判定顺序来自固定 revision；本地实现不得根据论文文字静默改参数或修正上游行为：
+以下函数名、默认参数与判定顺序来自 [`BTCGraphConstruction` 固定源码树](https://github.com/hugoschnoering2/BTCGraphConstruction/tree/3becbc44a951abbe1e85d374a66340a639059d1c)；本地实现不得根据论文文字静默改参数或修正上游行为：
 
 | 规则族 | 固定函数 | 主 profile 参数 |
 |---|---|---|
@@ -103,6 +105,8 @@ PayJoin 与未被规则识别的协作交易记为“未判定”，不能当作
 | Wasabi 1.1 | `is_coinjoin_wasabi_1_1` | `epsilon=1,000,000`；`max_inputs_per_participants=7`；`min_num_participants=5`；`max_mixing_level=12` |
 | Wasabi 2.0 | `is_coinjoin_wasabi_2` | 固定 denomination 集；`max_inputs_per_participants=10`；`min_num_inputs=50`；`min_input_value=5,000` |
 | Whirlpool mix | `is_coinjoin_samourai` | `epsilon_max=20,000` |
+
+本地纯标准库移植位于 `src/btcaml/data/coinjoin_filters.py`，固定上游 revision 常量与上述 commit 一致。审计时临时取得的上游 `coinjoin.py` 原始字节 SHA-256 为 `D181C90D19DEE0C477C55A1797ADFCFA44914B2C6A351B664954252E371D0C01`；以随机种子 `20260909` 生成 10,000 个合法交易特征样本，对五个函数的返回值／异常类型逐项差分，结果完全一致。合成测试另覆盖规则边界、稳定 tie/order、Tx0 不进入主过滤、`F_wide`、`D_wp100k` 和论文 Tx0 诊断。Ruff 检查和独立纯标准库 smoke 均以 exit 0 完成；定向 9 项与全套 35 项 pytest 都打印到 `[100%]`，但当前旧环境在 pytest 结束阶段不退出，人工中断后进程码为 1，因此只能记录“测试体已全部执行且未显示失败”，不能记录为干净的 pytest exit 0。
 
 上游 `populate_coinjoins` 还调用 `is_tx0_samourai`，随后 `populate_alias(..., exclude_coinjoin=True)` 按 CoinJoin 表中的 `(block, position)` 整体排除交易。但固定源码中的 `TransactionFeatures.is_position_zero_in_output` 判断“输出下标 0 是否存在”，`is_tx0_samourai` 又在该属性为真时立即返回 `False`；这与论文要求“恰有一个金额为 0 的输出”不是同一谓词。正常非空输出序列包含下标 0，因此该实现不能作为论文 Tx0 规则的可信转录。
 
@@ -232,5 +236,6 @@ S1/S2 不得用测试表现反向改变 S0 阈值、窗口、过滤器、标签�
 | 2026-09-09 | 在冻结数据源前只实现纯标准库参考语义与合成契约测试 | 该实现不解析原始块、不访问标签、不计算真实效应；用于提前锁定 cutoff、域外中介、固定支持和两个主要统计量 | 8 项定向测试通过；不构成 S0 Pilot 或 v1.0 冻结 |
 | 2026-09-09 | BitLINK 独立全文核验仍未取得正文 | 官方作者来源只证明 temporal cluster linkage 高度相邻；最近邻 checklist 第 1–5 项均不能由元数据判定，正文不可得也不能作阴性证据 | 风险保持 Unknown；冻结版禁止“BitLINK 未做 `C_t/C_T`”与“首次 temporal cluster linkage”措辞 |
 | 2026-09-09 | 通过 DataCite 核验 Zenodo 数据集注册元数据 | 已确认版本 `1.0`、CC BY 4.0、数据作者、概念 DOI 和 deposited description；Zenodo 文件 API 仍超时，实际 manifest/checksum 与 lineage 未取得 | 书目与许可关闭；作为 as-of 重放输入仍 No-Go |
-| 2026-09-09 | `F_pub` 冻结为固定 revision 的五个实际 mix detector，不含 Tx0 | 论文第 12–14 页把 Tx0 定义为 pre-mix 准备，第 19 页的总 CoinJoin 统计明确排除 Tx0；固定源码又把输出位置 0 与零值输出混淆。机械纳入会掩盖实现缺陷，按论文“修好”则会静默改变固定实现 | 主语义已裁决；待本地等价实现与合成测试后关闭清单第 3 项 |
-| 2026-09-09 | 论文—实现参数差异仅作预注册诊断 | 固定源码与论文的 Tx0、Whirlpool mix 参数不一致；`D_wp100k` 和 `D_tx0-paper` 用于报告差集，不能替代或事后改写主 profile | 待实现；差集若改变 1% 三态决定则结论降级为过滤器敏感 |
+| 2026-09-09 | `F_pub` 冻结为固定 revision 的五个实际 mix detector，不含 Tx0 | 论文第 12–14 页把 Tx0 定义为 pre-mix 准备，第 19 页的总 CoinJoin 统计明确排除 Tx0；固定源码又把输出位置 0 与零值输出混淆。机械纳入会掩盖实现缺陷，按论文“修好”则会静默改变固定实现 | 主语义、本地实现与合成／随机差分核验已关闭清单第 3 项 |
+| 2026-09-09 | 论文—实现参数差异仅作预注册诊断 | 固定源码与论文的 Tx0、Whirlpool mix 参数不一致；`D_wp100k` 和 `D_tx0-paper` 用于报告差集，不能替代或事后改写主 profile | 合成边界实现完成；真实差集仍须等合格数据源，若改变 1% 三态决定则结论降级为过滤器敏感 |
+| 2026-09-09 | 本机无可用原始链快照；BigQuery 仅保留为候选 | 默认 Bitcoin Core 目录和仓库数据目录无 `blk*.dat`/TXO manifest；Google 官方 schema 支持 prevout→output `script_hex` 连接，但未证明快照、主链／重组、缺失率和费用边界 | 数据硬门未关闭；不查询、不运行 S0 |
