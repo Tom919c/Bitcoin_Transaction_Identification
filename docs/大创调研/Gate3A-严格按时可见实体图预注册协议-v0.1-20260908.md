@@ -60,6 +60,8 @@ S0 输入必须能提供或确定性恢复：主链 `block_hash` 与 `block_heig
 
 [Blockchain ETL 公共数据登记](https://github.com/blockchain-etl/public-datasets/blob/master/README.md)只报告 Bitcoin 数据相对链头滞后 3 块；[Bitcoin ETL 流式命令说明](https://github.com/blockchain-etl/bitcoin-etl/blob/master/README.md#stream)把设置 lag 描述为处理链重组的最简单办法，因为离链头越远越不易重组。该证据说明存在运行时缓冲策略，不证明公共表具有不可变历史版本、完整重组对账或唯一主链保证。当前审阅到的公开 ETL/Airflow 路径也没有提供可直接引用的历史快照标识。因此，本项目只能把一次带查询时点、表元数据、tip hash、完整性结果、外部区块哈希交叉核验和导出哈希的冻结导出视为候选输入；3 块 lag 本身不能关闭重组硬门。
 
+2026-09-09 官方入口审计审阅了 Bitcoin ETL README、public-datasets README、[Bitcoin ETL streaming 文档](https://github.com/blockchain-etl/blockchain-etl-streaming)和公开架构说明。在已审官方文档中，未发现无需部署者凭证即可访问、带版本标识的历史 GCS 快照；streaming 部署关于 GCS 的说明要求使用者创建并配置自己的 GCS bucket，以保存 `last_synced_block.txt` 状态，未给出公开历史数据对象、manifest 或回放保证。已审文档把 Pub/Sub 描述为持续流式出口，并报告 Bitcoin lag 为 3 块，但未承诺公共 topic 可从创世块回放到冻结高度的完整、版本化前缀；当前没有独立冻结导出／快照和完整性审计，不能把它资格化为 S0 输入。在当前已审官方入口范围和本地资产条件下，待资格化候选暂收束为：(1) BigQuery 经授权 dry-run、资格查询、冻结导出；(2) 用户提供的 Bitcoin Core datadir 或 raw TXO snapshot，经版本、tip、hash、容量审计。该收束不表示已经穷尽其他可能满足硬门的原始链来源。
+
 候选源只有在实际 schema、主链／重组语义、快照可复现性和成本授权逐项核验后才可入选。即使存在名为 `spent_transaction_hash` 的字段，也必须以官方 schema 和固定样本核验它确为 `vin.prevout` 的父交易哈希，不能仅凭列名推断。BigQuery 适配还必须保存查询文本、项目与账单授权、最大扫描字节、费用上限、查询时点和导出分片哈希；这些条件未关闭前不得发起付费或大规模查询。
 
 资格查询固定为 `scripts/research/qualify_bigquery_crypto_bitcoin_v0_1.sql`，记录模板固定为 `configs/data/bigquery_source_qualification_manifest_v0_1.json`。查询只检查从创世块到预先冻结末端的区块连续性、唯一位置、父 outpoint、locking script 和 tip，不计算 `p_merge`、`p_rewrite` 或任何标签／模型结果。必须先对同一查询和参数 dry-run，记录估算扫描字节，并在真实运行中设置不高于人工批准额度的 `maximum_bytes_billed`；未获项目与账单授权时保持 `pending_authorization`，不得执行。任何只从局部高度开始的检查只能算适配器 smoke，不能代替正式资格查询，因为 `C_t` 的共同输入 union 必须从创世块累计。
@@ -251,5 +253,6 @@ S1/S2 不得用测试表现反向改变 S0 阈值、窗口、过滤器、标签�
 | 2026-09-09 | 论文—实现参数差异仅作预注册诊断 | 固定源码与论文的 Tx0、Whirlpool mix 参数不一致；`D_wp100k` 和 `D_tx0-paper` 用于报告差集，不能替代或事后改写主 profile | 合成边界实现完成；真实差集仍须等合格数据源，若改变 1% 三态决定则结论降级为过滤器敏感 |
 | 2026-09-09 | 本机无可用原始链快照；BigQuery 仅保留为候选 | 默认 Bitcoin Core 目录和仓库数据目录无 `blk*.dat`/TXO manifest；Google 官方 schema 支持 prevout→output `script_hex` 连接，但未证明快照、主链／重组、缺失率和费用边界 | 数据硬门未关闭；不查询、不运行 S0 |
 | 2026-09-09 | 固定 BigQuery 候选源资格查询与 manifest 模板，但不执行 | 资格查询从创世块累计并只读完整性；公开管线的 3 块 lag 是运行缓冲，不是不可变快照或完整重组证明；局部窗口不能替代 `C_t` 前缀 | 等待项目／账单授权、dry-run 字节上限、tip 外部核验与冻结导出哈希 |
+| 2026-09-09 | 官方入口审计暂时收束待资格化数据候选 | 已审文档未给出无需部署者凭证即可访问、带版本标识的历史 GCS 快照，也未承诺公共 Pub/Sub topic 可回放完整、版本化的创世块前缀；当前已审范围和本地资产条件下，保留经授权 BigQuery dry-run／资格查询／冻结导出，或用户提供的 Bitcoin Core datadir/raw TXO snapshot，不排除以后以同一硬门审计其他原始链来源 | 数据硬门未关闭；不查询、不运行 S0 |
 | 2026-09-09 | `v1.0` 仅授权无标签 S0；S1/S2 必须另行冻结 | 当前没有可审计标签时间与许可；把 S0 Go 自动扩张为模型授权会绕过标签、调参与 test-once Gate | 标签和模型均不进入当前协议执行范围 |
 | 2026-09-09 | 冻结原始脚本字节标识和窄 `provably-unspendable` 规则 | 地址字符串和脚本规范化会合并或丢失标识；一般可花费性判断超出 S0 所需 | 参考实现与边界测试完成；与 as-of/CoinJoin 合计 23 项在禁用第三方 pytest 自动插件后干净通过 |

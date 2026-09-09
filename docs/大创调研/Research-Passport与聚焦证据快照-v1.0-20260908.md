@@ -2,7 +2,7 @@
 
 日期：2026-09-08
 
-状态：Gate 0 条件未关闭；Gate 1 聚焦增量审计已完成第一轮，Yin 2019 已全文闭环，BitLINK 作者幻灯片已核验但论文正文与 Zenodo 工件仍未闭环；Gate 3A 已形成 v0.1 待冻结草案
+状态：Gate 0 条件未关闭；Gate 1 聚焦增量审计已完成第一轮，Yin 2019 已全文闭环，BitLINK 作者幻灯片已核验但论文正文仍未闭环；Zenodo 最小训练包已核验并对 PIT 重放作 No-Go，其他大包及内部语义保持 Unknown；Gate 3A 已形成 v0.1 待冻结草案
 
 研究分支：`asof-entity-graph-pilot`
 
@@ -52,7 +52,7 @@
 | 协作交易过滤 | 已核验固定 revision `3becbc44a951abbe1e85d374a66340a639059d1c` 的五个实际 mix detector、Tx0 detector、特征定义和聚类排除调用链 | 是规则检测结果，不是真值；源码 Tx0 条件与论文不等价，参数也有差异；PayJoin 仍未判定 | 上游 `blockchain/special_transactions/coinjoin.py`、`blockchain/models/transaction.py`、`steps/populate_coinjoin.py`、`steps/populate_alias.py`、`database/utils.py` |
 | 本地原始块解析片段 | 可解析部分原始块、交易和脚本结构 | 不是完整、已验证的全链索引与 prevout 管线 | `scripts/scan_block_sighash.py` |
 | 资金流证书代码 | 可检查局部 DAG 与价值守恒性质 | 与地址聚类重放不是同一任务，只可复用检查模式 | `src/btcaml/analysis/flow_certificate.py` |
-| 实验可追溯模式 | 历史 SSL manifest 提供版本、依赖和产物哈希范式 | 本分支未发现章程所述 `experiments/experiment_registry.csv`；正式运行前必须建立或恢复唯一登记入口 | 既有 SSL 产物与 `experiments/` |
+| 实验可追溯模式 | 历史 SSL manifest 提供版本、依赖和产物哈希范式 | `experiments/experiment_registry.csv` 已创建且只有冻结表头，尚无实验行；正式运行前必须登记 planned 行 | 既有 SSL 产物与 `experiments/` |
 | 当前工作树与本机原始链 | `data/README.md` 存在；已检查仓库与受控的 Windows 默认 Bitcoin Core 路径 | 仓库 `data/` 为空；未发现 `blk*.dat`、原始 TXO/manifest 或 Bitcoin Core datadir；当前进程也未设置数据连接变量 | 本地只读检查，2026-09-09 |
 
 `BITCOIN_DB_URL` 是外部敏感配置。本记录不保存连接串；任何诊断不得打印凭据。
@@ -60,6 +60,8 @@
 BigQuery `crypto_bitcoin` 仍是候选，但字段语义已得到更强的一手核验。[Google BigQuery 公共数据说明](https://docs.cloud.google.com/bigquery/public-data)、[GoogleCloudPlatform knowledge catalog](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/bundles/crypto_bitcoin/viz.html) 与 [Bitcoin ETL schema](https://github.com/blockchain-etl/bitcoin-etl/blob/master/README.md#schema) 一致确认：交易记录含区块哈希、高度、块内 index 与 coinbase 标志；input 含 `spent_transaction_hash` 和 `spent_output_index`；output 含金额与 locking `script_hex`。因此可用父交易键连接到 output 恢复 prevout script；input 自身的 `script_hex` 是 scriptSig，不能替代 locking script。尚未关闭的是实际表版本／快照、唯一主链与重组处理、缺失／重复率、许可适用、查询成本与导出 hash，故仍不能计为已满足数据硬门。现有 raw-block parser 也只是局部解析片段。
 
 公开管线层面的证据进一步收紧了这一判断。[Blockchain ETL 公共数据登记](https://github.com/blockchain-etl/public-datasets/blob/master/README.md)报告 Bitcoin lag 为 3 块，[Bitcoin ETL](https://github.com/blockchain-etl/bitcoin-etl/blob/master/README.md#stream)把 lag 称为处理重组的最简单方法；这只能说明链头缓冲，不能证明公共表提供不可变 vintage 或完整重组对账。已新增一份从创世块开始、只计算数据完整性的资格查询和一份不含凭据的 manifest 模板；两者当前均未执行。局部高度 smoke 不足以资格化正式 `C_t`，因为共同输入 union 依赖完整历史前缀。
+
+2026-09-09 官方入口审计审阅了 Bitcoin ETL README、public-datasets README、[Bitcoin ETL streaming 文档](https://github.com/blockchain-etl/blockchain-etl-streaming)和公开架构说明。在已审官方文档中，未发现无需部署者凭证即可访问、带版本标识的历史 GCS 快照；streaming 部署关于 GCS 的说明要求使用者创建并配置自己的 GCS bucket，以保存 `last_synced_block.txt` 状态，未给出公开历史数据对象、manifest 或回放保证。已审文档把 Pub/Sub 描述为持续流式出口，并报告 Bitcoin lag 为 3 块，但未承诺公共 topic 可从创世块回放到冻结高度的完整、版本化前缀；当前没有独立冻结导出／快照和完整性审计，不能把它资格化为 S0 输入。在当前已审官方入口范围和本地资产条件下，待资格化候选暂收束为：(1) BigQuery 经授权 dry-run、资格查询、冻结导出；(2) 用户提供的 Bitcoin Core datadir 或 raw TXO snapshot，经版本、tip、hash、容量审计。该收束不表示已经穷尽其他可能满足硬门的原始链来源。
 
 ### 2.4 算力、环境与预算
 
@@ -223,7 +225,7 @@ BitLINK 的当前证据边界不是“完整等价已排除”，而是“风险
 ## 6. 下一步验收顺序
 
 1. 补齐 Gate 1 的三项全文/工件核验并冻结去重后的聚焦来源表。
-2. 取得原始链入口授权：若采用 BigQuery，先 dry-run 已冻结资格查询并由人工确认扫描上限，再核验 tip、主链、父 outpoint、脚本与冻结导出哈希；若改用 Bitcoin Core/TXO 快照，则提供其版本、许可、tip、manifest、哈希与容量。两条路线只选一条进入正式适配。
+2. 同步当前已审入口收束：优先从经授权 BigQuery dry-run、资格查询、冻结导出，或用户提供的 Bitcoin Core datadir/raw TXO snapshot 中选择一条；前者需核验扫描上限、tip、主链、父 outpoint、脚本与冻结导出哈希，后者需提供版本、许可、tip、manifest、哈希与容量。若出现其他原始链来源，必须先按同一硬门重新资格化，不能直接进入正式适配。
 3. Gate 3A 的窗口、过滤器、脚本单位、1% 数值门、登记字段和 S0-only 范围已预先写定；原始链来源与完整性 blocker 关闭后才能升级为 v1.0。
 4. 冻结前仅维护不访问真实数据的参考语义与合成契约测试；协议升级为 v1.0 后，再实现 union provenance logger、已选数据源适配器和正式运行检查。
 5. 运行小窗口无模型数据 Gate，由 Research Director 根据预注册阈值作 Go/No-Go；只有 Go 才进入模型、校准、拒判和系统接入。
