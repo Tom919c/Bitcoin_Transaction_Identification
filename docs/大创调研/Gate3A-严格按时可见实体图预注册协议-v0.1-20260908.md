@@ -56,7 +56,11 @@ S0 输入必须能提供或确定性恢复：主链 `block_hash` 与 `block_heig
 
 [Google BigQuery 公共数据说明](https://docs.cloud.google.com/bigquery/public-data)、[GoogleCloudPlatform knowledge catalog](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/bundles/crypto_bitcoin/viz.html) 和 [Bitcoin ETL schema](https://github.com/blockchain-etl/bitcoin-etl/blob/master/README.md#schema) 已确认：交易含 `block_hash`、`block_number`、块内 `index` 和 `is_coinbase`；input 含 `spent_transaction_hash` 与 `spent_output_index`；output 含作为 locking script 的 `script_hex`、金额和输出序号。字段层面可通过父交易哈希与输出序号连接 prevout locking script，而 input 自身的 `script_hex` 是 scriptSig，不能误用。该核验只把 BigQuery 提升为“schema 上可继续审计的候选”，不等于选定数据源；当前快照版本、唯一主链／重组语义、实际缺失率、许可适用、项目与账单授权、扫描字节和导出成本均未关闭，仍不得发起查询或写成已选数据源。
 
+[Blockchain ETL 公共数据登记](https://github.com/blockchain-etl/public-datasets/blob/master/README.md)只报告 Bitcoin 数据相对链头滞后 3 块；[Bitcoin ETL 流式命令说明](https://github.com/blockchain-etl/bitcoin-etl/blob/master/README.md#stream)把设置 lag 描述为处理链重组的最简单办法，因为离链头越远越不易重组。该证据说明存在运行时缓冲策略，不证明公共表具有不可变历史版本、完整重组对账或唯一主链保证。当前审阅到的公开 ETL/Airflow 路径也没有提供可直接引用的历史快照标识。因此，本项目只能把一次带查询时点、表元数据、tip hash、完整性结果、外部区块哈希交叉核验和导出哈希的冻结导出视为候选输入；3 块 lag 本身不能关闭重组硬门。
+
 候选源只有在实际 schema、主链／重组语义、快照可复现性和成本授权逐项核验后才可入选。即使存在名为 `spent_transaction_hash` 的字段，也必须以官方 schema 和固定样本核验它确为 `vin.prevout` 的父交易哈希，不能仅凭列名推断。BigQuery 适配还必须保存查询文本、项目与账单授权、最大扫描字节、费用上限、查询时点和导出分片哈希；这些条件未关闭前不得发起付费或大规模查询。
+
+资格查询固定为 `scripts/research/qualify_bigquery_crypto_bitcoin_v0_1.sql`，记录模板固定为 `configs/data/bigquery_source_qualification_manifest_v0_1.json`。查询只检查从创世块到预先冻结末端的区块连续性、唯一位置、父 outpoint、locking script 和 tip，不计算 `p_merge`、`p_rewrite` 或任何标签／模型结果。必须先对同一查询和参数 dry-run，记录估算扫描字节，并在真实运行中设置不高于人工批准额度的 `maximum_bytes_billed`；未获项目与账单授权时保持 `pending_authorization`，不得执行。任何只从局部高度开始的检查只能算适配器 smoke，不能代替正式资格查询，因为 `C_t` 的共同输入 union 必须从创世块累计。
 
 ### 3.2 四个历史截止的确定规则
 
@@ -239,3 +243,4 @@ S1/S2 不得用测试表现反向改变 S0 阈值、窗口、过滤器、标签�
 | 2026-09-09 | `F_pub` 冻结为固定 revision 的五个实际 mix detector，不含 Tx0 | 论文第 12–14 页把 Tx0 定义为 pre-mix 准备，第 19 页的总 CoinJoin 统计明确排除 Tx0；固定源码又把输出位置 0 与零值输出混淆。机械纳入会掩盖实现缺陷，按论文“修好”则会静默改变固定实现 | 主语义、本地实现与合成／随机差分核验已关闭清单第 3 项 |
 | 2026-09-09 | 论文—实现参数差异仅作预注册诊断 | 固定源码与论文的 Tx0、Whirlpool mix 参数不一致；`D_wp100k` 和 `D_tx0-paper` 用于报告差集，不能替代或事后改写主 profile | 合成边界实现完成；真实差集仍须等合格数据源，若改变 1% 三态决定则结论降级为过滤器敏感 |
 | 2026-09-09 | 本机无可用原始链快照；BigQuery 仅保留为候选 | 默认 Bitcoin Core 目录和仓库数据目录无 `blk*.dat`/TXO manifest；Google 官方 schema 支持 prevout→output `script_hex` 连接，但未证明快照、主链／重组、缺失率和费用边界 | 数据硬门未关闭；不查询、不运行 S0 |
+| 2026-09-09 | 固定 BigQuery 候选源资格查询与 manifest 模板，但不执行 | 资格查询从创世块累计并只读完整性；公开管线的 3 块 lag 是运行缓冲，不是不可变快照或完整重组证明；局部窗口不能替代 `C_t` 前缀 | 等待项目／账单授权、dry-run 字节上限、tip 外部核验与冻结导出哈希 |

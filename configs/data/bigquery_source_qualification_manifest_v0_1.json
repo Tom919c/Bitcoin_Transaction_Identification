@@ -1,0 +1,90 @@
+{
+  "manifest_schema": "btcaml.bigquery_source_qualification.v0.1",
+  "status": "pending_authorization",
+  "purpose": "Qualify a frozen BigQuery export as a replay source; this is not an S0 effect run.",
+  "protocol": {
+    "path": "docs/大创调研/Gate3A-严格按时可见实体图预注册协议-v0.1-20260908.md",
+    "version": "v0.1",
+    "formal_start_height": 0,
+    "end_height": null,
+    "end_height_selection_rule": "Freeze before reading any partition-drift or graph-rewrite effect."
+  },
+  "authorization": {
+    "approved": false,
+    "approved_by": null,
+    "approved_at_utc": null,
+    "billing_project_alias": null,
+    "authorization_record": null,
+    "credentials_recorded_here": false
+  },
+  "cost_guard": {
+    "dry_run_completed": false,
+    "dry_run_at_utc": null,
+    "estimated_bytes_processed": null,
+    "maximum_bytes_billed": null,
+    "approved_cost_ceiling": null,
+    "currency": null
+  },
+  "query": {
+    "path": "scripts/research/qualify_bigquery_crypto_bitcoin_v0_1.sql",
+    "sha256": null,
+    "job_id": null,
+    "location": null,
+    "started_at_utc": null,
+    "completed_at_utc": null
+  },
+  "source": {
+    "project": "bigquery-public-data",
+    "dataset": "crypto_bitcoin",
+    "source_observed_at_utc": null,
+    "dataset_etag": null,
+    "tables": {
+      "blocks": {
+        "etag": null,
+        "last_modified_time": null,
+        "num_rows": null,
+        "num_bytes": null,
+        "schema_sha256": null,
+        "partitioning": null
+      },
+      "transactions": {
+        "etag": null,
+        "last_modified_time": null,
+        "num_rows": null,
+        "num_bytes": null,
+        "schema_sha256": null,
+        "partitioning": null
+      }
+    }
+  },
+  "qualification_results": {
+    "required_status_rule": "Every SQL result except reused_parent_outpoint_history must be pass; job completion alone is insufficient.",
+    "result_sha256": null,
+    "selected_tip_height": null,
+    "selected_tip_hash": null,
+    "selected_tip_timestamp": null,
+    "external_tip_source": null,
+    "external_tip_observed_at_utc": null,
+    "external_tip_hash": null,
+    "external_tip_match": null,
+    "all_required_checks_passed": null,
+    "exceptions": [],
+    "reused_parent_outpoint_history_review": null
+  },
+  "export": {
+    "performed": false,
+    "query_or_job_ids": [],
+    "block_range": null,
+    "row_counts": null,
+    "total_bytes": null,
+    "files": [],
+    "schema_manifest_sha256": null,
+    "export_manifest_sha256": null
+  },
+  "decision": {
+    "status": "blocked",
+    "reason": "Authorization, dry-run cost, source snapshot, integrity results, external tip check, and export hashes are incomplete.",
+    "decided_by": "Research Director",
+    "decided_at_utc": null
+  }
+}

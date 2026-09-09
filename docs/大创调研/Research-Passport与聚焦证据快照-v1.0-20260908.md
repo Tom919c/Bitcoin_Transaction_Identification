@@ -59,6 +59,8 @@
 
 BigQuery `crypto_bitcoin` 仍是候选，但字段语义已得到更强的一手核验。[Google BigQuery 公共数据说明](https://docs.cloud.google.com/bigquery/public-data)、[GoogleCloudPlatform knowledge catalog](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/bundles/crypto_bitcoin/viz.html) 与 [Bitcoin ETL schema](https://github.com/blockchain-etl/bitcoin-etl/blob/master/README.md#schema) 一致确认：交易记录含区块哈希、高度、块内 index 与 coinbase 标志；input 含 `spent_transaction_hash` 和 `spent_output_index`；output 含金额与 locking `script_hex`。因此可用父交易键连接到 output 恢复 prevout script；input 自身的 `script_hex` 是 scriptSig，不能替代 locking script。尚未关闭的是实际表版本／快照、唯一主链与重组处理、缺失／重复率、许可适用、查询成本与导出 hash，故仍不能计为已满足数据硬门。现有 raw-block parser 也只是局部解析片段。
 
+公开管线层面的证据进一步收紧了这一判断。[Blockchain ETL 公共数据登记](https://github.com/blockchain-etl/public-datasets/blob/master/README.md)报告 Bitcoin lag 为 3 块，[Bitcoin ETL](https://github.com/blockchain-etl/bitcoin-etl/blob/master/README.md#stream)把 lag 称为处理重组的最简单方法；这只能说明链头缓冲，不能证明公共表提供不可变 vintage 或完整重组对账。已新增一份从创世块开始、只计算数据完整性的资格查询和一份不含凭据的 manifest 模板；两者当前均未执行。局部高度 smoke 不足以资格化正式 `C_t`，因为共同输入 union 依赖完整历史前缀。
+
 ### 2.4 算力、环境与预算
 
 - 依赖真源为 `pyproject.toml` 与 `uv.lock`；新研究运行使用仓库级 `uv` 环境。
@@ -66,6 +68,7 @@ BigQuery `crypto_bitcoin` 仍是候选，但字段语义已得到更强的一手
 - 本机 2026-09-09 只读容量快照：`C:` 可用约 131.5 GB，`D:` 可用约 145.9 GB；未发现 Bitcoin Core 数据目录。尚未核验可用内存和 PostgreSQL 实例容量，也不能据剩余空间推定任何全链方案可行。
 - 不以工程工作量否决方向，但数据许可、可重放性、磁盘安全和可证伪性是硬门。
 - 任何 BigQuery 或外部源试探都必须先取得项目与账单授权并预设扫描字节和费用上限；快照、schema、主链／重组语义与成本记录未齐备前，不发起付费或大规模查询、不冻结数据源、不运行正式 Pilot。
+- BigQuery 资格查询必须先以完全相同的文件、参数做 dry-run，再把估算扫描字节、人工批准的 `maximum_bytes_billed`、查询时点、表元数据与查询哈希写入 manifest。局部窗口结果不允许支撑正式 Go/No-Go。
 
 ### 2.5 行政、伦理与许可
 
@@ -178,7 +181,7 @@ arXiv `2609.01942` 报告三个训练图、一个验证图和一个测试图来�
 
 ### Gate 0：条件未关闭
 
-已完成仓库资产、上游公开代码、环境和主要风险盘点。本机受控路径没有可用 Bitcoin Core 数据目录，仓库没有原始链快照；BigQuery 只完成字段级资格核验，尚无项目／账单授权和可复现导出。以下输入仍缺失：正式任务书/立项题名；已选原始链入口；数据版本、tip 与哈希；内存和数据库容量；外部标签的获取和许可记录。
+已完成仓库资产、上游公开代码、环境和主要风险盘点。本机受控路径没有可用 Bitcoin Core 数据目录，仓库没有原始链快照；BigQuery 已完成字段与公开管线语义审计，并已准备资格查询及 manifest，但尚无项目／账单授权、dry-run 费用记录和可复现导出。以下输入仍缺失：正式任务书/立项题名；已选原始链入口；数据版本、tip 与哈希；内存和数据库容量；外部标签的获取和许可记录。
 
 ### Gate 1：第一轮聚焦快照完成，仍未完全关闭
 
@@ -208,7 +211,7 @@ BitLINK 的当前证据边界不是“完整等价已排除”，而是“风险
 ## 6. 下一步验收顺序
 
 1. 补齐 Gate 1 的三项全文/工件核验并冻结去重后的聚焦来源表。
-2. 只读确认本机或获批来源中是否存在可用原始块/TXO 输入、版本、许可、哈希与容量。
+2. 取得原始链入口授权：若采用 BigQuery，先 dry-run 已冻结资格查询并由人工确认扫描上限，再核验 tip、主链、父 outpoint、脚本与冻结导出哈希；若改用 Bitcoin Core/TXO 快照，则提供其版本、许可、tip、manifest、哈希与容量。两条路线只选一条进入正式适配。
 3. 审查 Gate 3A v0.1 的窗口、过滤器和 1% 数值门；关闭数据与实现 blocker 后升级为 v1.0，仍须先冻结阈值再看数据。
 4. 冻结前仅维护不访问真实数据的参考语义与合成契约测试；协议升级为 v1.0 后，再实现 union provenance logger、数据适配器和正式运行检查。
 5. 运行小窗口无模型数据 Gate，由 Research Director 根据预注册阈值作 Go/No-Go；只有 Go 才进入模型、校准、拒判和系统接入。
