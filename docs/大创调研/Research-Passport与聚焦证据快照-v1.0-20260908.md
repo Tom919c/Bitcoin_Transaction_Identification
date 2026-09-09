@@ -2,7 +2,7 @@
 
 日期：2026-09-08
 
-状态：Gate 0 条件未关闭；Gate 1 聚焦增量审计已完成第一轮，Yin 2019 已全文闭环，BitLINK 作者幻灯片已核验但论文正文仍未闭环；Zenodo 最小训练包已核验并对 PIT 重放作 No-Go，其他大包及内部语义保持 Unknown；Gate 3A 已形成 v0.1 待冻结草案
+状态：Gate 0 条件未关闭；Gate 1 聚焦增量审计已完成第一轮，Yin 2019 已全文闭环，BitLINK 作者幻灯片已核验但论文正文仍未闭环；Zenodo 最小训练包已核验并对 PIT 重放作 No-Go，其他大包及内部语义保持 Unknown；AWS 公共比特币数据已完成匿名入口、对象清单与样本 schema 审计，但许可、快照、全量完整性和资源未关闭；Gate 3A 已形成 v0.1 待冻结草案
 
 研究分支：`asof-entity-graph-pilot`
 
@@ -63,11 +63,13 @@ BigQuery `crypto_bitcoin` 仍是候选，但字段语义已得到更强的一手
 
 2026-09-09 官方入口审计审阅了 Bitcoin ETL README、public-datasets README、[Bitcoin ETL streaming 文档](https://github.com/blockchain-etl/blockchain-etl-streaming)和公开架构说明。在已审官方文档中，未发现无需部署者凭证即可访问、带版本标识的历史 GCS 快照；streaming 部署关于 GCS 的说明要求使用者创建并配置自己的 GCS bucket，以保存 `last_synced_block.txt` 状态，未给出公开历史数据对象、manifest 或回放保证。已审文档把 Pub/Sub 描述为持续流式出口，并报告 Bitcoin lag 为 3 块，但未承诺公共 topic 可从创世块回放到冻结高度的完整、版本化前缀；当前没有独立冻结导出／快照和完整性审计，不能把它资格化为 S0 输入。在当前已审官方入口范围和本地资产条件下，待资格化候选暂收束为：(1) BigQuery 经授权 dry-run、资格查询、冻结导出；(2) 用户提供的 Bitcoin Core datadir 或 raw TXO snapshot，经版本、tip、hash、容量审计。该收束不表示已经穷尽其他可能满足硬门的原始链来源。
 
+2026-09-10 的增量审计新增 [AWS 公共比特币数据源资格审计](AWS公共比特币数据源资格审计-20260910.md)。AWS Open Data Registry 允许无账户匿名访问 `s3://aws-public-blockchain/v1.0/btc/`；实际 Parquet 样本包含 block hash/height/prevhash、块内交易 index、coinbase、input prevout 和 parent output locking `script_hex` 等必要字段，指定现代交易也与独立 Blockstream API 一致。该证据只把 AWS 提升为 schema 与访问方式已做样本核验的候选。清单时点的 transaction 对象约 2,026.838 GiB，远超本机可用空间；桶未启用 S3 Versioning，且样本对象 `VersionId=null`，历史对象可被替换；金额实际为 `double`；Registry 的 MIT-0 链接指向措辞限定为软件／文档的许可文本。许可适用、由项目控制且可复查的不可变冻结导出、全量主链／prevout 完整性、整数聪转换和资源门仍为 pending，所以不关闭数据硬门，也不启动 S0。若以后采用早期完整前缀，末端必须在读取效应前只按资源规则预注册，并从创世块完整处理到每个 `T_j`；其结论不得外推到当前时期。
+
 ### 2.4 算力、环境与预算
 
-- 依赖真源为 `pyproject.toml` 与 `uv.lock`；新研究运行使用仓库级 `uv` 环境。
+- 治理目标要求以 `pyproject.toml` 与 `uv.lock` 作为依赖真源并使用仓库级 `uv` 环境；当前工作树的 `pyproject.toml` 只有项目／pytest 元数据，未找到 `uv.lock`，因此该环境门尚未实现。AWS 样本审计使用的是未纳入锁文件的本机 Python 3.12.3 与 PyArrow 16.1.0，只能算资格检查，不能冒充正式可复现运行环境。
 - 当前隔离工作树未检测到可用的 `nvidia-smi`，不能宣称有 GPU。无模型数据 Gate 必须能在 CPU 和小窗口上完成。
-- 本机 2026-09-09 只读容量快照：`C:` 可用约 131.5 GB，`D:` 可用约 145.9 GB；未发现 Bitcoin Core 数据目录。尚未核验可用内存和 PostgreSQL 实例容量，也不能据剩余空间推定任何全链方案可行。
+- 本机 2026-09-10 只读资源快照：`C:` 可用 125,963,497,472 字节，`D:` 可用 139,442,827,264 字节，物理内存 29,734,326,272 字节；未发现 Bitcoin Core 数据目录。尚未核验 PostgreSQL 实例容量，也不能据剩余空间推定任何全链方案可行。
 - 不以工程工作量否决方向，但数据许可、可重放性、磁盘安全和可证伪性是硬门。
 - 任何 BigQuery 或外部源试探都必须先取得项目与账单授权并预设扫描字节和费用上限；快照、schema、主链／重组语义与成本记录未齐备前，不发起付费或大规模查询、不冻结数据源、不运行正式 Pilot。
 - BigQuery 资格查询必须先以完全相同的文件、参数做 dry-run，再把估算扫描字节、人工批准的 `maximum_bytes_billed`、查询时点、表元数据与查询哈希写入 manifest。局部窗口结果不允许支撑正式 Go/No-Go。

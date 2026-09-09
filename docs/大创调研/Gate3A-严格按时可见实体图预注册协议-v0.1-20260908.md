@@ -62,6 +62,8 @@ S0 输入必须能提供或确定性恢复：主链 `block_hash` 与 `block_heig
 
 2026-09-09 官方入口审计审阅了 Bitcoin ETL README、public-datasets README、[Bitcoin ETL streaming 文档](https://github.com/blockchain-etl/blockchain-etl-streaming)和公开架构说明。在已审官方文档中，未发现无需部署者凭证即可访问、带版本标识的历史 GCS 快照；streaming 部署关于 GCS 的说明要求使用者创建并配置自己的 GCS bucket，以保存 `last_synced_block.txt` 状态，未给出公开历史数据对象、manifest 或回放保证。已审文档把 Pub/Sub 描述为持续流式出口，并报告 Bitcoin lag 为 3 块，但未承诺公共 topic 可从创世块回放到冻结高度的完整、版本化前缀；当前没有独立冻结导出／快照和完整性审计，不能把它资格化为 S0 输入。在当前已审官方入口范围和本地资产条件下，待资格化候选暂收束为：(1) BigQuery 经授权 dry-run、资格查询、冻结导出；(2) 用户提供的 Bitcoin Core datadir 或 raw TXO snapshot，经版本、tip、hash、容量审计。该收束不表示已经穷尽其他可能满足硬门的原始链来源。
 
+2026-09-10 新增的 [AWS 公共比特币数据源资格审计](AWS公共比特币数据源资格审计-20260910.md)确认了第三个候选：`s3://aws-public-blockchain/v1.0/btc/` 可无账户匿名读取，样本字段提供重建／核验本节所需主链、顺序、prevout 与 locking script 的必要字段。它尚不具备 S0 资格：公开桶未启用 S3 Versioning，且样本对象 `VersionId=null`，当前 transaction 对象约 2,026.838 GiB，金额为 `double`，且 Registry 的 MIT-0 指针没有明确解决 S3 数据对象的保存／再分发许可范围。任何采用该源的冻结版必须先保存选定完整前缀中由项目控制且可复查的不可变冻结导出（本地或经授权存储）与逐对象校验清单，全量通过主链／prevout／金额完整性，并关闭资源与许可门。局部样本、局部窗口或匿名访问均不能代替从创世块到每个 `T_j` 的完整前缀。
+
 候选源只有在实际 schema、主链／重组语义、快照可复现性和成本授权逐项核验后才可入选。即使存在名为 `spent_transaction_hash` 的字段，也必须以官方 schema 和固定样本核验它确为 `vin.prevout` 的父交易哈希，不能仅凭列名推断。BigQuery 适配还必须保存查询文本、项目与账单授权、最大扫描字节、费用上限、查询时点和导出分片哈希；这些条件未关闭前不得发起付费或大规模查询。
 
 资格查询固定为 `scripts/research/qualify_bigquery_crypto_bitcoin_v0_1.sql`，记录模板固定为 `configs/data/bigquery_source_qualification_manifest_v0_1.json`。查询只检查从创世块到预先冻结末端的区块连续性、唯一位置、父 outpoint、locking script 和 tip，不计算 `p_merge`、`p_rewrite` 或任何标签／模型结果。必须先对同一查询和参数 dry-run，记录估算扫描字节，并在真实运行中设置不高于人工批准额度的 `maximum_bytes_billed`；未获项目与账单授权时保持 `pending_authorization`，不得执行。任何只从局部高度开始的检查只能算适配器 smoke，不能代替正式资格查询，因为 `C_t` 的共同输入 union 必须从创世块累计。
@@ -256,3 +258,4 @@ S1/S2 不得用测试表现反向改变 S0 阈值、窗口、过滤器、标签�
 | 2026-09-09 | 官方入口审计暂时收束待资格化数据候选 | 已审文档未给出无需部署者凭证即可访问、带版本标识的历史 GCS 快照，也未承诺公共 Pub/Sub topic 可回放完整、版本化的创世块前缀；当前已审范围和本地资产条件下，保留经授权 BigQuery dry-run／资格查询／冻结导出，或用户提供的 Bitcoin Core datadir/raw TXO snapshot，不排除以后以同一硬门审计其他原始链来源 | 数据硬门未关闭；不查询、不运行 S0 |
 | 2026-09-09 | `v1.0` 仅授权无标签 S0；S1/S2 必须另行冻结 | 当前没有可审计标签时间与许可；把 S0 Go 自动扩张为模型授权会绕过标签、调参与 test-once Gate | 标签和模型均不进入当前协议执行范围 |
 | 2026-09-09 | 冻结原始脚本字节标识和窄 `provably-unspendable` 规则 | 地址字符串和脚本规范化会合并或丢失标识；一般可花费性判断超出 S0 所需 | 参考实现与边界测试完成；与 as-of/CoinJoin 合计 23 项在禁用第三方 pytest 自动插件后干净通过 |
+| 2026-09-10 | AWS Public Blockchain Data 进入待资格化候选，不冻结为数据源 | 匿名访问、创世覆盖、关键 Parquet 字段和指定 parent-output join 已做样本核验；但公开桶未启用 S3 Versioning，且样本对象 `VersionId=null`，全量 transaction 对象约 2,026.838 GiB，金额为 `double`，数据对象许可和完整快照均未关闭 | Gate 3A 仍为 v0.1；不登记正式运行、不启动 S0；早期完整前缀只能在效应读取前按资源规则另行预注册 |
