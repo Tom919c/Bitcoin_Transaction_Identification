@@ -2,7 +2,7 @@
 
 日期：2026-09-08
 
-状态：Gate 0 条件未关闭；Gate 1 聚焦增量审计已完成第一轮，Yin 2019 已全文闭环，BitLINK 与 Zenodo 工件仍未闭环；Gate 3A 已形成 v0.1 待冻结草案
+状态：Gate 0 条件未关闭；Gate 1 聚焦增量审计已完成第一轮，Yin 2019 已全文闭环，BitLINK 作者幻灯片已核验但论文正文与 Zenodo 工件仍未闭环；Gate 3A 已形成 v0.1 待冻结草案
 
 研究分支：`asof-entity-graph-pilot`
 
@@ -75,7 +75,7 @@ BigQuery `crypto_bitcoin` 仍是候选，但字段语义已得到更强的一手
 - 正式立项题名、任务书、项目编号、结题材料版本和成果承诺仍未进入当前分支的可核验输入，Gate 0 因此不能完全关闭。
 - 公开链数据不等于可以对真实主体作风险指控。演示系统只能展示“实体类型识别结果”“不确定结果”和“待复核对象”。
 - 现有标签含论坛、公开名单和外部来源，可能存在错误、时间漂移和选择偏差；没有发现/公开/采集时间时，不得用于严格历史部署训练。
-- 新预印本称其 Zenodo 数据集采用 CC BY 4.0；当前尚未独立取得该记录的文件清单、大小和哈希，因此不把它写成已可用本地数据。
+- Zenodo 官方 record 已确认 CC BY 4.0、三个外层 ZIP 的文件名、大小和仓库声明 MD5；当前尚未取得 ZIP 内部成员 manifest，也未下载或独立复算任何文件 checksum，因此不把它写成已可用本地数据。
 - 不向外部模型或服务上传数据库内容、私有标签、未发表手稿、连接信息或凭据。
 
 ## 3. Gate 1 聚焦 decision corpus snapshot
@@ -117,7 +117,7 @@ BigQuery `crypto_bitcoin` 仍是候选，但字段语义已得到更强的一手
 | Maganti, *When Graph Structure Becomes a Liability*, arXiv `2604.19514` | Undermind 全文核验；预印本 | 严格归纳设置只让编码器看到训练期子图；其主要差异来自未来测试节点/边和全图统计；报告 RF 与 GNN 排名差异并评估校准 | 证明严格时间协议可改变模型结论；预测单位是交易，不涉及实体分区版本 |
 | Khaleghpour & McKinney, *Leakage Safe Graph Features...*, arXiv `2603.06632` | Undermind 全文核验；预印本 | 用 `G_{<=t}` 计算因果图特征，评估 Brier/校准和 Precision@K | 校准与预算队列不是本项目可单独主张的新指标；仍未改变地址实体分区 |
 | Malik, *Do Transaction-Level and Actor-Level AML Queues Agree?*, arXiv `2604.23494` | Undermind 全文核验；预印本 | 固定 1% 预算比较交易级与地址级队列；文中 actor 明确定义为地址，不是真实解析实体 | 与队列粒度效应直接相邻；未研究聚类版本，要求本项目报告固定预算与单位映射 |
-| Zhong & Mueen, *BitLINK*, KDD 2024, DOI `10.1145/3637528.3672037` | 官方作者 CV 与主页、UNM 学位论文记录核验；正文未取得 | 作者主页只确认其用 temporal patterns 链接 Bitcoin 地址 cluster；学位论文记录确认 BitLINK 属于 blockchain address identification | 动态实体解析近邻；是否执行 `C_t/C_T`、固定历史支持、lineage、实体类型／校准／预算队列评测均为 Unknown |
+| Zhong & Mueen, *BitLINK*, KDD 2024, DOI `10.1145/3637528.3672037` | 官方作者 CV、主页、22 页作者幻灯片与 UNM 学位论文记录核验；正文未取得 | 作者幻灯片明确把 address flushing 定义为旧簇被放弃后很快生成新簇，并将任务表述为连接 cluster-chain fragments；桥接簇可由前后簇交叉验证，案例结果以按时间排列的 linked clusters 展示 | 直接否决“首次研究 temporal cluster linkage/cluster chain”措辞；幻灯片没有提供可核验的 `C_t/C_T` 固定支持对照或可重放 union lineage，不能据此判定论文正文是否包含这些设计 |
 | Yin, Mukkamala & Vatrapu, *Regulating Cryptocurrencies...*, JMIS 2019, DOI `10.1080/07421222.2018.1550550` | 出版社元数据与作者公开全文核验 | 以 Chainalysis 提供的 957 个已分类地址簇作多类预测；数据截至区块 512,033，采用 75/25 随机式切分与训练内三折交叉验证；聚类含共同花费、外部情报和人工合并，未提供 lineage 或标签可得时间 | 否决“首次做 Bitcoin 实体簇类型预测”；不能断言其使用截止块后的未来分区，但其不透明终态聚类与随机切分是本项目必须控制的近邻风险 |
 | Schnoering et al., *Refining Heuristic-Based Bitcoin Address Clustering with GNNs*, arXiv `2609.01942` | 官方 arXiv HTML 全文核验；预印本 | 以启发式 cluster 为训练标签，用对比式 GNN 表征和层次聚类检测可疑合并；训练/验证/测试来自不重叠区块区间；发布的地址图字段是聚合节点、边和 cluster 映射 | 对“聚类置信度/细化 GNN”构成直接方法碰撞；其非重叠交易切分不等于 cutoff-specific identity；正文所称代码仓库当前为空，复现性仍需核验 |
 | `BTCGraphConstruction` 官方代码 | 官方 GitHub 源码核验 | `populate_alias.py` 按区块收集合并并更新 `UnionFind`，最终只落 `node_id -> alias`；没有 union-event logger | 为小窗口重放提供最接近上游实现，但不能直接把其最终 alias 当作历史分区 |
@@ -128,11 +128,13 @@ BigQuery `crypto_bitcoin` 仍是候选，但字段语义已得到更强的一手
 
 arXiv `2609.01942` 报告三个训练图、一个验证图和一个测试图来自不重叠区块区间，并声明 Zenodo DOI `10.5281/zenodo.22239038`、CC BY 4.0。附录公开字段包括节点、地址级聚合边和 cluster 映射；正文没有给出逐 union 事件日志。
 
-官方 `hugoschnoering2/btc-graph-hc` 仓库在 2026-09-08 的 GitHub 元数据显示大小为 0，虽有默认分支名，但当前没有可读取实现。`BTCGraphConstruction` 仓库可读，README 为空，源码保留原始块解析和最终 alias 构建。
+官方 `hugoschnoering2/btc-graph-hc` 仓库在 2026-09-08 的 GitHub 元数据显示大小为 0；2026-09-09 再次读取官方仓库页，页面仍明确显示 “This repository is empty.”。本 decision snapshot 因而把代码状态冻结为“截至 2026-09-09 未公开可读实现”，但不外推未来仍为空。`BTCGraphConstruction` 仓库可读，README 为空，源码保留原始块解析和最终 alias 构建。
 
 2026-09-09 的 DataCite 官方 DOI 注册记录已确认 Zenodo `10.5281/zenodo.22239038` 的标题为 *Bitcoin transaction graphs: training, labelled entities, and CoinJoins*，版本 `1.0`，issued date 为 2026-09-01，creators 为 Hugo Pierre Philippe Schnoering 与 Michalis Vazirgiannis，许可为 CC BY 4.0，并以 `IsVersionOf` 指向概念 DOI `10.5281/zenodo.22239037`。注册元数据的 deposited description 列出 `1_training_dataset.zip`、`2_labels_eval_dataset.zip` 和 `3_coinjoin_eval_dataset.zip`，并声称标注／CoinJoin 图目录含 `node_features.parquet`、`edge_features.parquet`、`clustering.parquet` 与 `metadata.json`。
 
-这关闭了书目、版本和许可核验，不等于核验实际文件。Zenodo record/API 本轮仍返回超时，DataCite 的 `sizes`、`formats` 为空且 `contentUrl` 为 `null`；因此文件 manifest、逐文件大小与 checksum、实际 schema、raw transaction/outpoint/script、主链／重组信息和 union lineage 仍为 Unknown。该 release 继续 No-Go 为当前 `C_t/C_T` 重放输入；若 Zenodo 恢复可访问，须先保存 record JSON、文件 manifest 与 checksum，再判断是否具备 union event 或足够原始链数据。
+Zenodo 官方 record API 随后恢复可读。取得的 record JSON 创建时间为 `2026-09-01T22:34:47.018801+00:00`、更新时间为 `2026-09-01T22:34:47.335246+00:00`，原始响应 SHA-256 为 `674F70DAFCD5DAEABC154A209862D6B45A2CE6E1A55E4D189A25AF84B5223D1D`。API 给出的三项文件元数据为：`1_training_dataset.zip`，410,978,944 字节，`md5:ff69c727f0a63bece2c524adb97090a9`；`2_labels_eval_dataset.zip`，2,520,167,227 字节，`md5:f65536cd4f67311678dc67eea1c02195`；`3_coinjoin_eval_dataset.zip`，12,268,153,610 字节，`md5:ab3624eb568d796acc2e1b32045561da`。总压缩体积为 15,199,299,781 字节。MD5 是 Zenodo 声明值，尚未由本地完整下载独立复算。
+
+为避免无审计地下载约 15.20 GB，中央目录探测设置了 64 MiB 总响应体硬上限，并要求每次请求必须返回有效 `Content-Range`；唯一一次 Range-only 尝试没有生成可用响应，按预先停止线未重试、未读取成员、未下载 ZIP。因此只关闭“外层文件名、大小与 Zenodo checksum 声明”，内部成员路径、压缩／解压大小、CRC、实际 schema、raw transaction/outpoint/script、主链／重组信息和 union lineage 仍为 Unknown。该 release 继续 No-Go 为当前 `C_t/C_T` 重放输入；是否下载任一完整文件必须在独立磁盘预算和数据价值审查后决定。
 
 ### 3.5 CoinJoin 过滤器源码—论文核验
 
@@ -187,14 +189,14 @@ arXiv `2609.01942` 报告三个训练图、一个验证图和一个测试图来�
 
 双链检索、关键全文核验和独立反方审查已经完成。关闭前仍需：
 
-1. 核验 BitLINK 全文是否包含可重放 cluster lineage；2026-09-09 的独立核验已尝试 ACM landing/PDF、作者主页与 slides、UNM 学位论文记录与下载入口，但 ACM 返回 403、slides 无法由当前文本链读取、学位论文下载遇到 Cloudflare challenge，未取得可逐页核验正文。最近邻 checklist 第 1–5 项保持 Unknown，第 6 项只确认同行评审出版身份；禁止写“BitLINK 未做 `C_t/C_T`”或“本项目首次研究 temporal cluster linkage”；
-2. Zenodo `22239038` 的 DataCite 注册元数据、版本和许可已核验；仍需取得 Zenodo record JSON、文件 manifest、checksum 与实际 schema。当前明确 No-Go 为 PIT 重建数据源；
-3. 对 2026 新预印本的代码空仓状态和后续版本做一次冻结快照；
+1. 核验 BitLINK 全文是否包含可重放 cluster lineage；2026-09-09 已从作者主页取得并完整读取 `https://www.cs.unm.edu/~mueen/BitLink.pptx`（22 页，19,771,433 字节，SHA-256 `1DB891F815154C5E4E8BF49F9FE1AACEDFE0CD6A30EECCFE428A76AAC642CFCA`）。幻灯片关闭了“是否显式研究跨时间 cluster chain”这一疑问，但不是论文正文：ACM 正文仍返回 403，UNM 学位论文下载仍遇到 Cloudflare challenge。最近邻 checklist 第 1、2、4、5 项仍为 Unknown；第 3 项只确认概念级有序簇链，未确认可重放 lineage；禁止写“BitLINK 未做 `C_t/C_T`”“本项目首次研究 temporal cluster linkage”或“本项目首次连接 cluster chain”；
+2. Zenodo `22239038` 的 DataCite 与 record API 元数据、版本、许可、三个外层文件名、大小和 Zenodo MD5 声明已核验；仍需内部成员 manifest、实际 schema 和 lineage。当前明确 No-Go 为 PIT 重建数据源；
+3. 2026 新预印本的官方代码仓已在 2026-09-09 冻结为空仓快照；后续只有新 decision snapshot 才能改变该状态；
 4. 继续将其余纳入来源按 DOI/标题去重并补稳定 BibTeX 与页码定位；Yin 2019、BitLINK、2026 GNN 聚类预印本、Glassnode PIT 与 Möser–Narayanan FC 2022 已作为相互独立版本写入 `references.bib`。
 
 Yin et al. 2019 的剩余全文项已经关闭：其预测单位是专有地址簇，交易截止为区块 512,033（2018-03-04 23:58:21 UTC），采用 75/25 随机式切分和训练内三折交叉验证；全文没有 cluster lineage、label availability cutoff 或 `C_t/C_T` 对照。它是实体类型预测的 Critical 近邻，但不是已经核验的完整等价评测。
 
-BitLINK 的当前证据边界不是“完整等价已排除”，而是“风险仍未关闭”。作者级来源足以证明它与 temporal cluster linkage 高度相邻，却不足以证明或否定本协议的固定历史窗口、固定支持和下游决策传播设计；无法访问正文不能当作论文没有报告这些内容。
+BitLINK 的当前证据边界不是“完整等价已排除”，而是“风险仍未关闭”。作者幻灯片足以证明它显式研究 address flushing、前后簇桥接和按时间延伸的 cluster chain，因此这些对象不能作为本项目独立创新；但幻灯片不足以证明或否定本协议的固定历史窗口、`C_t/C_T` 固定支持对照、可重放共同输入 union lineage 和下游决策传播设计。无法访问正文不能当作论文没有报告这些内容，幻灯片中的特定服务归属和金额也不进入本项目事实主张。
 
 ### Gate 2：方向保持，创新叙事已修订
 

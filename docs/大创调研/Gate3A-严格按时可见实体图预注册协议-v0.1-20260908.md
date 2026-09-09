@@ -244,8 +244,8 @@ S1/S2 不得用测试表现反向改变 S0 阈值、窗口、过滤器、标签�
 | 2026-09-08 | 以 `p_merge`、`p_rewrite` 的 1% 作为共同资源门 | 阈值不等于 top-k 队列效用；真正队列影响必须在 S1 直接检验 | 待冻结 |
 | 2026-09-08 | 独立反方提出固定支持、统计量唯一性、filter 伪真值、bootstrap 与三态逻辑问题 | 已把 `V_j` 改为创建时定义，限制实体代表到 `V_j`，形式化两个统计量，收紧过滤措辞与逐统计量停止线，并把扩大窗口定义为新 estimand | P0 已关闭；P1/P2 边界已写入，待 v1.0 实现核验 |
 | 2026-09-09 | 在冻结数据源前只实现纯标准库参考语义与合成契约测试 | 该实现不解析原始块、不访问标签、不计算真实效应；用于提前锁定 cutoff、域外中介、固定支持和两个主要统计量 | 8 项定向测试通过；不构成 S0 Pilot 或 v1.0 冻结 |
-| 2026-09-09 | BitLINK 独立全文核验仍未取得正文 | 官方作者来源只证明 temporal cluster linkage 高度相邻；最近邻 checklist 第 1–5 项均不能由元数据判定，正文不可得也不能作阴性证据 | 风险保持 Unknown；冻结版禁止“BitLINK 未做 `C_t/C_T`”与“首次 temporal cluster linkage”措辞 |
-| 2026-09-09 | 通过 DataCite 核验 Zenodo 数据集注册元数据 | 已确认版本 `1.0`、CC BY 4.0、数据作者、概念 DOI 和 deposited description；Zenodo 文件 API 仍超时，实际 manifest/checksum 与 lineage 未取得 | 书目与许可关闭；作为 as-of 重放输入仍 No-Go |
+| 2026-09-09 | BitLINK 论文正文仍未取得，但作者 22 页幻灯片已逐页核验 | 幻灯片明确研究 address flushing、用前后簇交叉验证桥接簇，并输出按时间延伸的 cluster chain；它不提供足以核验固定支持 `C_t/C_T`、可重放 union lineage 或下游决策传播的正文细节 | cluster-chain 组件碰撞已确认；完整等价风险保持 Unknown，冻结版禁止“BitLINK 未做 `C_t/C_T`”“首次 temporal cluster linkage/cluster chain”措辞 |
+| 2026-09-09 | 通过 DataCite 与 Zenodo record API 核验数据集外层工件 | 已确认版本 `1.0`、CC BY 4.0、数据作者、三个 ZIP 的精确大小与 Zenodo MD5 声明，总压缩体积 15,199,299,781 字节；受限 Range 尝试未取得中央目录且按停止线未重试 | 外层 manifest 关闭；内部 schema、raw outpoint/script、主链语义与 lineage 未取得，作为 as-of 重放输入仍 No-Go |
 | 2026-09-09 | `F_pub` 冻结为固定 revision 的五个实际 mix detector，不含 Tx0 | 论文第 12–14 页把 Tx0 定义为 pre-mix 准备，第 19 页的总 CoinJoin 统计明确排除 Tx0；固定源码又把输出位置 0 与零值输出混淆。机械纳入会掩盖实现缺陷，按论文“修好”则会静默改变固定实现 | 主语义、本地实现与合成／随机差分核验已关闭清单第 3 项 |
 | 2026-09-09 | 论文—实现参数差异仅作预注册诊断 | 固定源码与论文的 Tx0、Whirlpool mix 参数不一致；`D_wp100k` 和 `D_tx0-paper` 用于报告差集，不能替代或事后改写主 profile | 合成边界实现完成；真实差集仍须等合格数据源，若改变 1% 三态决定则结论降级为过滤器敏感 |
 | 2026-09-09 | 本机无可用原始链快照；BigQuery 仅保留为候选 | 默认 Bitcoin Core 目录和仓库数据目录无 `blk*.dat`/TXO manifest；Google 官方 schema 支持 prevout→output `script_hex` 连接，但未证明快照、主链／重组、缺失率和费用边界 | 数据硬门未关闭；不查询、不运行 S0 |
