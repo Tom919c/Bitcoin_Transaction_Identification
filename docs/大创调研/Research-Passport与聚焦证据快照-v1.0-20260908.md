@@ -49,7 +49,7 @@
 | 本地 2.52 亿节点实体图接口 | 可流式读取 `node_features` 与 `transaction_edges`；节点含最终 `alias`、统计特征和实体类型标签，边含首次/末次出现区块及聚合金额 | 没有地址/脚本表、单笔交易输入分组、合并事件、规则版本和合并证据；不能逆推出 `C_t` | `src/btcaml/data/db.py`、`src/btcaml/data/schema.py`、`configs/data/raw_db.yaml` |
 | 协议数据构建 | 可从最终实体图生成处理数据；标准化在训练期拟合 | 继承最终 alias；不是 as-of 重放 | `scripts/build_protocol_dataset.py`、`src/btcaml/data/build_graph.py` |
 | 上游公开构图代码 | 能从 Bitcoin Core 原始块解析 TXO，逐区块运行多种启发式，并以 Union-Find 合并 | 只写最终 `Alias(node_id, alias)`；`UnionFind.union` 不记录时间、规则或证据；需审计每个启发式的未来可见性 | `hugoschnoering2/BTCGraphConstruction` 的 `steps/populate_alias.py`、`clustering/unionFind.py` |
-| 协作交易过滤 | 上游代码包含 JoinMarket、Wasabi、Samourai/Whirlpool 等 CoinJoin 检测并可在聚类中排除 | 是规则检测结果，不是真值；尚未核验规则版本、误差和 PayJoin 边界 | 上游 `steps/populate_coinjoin.py` |
+| 协作交易过滤 | 已核验固定 revision `3becbc44a951abbe1e85d374a66340a639059d1c` 的五个实际 mix detector、Tx0 detector、特征定义和聚类排除调用链 | 是规则检测结果，不是真值；源码 Tx0 条件与论文不等价，参数也有差异；PayJoin 仍未判定 | 上游 `blockchain/special_transactions/coinjoin.py`、`blockchain/models/transaction.py`、`steps/populate_coinjoin.py`、`steps/populate_alias.py`、`database/utils.py` |
 | 本地原始块解析片段 | 可解析部分原始块、交易和脚本结构 | 不是完整、已验证的全链索引与 prevout 管线 | `scripts/scan_block_sighash.py` |
 | 资金流证书代码 | 可检查局部 DAG 与价值守恒性质 | 与地址聚类重放不是同一任务，只可复用检查模式 | `src/btcaml/analysis/flow_certificate.py` |
 | 实验可追溯模式 | 历史 SSL manifest 提供版本、依赖和产物哈希范式 | 本分支未发现章程所述 `experiments/experiment_registry.csv`；正式运行前必须建立或恢复唯一登记入口 | 既有 SSL 产物与 `experiments/` |
@@ -131,6 +131,14 @@ arXiv `2609.01942` 报告三个训练图、一个验证图和一个测试图来�
 
 这关闭了书目、版本和许可核验，不等于核验实际文件。Zenodo record/API 本轮仍返回超时，DataCite 的 `sizes`、`formats` 为空且 `contentUrl` 为 `null`；因此文件 manifest、逐文件大小与 checksum、实际 schema、raw transaction/outpoint/script、主链／重组信息和 union lineage 仍为 Unknown。该 release 继续 No-Go 为当前 `C_t/C_T` 重放输入；若 Zenodo 恢复可访问，须先保存 record JSON、文件 manifest 与 checksum，再判断是否具备 union event 或足够原始链数据。
 
+### 3.5 CoinJoin 过滤器源码—论文核验
+
+2026-09-09 已逐项读取 `BTCGraphConstruction` 固定 revision `3becbc44a951abbe1e85d374a66340a639059d1c` 的 detector、交易特征、CoinJoin 表写入、alias 构建和 SQL 排除路径。上游 `populate_coinjoins` 对 JoinMarket、Wasabi 1.0/1.1/2.0、Whirlpool mix 与 Whirlpool Tx0 六个标志取 OR；`populate_alias(..., exclude_coinjoin=True)` 随后按 CoinJoin 表中的区块和交易位置整体排除，因此命中的 Tx0 也会阻断共同输入 union。
+
+仓库内原论文 `cp13_coinjoin.pdf` 的 SHA-256 为 `2DA3099D48A528E11C777FF08E59D1980049815CA04E1215DC084614E612DCB9`。论文第 12–14 页把 Tx0 描述为进入 pool 前、尚未混合的 pre-mix 准备交易，并以“恰一个金额为 0 的输出”为必要条件；第 19 页的最终 CoinJoin 汇总明确排除 Tx0。固定源码却以“输出下标 0 是否存在”实现首个 Tx0 检查，并在存在时直接返回 `False`，同时其 Tx0 与 Whirlpool mix 默认参数也不同于论文实验参数。
+
+据此，Gate 3A 主 `F_pub` 不机械继承上游六标志 OR，也不把论文规则静默改写进固定实现，而是冻结为五个实际 mix detector 的固定实现 OR，明确排除 Tx0 detector。论文参数差异进入预注册诊断 `D_wp100k` 与 `D_tx0-paper`；二者不是 ground truth，不单独支持 Go。独立反方指出的剩余风险是：异常或多方 Tx0 仍可能破坏共同输入假设，且五个 detector 的假阳性、假阴性未知；因此必须报告诊断差集、`F_wide` 和 `F_none`，结论只能表述为对已定义操作性 profile 的稳健性。
+
 ## 4. 贡献边界与反方结论
 
 ### 4.1 已被覆盖的主张
@@ -191,7 +199,7 @@ BitLINK 的当前证据边界不是“完整等价已排除”，而是“风险
 
 ### Gate 3A：v0.1 待冻结
 
-已形成[严格按时可见实体图预注册协议 v0.1](Gate3A-严格按时可见实体图预注册协议-v0.1-20260908.md)，预先写定 S0/S1/S2 分层、脚本单位、共同输入 union 日志、四窗口选择算法、主要结构统计量、1% 最小实际差异、时间块 bootstrap、三态停止规则和 test-once 纪律。它仍不是 `v1.0`：原始链来源、完整 schema/hash、`F_pub` 本地实现快照、BitLINK 风险处置和标签路线未关闭，不能运行正式 Pilot。
+已形成[严格按时可见实体图预注册协议 v0.1](Gate3A-严格按时可见实体图预注册协议-v0.1-20260908.md)，预先写定 S0/S1/S2 分层、脚本单位、共同输入 union 日志、四窗口选择算法、主要结构统计量、1% 最小实际差异、时间块 bootstrap、三态停止规则和 test-once 纪律。`F_pub` 的科学语义、固定 revision、函数与参数已裁决，但本地等价实现和诊断边界测试仍在完成中。协议仍不是 `v1.0`：原始链来源、完整 schema/hash、过滤器可执行快照、BitLINK 风险处置和标签路线未全部关闭，不能运行正式 Pilot。
 
 纯标准库参考实现 `src/btcaml/data/asof_replay.py` 已锁定事件规范排序、按位置 cutoff、确定性并查集、只从历史支持取代表、future-only 中介语义以及 `p_merge`/`p_rewrite`；8 项定向测试通过。该实现只消费合成的已提取事件和端点，不含 raw adapter、CoinJoin 过滤、bootstrap 或真实数据，因此只关闭实现语义的局部歧义，不关闭数据 Gate，也不构成实验结果。
 

@@ -86,11 +86,38 @@ filter_profile, filter_decision, evidence_json, source_manifest_sha256
 
 S0 至少运行两个预先冻结的过滤配置，并保留一个诊断条件：
 
-- `F_pub`：按 `BTCGraphConstruction` 固定 revision `3becbc44a951abbe1e85d374a66340a639059d1c` 中已发表的 JoinMarket、Wasabi 1.x/2.0 与 Samourai/Whirlpool 规则排除命中交易；具体函数、参数和本地移植测试必须在 `v1.0` 记录。
+- `F_pub`：采用 `BTCGraphConstruction` 固定 revision `3becbc44a951abbe1e85d374a66340a639059d1c` 的五个实际 mix detector 的 OR，排除命中 JoinMarket、Wasabi 1.0、Wasabi 1.1、Wasabi 2.0 或 Whirlpool mix 的交易。它是“固定实现 profile”，不是 CoinJoin 真值，也不声称逐式等同论文。Whirlpool Tx0 不进入此主过滤器。
 - `F_wide`：在 `F_pub` 基础上，再排除 `n_inputs >= 2`、`n_outputs >= 3` 且至少三个输出金额完全相同的交易。它是更严格的操作性排除条件，可能排除普通批量支付；它既不是 CoinJoin 真值，也不构成真实共同控制关系或真实效应的上界／下界。
 - `F_none`：不排除协作交易的历史 common-input 基线，只作诊断，不单独支持 Go。
 
 PayJoin 与未被规则识别的协作交易记为“未判定”，不能当作非协作交易真值。两个主过滤配置都要报告排除率、未判定范围、按规则族命中数和 union 数；`F_none` 也必须完整报告，不能只在结果有利时展示。跨配置一致只表示对两个操作性 profile 稳健，不表示对真实非协作交易稳健。若未来获得独立 detector，只能在新协议版本中加入，不能替换本版结果。
+
+### 5.1 `F_pub` 固定实现清单
+
+以下函数名、默认参数与判定顺序来自固定 revision；本地实现不得根据论文文字静默改参数或修正上游行为：
+
+| 规则族 | 固定函数 | 主 profile 参数 |
+|---|---|---|
+| JoinMarket | `is_coinjoin_joinmarket` | `min_num_participants=3` |
+| Wasabi 1.0 | `is_coinjoin_wasabi_1_0` | `epsilon=1,000,000`；`max_inputs_per_participants=7`；`min_num_participants=5` |
+| Wasabi 1.1 | `is_coinjoin_wasabi_1_1` | `epsilon=1,000,000`；`max_inputs_per_participants=7`；`min_num_participants=5`；`max_mixing_level=12` |
+| Wasabi 2.0 | `is_coinjoin_wasabi_2` | 固定 denomination 集；`max_inputs_per_participants=10`；`min_num_inputs=50`；`min_input_value=5,000` |
+| Whirlpool mix | `is_coinjoin_samourai` | `epsilon_max=20,000` |
+
+上游 `populate_coinjoins` 还调用 `is_tx0_samourai`，随后 `populate_alias(..., exclude_coinjoin=True)` 按 CoinJoin 表中的 `(block, position)` 整体排除交易。但固定源码中的 `TransactionFeatures.is_position_zero_in_output` 判断“输出下标 0 是否存在”，`is_tx0_samourai` 又在该属性为真时立即返回 `False`；这与论文要求“恰有一个金额为 0 的输出”不是同一谓词。正常非空输出序列包含下标 0，因此该实现不能作为论文 Tx0 规则的可信转录。
+
+主 profile 明确不调用 Tx0 detector，原因有三项：论文把 Tx0 定义为进入 Whirlpool pool 前的 pre-mix 资金准备，尚未完成混合；论文最终 CoinJoin 总数明确排除 Tx0；本研究的过滤目标是阻断会破坏共同输入所有权假设的协作 mix，而不是把所有隐私工具相关交易都当成协作交易。该选择仍可能漏掉具有多方输入的异常 Tx0，不能解释为 common-input 必然正确。
+
+### 5.2 实现—论文差异诊断
+
+CoinJoin 原论文 PDF 固定为仓库内 `cp13_coinjoin.pdf`，SHA-256 为 `2DA3099D48A528E11C777FF08E59D1980049815CA04E1215DC084614E612DCB9`。全文核验得到：Tx0 条件包含恰一个零值输出；论文实验参数为 `a_max=70`、`eta_1=0.5`、`eta_2=3`、`epsilon_min=100`、`epsilon_max=100,000`；Whirlpool mix 的论文 `epsilon_max=100,000`。固定源码 Tx0 默认值分别为 `75/0.5/3/1/11,000`，Whirlpool mix 默认 `epsilon_max=20,000`。
+
+这些差异预先作为诊断，不并入主 Go/No-Go profile：
+
+- `D_wp100k`：只把 Whirlpool mix 的 `epsilon_max` 从固定实现的 `20,000` 改为论文的 `100,000`，其余 `F_pub` 条件不变；报告新增命中、被抑制 union 和两个主要统计量的差值。
+- `D_tx0-paper`：按论文的零值输出语义和论文参数标记 Tx0 候选，只报告候选数、与五个主 detector/`F_wide` 的交集及其潜在 union 数；不自动阻断 union，不单独支持 Go。
+
+若任一诊断尚未通过合成边界测试，只能标为未实现，不能从真实数据结果反推实现。若诊断差集足以使主结论越过 1% 判据或改变三态决定，最终解释必须降级为过滤器敏感，不能宣称对协作交易处理稳健。
 
 ## 6. S0 主要统计量
 
@@ -205,3 +232,5 @@ S1/S2 不得用测试表现反向改变 S0 阈值、窗口、过滤器、标签�
 | 2026-09-09 | 在冻结数据源前只实现纯标准库参考语义与合成契约测试 | 该实现不解析原始块、不访问标签、不计算真实效应；用于提前锁定 cutoff、域外中介、固定支持和两个主要统计量 | 8 项定向测试通过；不构成 S0 Pilot 或 v1.0 冻结 |
 | 2026-09-09 | BitLINK 独立全文核验仍未取得正文 | 官方作者来源只证明 temporal cluster linkage 高度相邻；最近邻 checklist 第 1–5 项均不能由元数据判定，正文不可得也不能作阴性证据 | 风险保持 Unknown；冻结版禁止“BitLINK 未做 `C_t/C_T`”与“首次 temporal cluster linkage”措辞 |
 | 2026-09-09 | 通过 DataCite 核验 Zenodo 数据集注册元数据 | 已确认版本 `1.0`、CC BY 4.0、数据作者、概念 DOI 和 deposited description；Zenodo 文件 API 仍超时，实际 manifest/checksum 与 lineage 未取得 | 书目与许可关闭；作为 as-of 重放输入仍 No-Go |
+| 2026-09-09 | `F_pub` 冻结为固定 revision 的五个实际 mix detector，不含 Tx0 | 论文第 12–14 页把 Tx0 定义为 pre-mix 准备，第 19 页的总 CoinJoin 统计明确排除 Tx0；固定源码又把输出位置 0 与零值输出混淆。机械纳入会掩盖实现缺陷，按论文“修好”则会静默改变固定实现 | 主语义已裁决；待本地等价实现与合成测试后关闭清单第 3 项 |
+| 2026-09-09 | 论文—实现参数差异仅作预注册诊断 | 固定源码与论文的 Tx0、Whirlpool mix 参数不一致；`D_wp100k` 和 `D_tx0-paper` 用于报告差集，不能替代或事后改写主 profile | 待实现；差集若改变 1% 三态决定则结论降级为过滤器敏感 |
