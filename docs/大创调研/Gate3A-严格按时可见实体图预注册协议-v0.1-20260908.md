@@ -20,6 +20,8 @@
 | S1：回顾性实体类型敏感性 | 分区版本是否改变既有 11 类实体类型标签的可投影性、模型比较与决策 | 可以，但没有 `L_{<=t}` 时只能作回顾性敏感性分析 | S0 为 Go，标签来源、许可、冲突规则和快照哈希完整 |
 | S2：历史部署评测 | 当时可得的标签与特征能否支撑历史决策 | 是，必须为 `L_{<=t}` | S0 为 Go，且每条标签有可核验的首次公开／发现／采集时间 |
 
+计划冻结的首个 `v1.0` 只授权 S0。S1 必须在 S0 为 Go 后另建协议版本，先冻结标签证据锚点、许可、B/C 配对 eligible set、冲突与未投影规则、模型预算和 test-once 记录；S2 只有取得 `L_{<=t}` 后才能另行预注册。S0 的通过不会自动授权模型训练，也不会把回顾性实体类型标签变成历史可得标签。
+
 旧 `C1-预注册协议草案-20260901.md` 研究的是“两输出交易的未来关联揭示”，与本协议的实体分区版本效应不是同一任务。本协议只复用其主链顺序、块内信息截止、协作交易不确定性、聚簇重采样和 test-once 纪律；不继承其预测单位、竞争事件标签或 5 个百分点性能门槛。
 
 ## 2. 固定对象与对照
@@ -73,6 +75,8 @@ S0 输入必须能提供或确定性恢复：主链 `block_hash` 与 `block_heig
 ## 4. 脚本标识、主链顺序与 union 日志
 
 基本标识不是地址字符串，而是 prevout 的原始 `scriptPubKey` 字节经 `SHA-256` 得到的稳定 `script_id`。这保留 P2PK、P2PKH、P2SH、SegWit、Taproot 和可解析但没有传统地址字符串的脚本。不可花费输出不进入分区；无法取得原始脚本的输入记为缺失并触发数据完整性统计，不能静默丢弃。
+
+本协议把 `provably-unspendable` 冻结为一个窄的操作性规则：原始脚本首字节为 `OP_RETURN`（`0x6a`），或脚本长度严格大于 10,000 字节。空脚本、`OP_FALSE OP_RETURN`（`0x00 0x6a`）和其他不满足这两个条件的脚本不由该规则排除；这不是一般性的可花费性证明。`script_id` 必须直接对原始字节取 SHA-256 小写十六进制，禁止先转地址、反汇编、规范化或重新编码。纯标准库参考实现位于 `src/btcaml/data/script_identity.py`。
 
 输入的 `scriptSig` 或 witness 只是花费交易携带的解锁材料，不是被引用 prevout 的 locking `scriptPubKey`，二者不得互换。数据适配层至少输出 `(block_hash, block_height, tx_index, txid, input_index, prev_txid, prev_vout, prevout_value, prevout_scriptPubKey, output_index, output_value, output_scriptPubKey, coinbase)`；缺列或字段语义未核验时不得进入 S0。
 
@@ -195,7 +199,7 @@ S1/S2 不得用测试表现反向改变 S0 阈值、窗口、过滤器、标签�
 
 ## 10. 运行登记与不可变产物
 
-正式运行前建立单一 as-of 实验登记入口，字段至少包括：`run_id`、问题、协议版本、数据 manifest hash、cutoff/window/horizon、过滤配置、代码 revision 与 dirty 状态、随机种子、预算、主要/次要统计量、预期判别条件、开始/结束时间、状态和产物目录。
+单一 as-of 实验登记入口固定为 `experiments/experiment_registry.csv`。字段包括：`run_id`、`question_id`、`protocol_version`、`data_manifest_sha256`、`cutoff_height`、`window_blocks`、`horizon_blocks`、`filter_profile`、`code_revision`、`dirty_state`、`seed`、`budget`、`primary_metrics`、`secondary_metrics`、`decision_rule`、`started_at_utc`、`completed_at_utc`、`status`、`artifact_directory` 和 `notes`。当前文件只有冻结表头；正式运行必须先登记 planned 行，运行失败也必须更新而不能删除。
 
 每次 S0 运行保存：原始数据 manifest、union 日志或其分片及哈希、cutoff 分区映射、B/C 图 manifest、抽样审计记录、原始统计、bootstrap 配置与输出、命令、环境和失败日志。结果表与图只能从这些产物生成。
 
@@ -224,9 +228,11 @@ S1/S2 不得用测试表现反向改变 S0 阈值、窗口、过滤器、标签�
 4. 用合成反例核验 `F_wide`、脚本标识、事件排序、并查集确定性和同区块未来边界；
 5. 关闭 BitLINK 全文风险，或在 decision log 中记录全文不可得及禁止的创新措辞；
 6. 建立数据与实验登记路径，并预先写入四个 cutoff 的确定规则、阈值和一次扩展规则；
-7. 若计划进入 S2，取得标签时间与许可；否则在 `v1.0` 明确冻结为 S0/S1-only。
+7. `v1.0` 明确冻结为 S0-only；S1/S2 只能由后续独立协议版本授权。
 
 任何未填项都不能用 Pilot 或模型结果倒推补写。`v1.0` 冻结提交必须先于 union logger 的正式数据运行提交。
+
+截至 2026-09-09，第 3 项已由固定 detector revision、本地实现和 10,000 样本差分关闭；第 4 项已由 `F_wide`、脚本字节哈希／排除边界、事件排序、确定性并查集、同块 cutoff 和 future-only 中介的合成测试关闭；第 5 项已通过保留 Unknown 并禁止两类首创措辞关闭；第 6 项的登记路径与判据已关闭；第 7 项已冻结为 S0-only。第 1、2 项仍被原始链来源、快照与完整性证据阻断，因此本协议仍是 `v0.1`。
 
 ## 13. 决策记录
 
@@ -244,3 +250,5 @@ S1/S2 不得用测试表现反向改变 S0 阈值、窗口、过滤器、标签�
 | 2026-09-09 | 论文—实现参数差异仅作预注册诊断 | 固定源码与论文的 Tx0、Whirlpool mix 参数不一致；`D_wp100k` 和 `D_tx0-paper` 用于报告差集，不能替代或事后改写主 profile | 合成边界实现完成；真实差集仍须等合格数据源，若改变 1% 三态决定则结论降级为过滤器敏感 |
 | 2026-09-09 | 本机无可用原始链快照；BigQuery 仅保留为候选 | 默认 Bitcoin Core 目录和仓库数据目录无 `blk*.dat`/TXO manifest；Google 官方 schema 支持 prevout→output `script_hex` 连接，但未证明快照、主链／重组、缺失率和费用边界 | 数据硬门未关闭；不查询、不运行 S0 |
 | 2026-09-09 | 固定 BigQuery 候选源资格查询与 manifest 模板，但不执行 | 资格查询从创世块累计并只读完整性；公开管线的 3 块 lag 是运行缓冲，不是不可变快照或完整重组证明；局部窗口不能替代 `C_t` 前缀 | 等待项目／账单授权、dry-run 字节上限、tip 外部核验与冻结导出哈希 |
+| 2026-09-09 | `v1.0` 仅授权无标签 S0；S1/S2 必须另行冻结 | 当前没有可审计标签时间与许可；把 S0 Go 自动扩张为模型授权会绕过标签、调参与 test-once Gate | 标签和模型均不进入当前协议执行范围 |
+| 2026-09-09 | 冻结原始脚本字节标识和窄 `provably-unspendable` 规则 | 地址字符串和脚本规范化会合并或丢失标识；一般可花费性判断超出 S0 所需 | 参考实现与边界测试完成；与 as-of/CoinJoin 合计 23 项在禁用第三方 pytest 自动插件后干净通过 |
