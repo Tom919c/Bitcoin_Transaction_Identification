@@ -84,7 +84,7 @@ BigQuery `crypto_bitcoin` 仍是候选，但字段语义已得到更强的一手
 
 ### 3.1 快照范围
 
-检索日期：2026-09-08。
+检索日期：2026-09-08；增量核验至 2026-09-09。
 
 目标：寻找完整等价工作和反证，而不是扩大一般 Bitcoin AML 综述。纳入项必须至少触及下列一项：按时间更新的 Bitcoin 地址聚类、最终与历史分区差异、聚类误差真值、严格时间图评测、实体类型预测、概率校准或固定预算队列。
 
@@ -92,7 +92,7 @@ BigQuery `crypto_bitcoin` 仍是候选，但字段语义已得到更强的一手
 
 ### 3.2 两条独立检索链
 
-链 A 为 Undermind 增量深检，工作区 `quan's workspace`，搜索路径 `/01 Discovery/As of Bitcoin Entity Identity Leakage Incremental`。目标查询完整限定了 `C_t/C_T`、固定地址支持、union 时间与 provenance、下游模型排序/校准/队列，以及 decisive No-Go。搜索返回 16 篇相关工作；摘要级综合未发现完整等价论文。随后对 `Mos21`、`Sch24c`、`Mul26`、`Sch24`、`Mag26`、`Mal26` 和 `Kha26` 做了全文定向问答。旧搜索 `/01 Discovery/Temporal Entity Resolution Error Propagation` 与 `/01 Discovery/Provenance Preserving Bitcoin Benchmark Reconstruction` 仅作为历史独立发现池，不重复计数。
+链 A 为 Undermind 增量深检，工作区 `quan's workspace`，搜索路径 `/01 Discovery/As of Bitcoin Entity Identity Leakage Incremental`。目标查询完整限定了 `C_t/C_T`、固定地址支持、union 时间与 provenance、下游模型排序/校准/队列，以及 decisive No-Go。搜索返回 16 篇相关工作；摘要级综合未发现完整等价论文。随后对 `Mos21`、`Sch24c`、`Mul26`、`Sch24`、`Mag26`、`Mal26` 和 `Kha26` 做了全文定向问答；DOI lookup 另定位 `Zho24`，书目/摘要匹配但 PDF 状态为 X（未取得 PDF），不按全文计入。旧搜索 `/01 Discovery/Temporal Entity Resolution Error Propagation` 与 `/01 Discovery/Provenance Preserving Bitcoin Benchmark Reconstruction` 仅作为历史独立发现池，不重复计数。
 
 链 B 由主负责人和一名不继承结论的反方审查者独立执行，查询包括：
 
@@ -104,6 +104,7 @@ BigQuery `crypto_bitcoin` 仍是候选，但字段语义已得到更强的一手
 - `Bitcoin entity type prediction address clusters supervised learning`
 - `temporal graph leakage future information evaluation`
 - `Bitcoin entity classification address clustering temporal evaluation`
+- exact-title/DOI 查询：`BitLINK: Temporal Linkage of Address Clusters in Bitcoin Blockchain`、`Online Temporal Data Mining and Learning: Pursuing Enhanced Efficiency and Robust Algorithms`、`10.1145/3637528.3672037`；以及作者名与 `site:digitalrepository.unm.edu`/UNM domain 定向查询
 
 链 B 只把论文原文、出版社页面、作者/机构正式页面、官方数据仓库和官方代码作为主张证据。搜索摘要只用于发现。
 
@@ -119,7 +120,7 @@ BigQuery `crypto_bitcoin` 仍是候选，但字段语义已得到更强的一手
 | Maganti, *When Graph Structure Becomes a Liability*, arXiv `2604.19514` | Undermind 全文核验；预印本 | 严格归纳设置只让编码器看到训练期子图；其主要差异来自未来测试节点/边和全图统计；报告 RF 与 GNN 排名差异并评估校准 | 证明严格时间协议可改变模型结论；预测单位是交易，不涉及实体分区版本 |
 | Khaleghpour & McKinney, *Leakage Safe Graph Features...*, arXiv `2603.06632` | Undermind 全文核验；预印本 | 用 `G_{<=t}` 计算因果图特征，评估 Brier/校准和 Precision@K | 校准与预算队列不是本项目可单独主张的新指标；仍未改变地址实体分区 |
 | Malik, *Do Transaction-Level and Actor-Level AML Queues Agree?*, arXiv `2604.23494` | Undermind 全文核验；预印本 | 固定 1% 预算比较交易级与地址级队列；文中 actor 明确定义为地址，不是真实解析实体 | 与队列粒度效应直接相邻；未研究聚类版本，要求本项目报告固定预算与单位映射 |
-| Zhong & Mueen, *BitLINK*, KDD 2024, DOI `10.1145/3637528.3672037` | 官方作者 CV、主页、22 页作者幻灯片与 UNM 学位论文记录核验；正文未取得 | 作者幻灯片明确把 address flushing 定义为旧簇被放弃后很快生成新簇，并将任务表述为连接 cluster-chain fragments；桥接簇可由前后簇交叉验证，案例结果以按时间排列的 linked clusters 展示 | 直接否决“首次研究 temporal cluster linkage/cluster chain”措辞；幻灯片没有提供可核验的 `C_t/C_T` 固定支持对照或可重放 union lineage，不能据此判定论文正文是否包含这些设计 |
+| Zhong & Mueen, *BitLINK*, KDD 2024, DOI `10.1145/3637528.3672037` | 官方作者 CV、主页、22 页作者幻灯片与 UNM 学位论文元数据/摘要核验；正文 PDF 未取得 | UNM 记录列出 Sheng Zhong 学位论文及摘要中的 BitLINK；作者幻灯片明确把 address flushing 定义为旧簇被放弃后很快生成新簇，并将任务表述为连接 cluster-chain fragments；桥接簇可由前后簇交叉验证 | 直接否决“首次研究 temporal cluster linkage/cluster chain”措辞；学位论文 PDF 未取得，不能关闭论文正文 checklist，也不能据此判定 `C_t/C_T` 固定支持或可重放 union lineage |
 | Yin, Mukkamala & Vatrapu, *Regulating Cryptocurrencies...*, JMIS 2019, DOI `10.1080/07421222.2018.1550550` | 出版社元数据与作者公开全文核验 | 以 Chainalysis 提供的 957 个已分类地址簇作多类预测；数据截至区块 512,033，采用 75/25 随机式切分与训练内三折交叉验证；聚类含共同花费、外部情报和人工合并，未提供 lineage 或标签可得时间 | 否决“首次做 Bitcoin 实体簇类型预测”；不能断言其使用截止块后的未来分区，但其不透明终态聚类与随机切分是本项目必须控制的近邻风险 |
 | Schnoering et al., *Refining Heuristic-Based Bitcoin Address Clustering with GNNs*, arXiv `2609.01942` | 官方 arXiv HTML 全文核验；预印本 | 以启发式 cluster 为训练标签，用对比式 GNN 表征和层次聚类检测可疑合并；训练/验证/测试来自不重叠区块区间；发布的地址图字段是聚合节点、边和 cluster 映射 | 对“聚类置信度/细化 GNN”构成直接方法碰撞；其非重叠交易切分不等于 cutoff-specific identity；正文所称代码仓库当前为空，复现性仍需核验 |
 | `BTCGraphConstruction` 官方代码 | 官方 GitHub 源码核验 | `populate_alias.py` 按区块收集合并并更新 `UnionFind`，最终只落 `node_id -> alias`；没有 union-event logger | 为小窗口重放提供最接近上游实现，但不能直接把其最终 alias 当作历史分区 |
@@ -199,10 +200,10 @@ CSV header 只确认 node-style feature 字段、edge-style 的 `a,b,reveal,last
 
 双链检索、关键全文核验和独立反方审查已经完成。关闭前仍需：
 
-1. 核验 BitLINK 全文是否包含可重放 cluster lineage；2026-09-09 已从作者主页取得并完整读取 `https://www.cs.unm.edu/~mueen/BitLink.pptx`（22 页，19,771,433 字节，SHA-256 `1DB891F815154C5E4E8BF49F9FE1AACEDFE0CD6A30EECCFE428A76AAC642CFCA`）。幻灯片关闭了“是否显式研究跨时间 cluster chain”这一疑问，但不是论文正文：ACM 正文仍返回 403，UNM 学位论文下载仍遇到 Cloudflare challenge。最近邻 checklist 第 1、2、4、5 项仍为 Unknown；第 3 项只确认概念级有序簇链，未确认可重放 lineage；禁止写“BitLINK 未做 `C_t/C_T`”“本项目首次研究 temporal cluster linkage”或“本项目首次连接 cluster chain”；
+1. 核验 BitLINK 全文是否包含可重放 cluster lineage；2026-09-09 已定位 UNM 学位论文官方元数据与摘要（Sheng Zhong，*Online Temporal Data Mining and Learning: Pursuing Enhanced Efficiency and Robust Algorithms*，2024-05-11），摘要列出 BitLINK；UNM direct download 遇 Cloudflare challenge，ACM DOI／正文入口返回 HTTP 403，两者均未取得 PDF。作者主页幻灯片已取得并完整读取（22 页，19,771,433 字节，SHA-256 `1DB891F815154C5E4E8BF49F9FE1AACEDFE0CD6A30EECCFE428A76AAC642CFCA`），但不能关闭论文正文 checklist。最近邻 checklist 第 1、2、4、5 项仍为 Unknown；第 3 项只确认概念级有序簇链，未确认可重放 lineage；禁止写“BitLINK 未做 `C_t/C_T`”“本项目首次研究 temporal cluster linkage”或“本项目首次连接 cluster chain”；
 2. Zenodo `22239038` 的 DataCite 与 record API 元数据、版本、许可、三个外层文件名、大小和 Zenodo MD5 声明已核验；最小训练包已经本地校验并完成中央目录／CSV header 审计，确认缺少本协议必需的 raw transaction/outpoint/script 与 union provenance 字段，作为 PIT 重建数据源 No-Go。node/edge/alias 列的精确语义及其余大包内部 schema 保持 Unknown，不因列名或文件名推断；
 3. 2026 新预印本的官方代码仓已在 2026-09-09 冻结为空仓快照；后续只有新 decision snapshot 才能改变该状态；
-4. 继续将其余纳入来源按 DOI/标题去重并补稳定 BibTeX 与页码定位；Yin 2019、BitLINK、2026 GNN 聚类预印本、Glassnode PIT 与 Möser–Narayanan FC 2022 已作为相互独立版本写入 `references.bib`。
+4. 继续将其余纳入来源按 DOI/标题去重并补稳定 BibTeX 与页码定位；Yin 2019、BitLINK、Zhong 2024 学位论文、2026 GNN 聚类预印本、Glassnode PIT 与 Möser–Narayanan FC 2022 已作为相互独立版本写入 `references.bib`。学位论文仅为元数据/摘要 source-verified，全文仍未取得。
 
 Yin et al. 2019 的剩余全文项已经关闭：其预测单位是专有地址簇，交易截止为区块 512,033（2018-03-04 23:58:21 UTC），采用 75/25 随机式切分和训练内三折交叉验证；全文没有 cluster lineage、label availability cutoff 或 `C_t/C_T` 对照。它是实体类型预测的 Critical 近邻，但不是已经核验的完整等价评测。
 
