@@ -114,7 +114,7 @@ BigQuery `crypto_bitcoin` 当前仅是未核验候选：仓库内没有对应 ET
 | Maganti, *When Graph Structure Becomes a Liability*, arXiv `2604.19514` | Undermind 全文核验；预印本 | 严格归纳设置只让编码器看到训练期子图；其主要差异来自未来测试节点/边和全图统计；报告 RF 与 GNN 排名差异并评估校准 | 证明严格时间协议可改变模型结论；预测单位是交易，不涉及实体分区版本 |
 | Khaleghpour & McKinney, *Leakage Safe Graph Features...*, arXiv `2603.06632` | Undermind 全文核验；预印本 | 用 `G_{<=t}` 计算因果图特征，评估 Brier/校准和 Precision@K | 校准与预算队列不是本项目可单独主张的新指标；仍未改变地址实体分区 |
 | Malik, *Do Transaction-Level and Actor-Level AML Queues Agree?*, arXiv `2604.23494` | Undermind 全文核验；预印本 | 固定 1% 预算比较交易级与地址级队列；文中 actor 明确定义为地址，不是真实解析实体 | 与队列粒度效应直接相邻；未研究聚类版本，要求本项目报告固定预算与单位映射 |
-| Zhong & Mueen, *BitLINK*, KDD 2024, DOI `10.1145/3637528.3672037` | 元数据/摘要核验，全文待补 | 使用时间签名跨时链接地址 cluster | 动态实体解析近邻；尚无证据表明它执行 final-vintage 对照和下游可信评测 |
+| Zhong & Mueen, *BitLINK*, KDD 2024, DOI `10.1145/3637528.3672037` | 官方作者 CV 与主页、UNM 学位论文记录核验；正文未取得 | 作者主页只确认其用 temporal patterns 链接 Bitcoin 地址 cluster；学位论文记录确认 BitLINK 属于 blockchain address identification | 动态实体解析近邻；是否执行 `C_t/C_T`、固定历史支持、lineage、实体类型／校准／预算队列评测均为 Unknown |
 | Yin, Mukkamala & Vatrapu, *Regulating Cryptocurrencies...*, JMIS 2019, DOI `10.1080/07421222.2018.1550550` | 出版社元数据与作者公开全文核验 | 以 Chainalysis 提供的 957 个已分类地址簇作多类预测；数据截至区块 512,033，采用 75/25 随机式切分与训练内三折交叉验证；聚类含共同花费、外部情报和人工合并，未提供 lineage 或标签可得时间 | 否决“首次做 Bitcoin 实体簇类型预测”；不能断言其使用截止块后的未来分区，但其不透明终态聚类与随机切分是本项目必须控制的近邻风险 |
 | Schnoering et al., *Refining Heuristic-Based Bitcoin Address Clustering with GNNs*, arXiv `2609.01942` | 官方 arXiv HTML 全文核验；预印本 | 以启发式 cluster 为训练标签，用对比式 GNN 表征和层次聚类检测可疑合并；训练/验证/测试来自不重叠区块区间；发布的地址图字段是聚合节点、边和 cluster 映射 | 对“聚类置信度/细化 GNN”构成直接方法碰撞；其非重叠交易切分不等于 cutoff-specific identity；正文所称代码仓库当前为空，复现性仍需核验 |
 | `BTCGraphConstruction` 官方代码 | 官方 GitHub 源码核验 | `populate_alias.py` 按区块收集合并并更新 `UnionFind`，最终只落 `node_id -> alias`；没有 union-event logger | 为小窗口重放提供最接近上游实现，但不能直接把其最终 alias 当作历史分区 |
@@ -172,12 +172,14 @@ arXiv `2609.01942` 报告三个训练图、一个验证图和一个测试图来�
 
 双链检索、关键全文核验和独立反方审查已经完成。关闭前仍需：
 
-1. 核验 BitLINK 全文是否包含可重放 cluster lineage；当前仅有 DOI、作者主页、正式 CV 和学校学位库记录，不能据此推断其 cutoff、更新或输出结构；
+1. 核验 BitLINK 全文是否包含可重放 cluster lineage；2026-09-09 的独立核验已尝试 ACM landing/PDF、作者主页与 slides、UNM 学位论文记录与下载入口，但 ACM 返回 403、slides 无法由当前文本链读取、学位论文下载遇到 Cloudflare challenge，未取得可逐页核验正文。最近邻 checklist 第 1–5 项保持 Unknown，第 6 项只确认同行评审出版身份；禁止写“BitLINK 未做 `C_t/C_T`”或“本项目首次研究 temporal cluster linkage”；
 2. 获取并核验 Zenodo `22239038` 官方 metadata、文件 manifest、checksum 与实际 schema；当前明确 No-Go 为 PIT 重建数据源；
 3. 对 2026 新预印本的代码空仓状态和后续版本做一次冻结快照；
 4. 继续将其余纳入来源按 DOI/标题去重并补稳定 BibTeX 与页码定位；Yin 2019、BitLINK、2026 GNN 聚类预印本、Glassnode PIT 与 Möser–Narayanan FC 2022 已作为相互独立版本写入 `references.bib`。
 
 Yin et al. 2019 的剩余全文项已经关闭：其预测单位是专有地址簇，交易截止为区块 512,033（2018-03-04 23:58:21 UTC），采用 75/25 随机式切分和训练内三折交叉验证；全文没有 cluster lineage、label availability cutoff 或 `C_t/C_T` 对照。它是实体类型预测的 Critical 近邻，但不是已经核验的完整等价评测。
+
+BitLINK 的当前证据边界不是“完整等价已排除”，而是“风险仍未关闭”。作者级来源足以证明它与 temporal cluster linkage 高度相邻，却不足以证明或否定本协议的固定历史窗口、固定支持和下游决策传播设计；无法访问正文不能当作论文没有报告这些内容。
 
 ### Gate 2：方向保持，创新叙事已修订
 
