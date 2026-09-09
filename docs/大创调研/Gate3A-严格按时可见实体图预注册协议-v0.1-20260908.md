@@ -54,6 +54,8 @@ S0 输入必须能提供或确定性恢复：主链 `block_hash` 与 `block_heig
 
 当前本地 2.52 亿节点聚合库、最终 alias 表和 Zenodo `10.5281/zenodo.22239038` 都未满足该硬门。Google BigQuery `bigquery-public-data.crypto_bitcoin` 只是候选入口；在取得项目授权、费用上限并核验 schema 前不得查询或写成已选数据源。
 
+候选源只有在实际 schema、主链／重组语义、快照可复现性和成本授权逐项核验后才可入选。即使存在名为 `spent_transaction_hash` 的字段，也必须以官方 schema 和固定样本核验它确为 `vin.prevout` 的父交易哈希，不能仅凭列名推断。BigQuery 适配还必须保存查询文本、项目与账单授权、最大扫描字节、费用上限、查询时点和导出分片哈希；这些条件未关闭前不得发起付费或大规模查询。
+
 ### 3.2 四个历史截止的确定规则
 
 数据快照与可用末端 `h_max` 冻结后，先排除不能提供完整未来跨度的区块，即只保留 `0` 至 `h_max-H`。按该范围内的累计非 coinbase 交易数，取 20%、40%、60% 和 80% 四个分位首次达到的区块，再向下对齐到最近的 2,016 块边界，得到四个 `t_j`。若两个截止因对齐而重合，后一个顺延一个 2,016 块窗口；若因此越过 `h_max-H`，数据源 No-Go。
@@ -66,6 +68,8 @@ S0 输入必须能提供或确定性恢复：主链 `block_hash` 与 `block_heig
 
 基本标识不是地址字符串，而是 prevout 的原始 `scriptPubKey` 字节经 `SHA-256` 得到的稳定 `script_id`。这保留 P2PK、P2PKH、P2SH、SegWit、Taproot 和可解析但没有传统地址字符串的脚本。不可花费输出不进入分区；无法取得原始脚本的输入记为缺失并触发数据完整性统计，不能静默丢弃。
 
+输入的 `scriptSig` 或 witness 只是花费交易携带的解锁材料，不是被引用 prevout 的 locking `scriptPubKey`，二者不得互换。数据适配层至少输出 `(block_hash, block_height, tx_index, txid, input_index, prev_txid, prev_vout, prevout_value, prevout_scriptPubKey, output_index, output_value, output_scriptPubKey, coinbase)`；缺列或字段语义未核验时不得进入 S0。
+
 主启发式只采用共同输入所有权启发式：对每笔通过过滤、具有至少两个不同输入 `script_id` 的非 coinbase 交易，将字典序最小的 `script_id` 与其余唯一输入依次形成星形 union。它是可重放的启发式，不是真实共同控制权。change heuristic、外部人工合并和 GNN refinement 不进入 S0 主分析。
 
 每个 union 事件至少记录：
@@ -76,7 +80,7 @@ script_id_a, script_id_b, heuristic_id, heuristic_version,
 filter_profile, filter_decision, evidence_json, source_manifest_sha256
 ```
 
-排序键固定为 `(block_height, tx_index, event_index, script_id_a, script_id_b)`；一对脚本先按字典序规范化，重复事件保留首次事件并记录重复计数。并查集 root 选择必须由固定规则决定，不能依赖线程完成顺序。检查点只能作为加速手段；从空状态重放到同一 cutoff 的分区哈希必须与检查点路径一致。
+排序键固定为 `(block_height, tx_index, event_index, script_id_a, script_id_b)`；一对脚本先按字典序规范化，提取层对重复事件保留首次事件并记录重复计数，参考重放层必须拒绝任何尚未去重的 `event_id`。并查集 root 选择必须由固定规则决定，不能依赖线程完成顺序。检查点只能作为加速手段；从空状态重放到同一 cutoff 的分区哈希必须与检查点路径一致。
 
 ## 5. 协作交易过滤
 
@@ -118,6 +122,7 @@ p_rewrite = mean_q 1[ (I_CT(q), O_CT(q)) != (I_Ct(q), O_Ct(q)) ]
 4. B/C 导出的所有节点 ID 与端点代表都属于 `V_j`，域外代表数为 0；`V_j` 的构造不读取 spent/UTXO 状态或标签表。
 5. 从四个窗口、两个主过滤配置按 `SHA-256(event_id || "asof-audit-v1")` 升序抽取合计至少 1,000 个唯一 union 事件，且每个窗口／配置至少 100 个；原始 prevout、交易位置和规则证据可恢复率至少 99.5%。任何无法解释的未来事件进入 `C_t` 都直接失败。
 6. 缺失 prevout/script 的交易比例不高于 0.1%，且这些交易在 B/C 中使用同一排除规则；超过门槛则只允许修复数据源后重跑，不得插补。
+7. 每个 input parent outpoint 必须能连接到同一主链快照中的唯一父输出，并分别记录 missing、orphan、reorg 和 duplicate 计数；主链选择或重组语义未核验时直接阻断。
 
 完整性失败先停止效应解释。一次协议内允许修复确定性实现或数据缺失并从头重跑；若仍失败，S0 No-Go，不进入模型。
 
@@ -159,6 +164,8 @@ S1/S2 不得用测试表现反向改变 S0 阈值、窗口、过滤器、标签�
 
 每次 S0 运行保存：原始数据 manifest、union 日志或其分片及哈希、cutoff 分区映射、B/C 图 manifest、抽样审计记录、原始统计、bootstrap 配置与输出、命令、环境和失败日志。结果表与图只能从这些产物生成。
 
+数据来源记录还必须包含源 revision、快照或分区标识、schema manifest、原始与导出哈希、适配器 revision，以及适用的查询、授权和费用记录；只保存 URL 不构成可重放快照。
+
 ## 11. 最近邻完整等价 checklist
 
 只有一项可取得全文的工作同时满足以下全部条件，才触发“完整等价评测”自动 No-Go：
@@ -195,3 +202,4 @@ S1/S2 不得用测试表现反向改变 S0 阈值、窗口、过滤器、标签�
 | 2026-09-08 | 主设计固定 `W=2,016`、`H=52,560`，另完整报告三个月/两年 horizon 敏感性 | 一年不是领域真值，只是固定 vintage estimand；四个 cutoff 不能支持全时期泛化 | 待数据 manifest 后冻结 |
 | 2026-09-08 | 以 `p_merge`、`p_rewrite` 的 1% 作为共同资源门 | 阈值不等于 top-k 队列效用；真正队列影响必须在 S1 直接检验 | 待冻结 |
 | 2026-09-08 | 独立反方提出固定支持、统计量唯一性、filter 伪真值、bootstrap 与三态逻辑问题 | 已把 `V_j` 改为创建时定义，限制实体代表到 `V_j`，形式化两个统计量，收紧过滤措辞与逐统计量停止线，并把扩大窗口定义为新 estimand | P0 已关闭；P1/P2 边界已写入，待 v1.0 实现核验 |
+| 2026-09-09 | 在冻结数据源前只实现纯标准库参考语义与合成契约测试 | 该实现不解析原始块、不访问标签、不计算真实效应；用于提前锁定 cutoff、域外中介、固定支持和两个主要统计量 | 8 项定向测试通过；不构成 S0 Pilot 或 v1.0 冻结 |
