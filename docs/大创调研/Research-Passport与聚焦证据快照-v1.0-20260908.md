@@ -75,7 +75,7 @@ BigQuery `crypto_bitcoin` 仍是候选，但字段语义已得到更强的一手
 - 正式立项题名、任务书、项目编号、结题材料版本和成果承诺仍未进入当前分支的可核验输入，Gate 0 因此不能完全关闭。
 - 公开链数据不等于可以对真实主体作风险指控。演示系统只能展示“实体类型识别结果”“不确定结果”和“待复核对象”。
 - 现有标签含论坛、公开名单和外部来源，可能存在错误、时间漂移和选择偏差；没有发现/公开/采集时间时，不得用于严格历史部署训练。
-- Zenodo 官方 record 已确认 CC BY 4.0、三个外层 ZIP 的文件名、大小和仓库声明 MD5；当前尚未取得 ZIP 内部成员 manifest，也未下载或独立复算任何文件 checksum，因此不把它写成已可用本地数据。
+- Zenodo 官方 record 已确认 CC BY 4.0、三个外层 ZIP 的文件名、大小和仓库声明 MD5；仅最小训练 ZIP 已下载并本地复算 MD5/SHA-256，其余两包未下载、内部成员清单与 checksum 未取得，因此不把整个 release 写成已可用本地数据。
 - 不向外部模型或服务上传数据库内容、私有标签、未发表手稿、连接信息或凭据。
 
 ## 3. Gate 1 聚焦 decision corpus snapshot
@@ -136,6 +136,14 @@ Zenodo 官方 record API 随后恢复可读。取得的 record JSON 创建时间
 
 为避免无审计地下载约 15.20 GB，中央目录探测设置了 64 MiB 总响应体硬上限，并要求每次请求必须返回有效 `Content-Range`；唯一一次 Range-only 尝试没有生成可用响应，按预先停止线未重试、未读取成员、未下载 ZIP。因此只关闭“外层文件名、大小与 Zenodo checksum 声明”，内部成员路径、压缩／解压大小、CRC、实际 schema、raw transaction/outpoint/script、主链／重组信息和 union lineage 仍为 Unknown。该 release 继续 No-Go 为当前 `C_t/C_T` 重放输入；是否下载任一完整文件必须在独立磁盘预算和数据价值审查后决定。
 
+经明确的 410,978,944 字节上限后，只下载最小的 `1_training_dataset.zip` 到系统临时目录。文件 MD5 与 Zenodo 声明 `ff69c727f0a63bece2c524adb97090a9` 一致，本地 SHA-256 为 `7A1E0E1B76F5D9FF487DF0B005BC3E24E1A73464A25AABB7FB73AF9CF0413BC4`。ZIP 有 24 个成员，压缩成员合计 410,974,640 字节、未压缩合计 2,411,465,040 字节；没有 README、metadata、manifest 或 schema 文件。五组 `train/{0,1,2}`、`valid/0`、`test/0` 各只有三个 CSV，首行在所有组完全一致：
+
+- `node_features.csv`：`node_id,degree_in,degree_out,total_transactions_in,total_transactions_out,first_transaction_in,last_transaction_in,first_transaction_out,last_transaction_out,min_sent,max_sent,total_sent,min_received,max_received,total_received`；
+- `edge_features.csv`：`a,b,reveal,last_seen,total,min_sent,max_sent,total_sent`；
+- `clustering.csv`：`node_id,alias`。
+
+CSV header 只确认 node-style feature 字段、edge-style 的 `a,b,reveal,last_seen,...` 字段和 `node_id,alias` 映射；没有 metadata 或数据行证据独立说明 `a/b`、`reveal/last_seen` 的精确语义，也不能仅凭列名断言 alias 的 vintage。即便如此，header 明确没有 `block_hash`、块内交易位置、`txid`、input/output index、prevout、原始 locking script、coinbase 或 union-event provenance；`reveal/last_seen/alias` 无法补出输入分组和原始脚本。因此它不能从创世块确定性重放本协议的共同输入 `C_t`，该训练包对 Gate 3A 数据硬门为确定 No-Go。检查只读取 ZIP 中央目录和每个 CSV 首行，没有读取 `clustering.csv` 数据行、标签、效应或模型结果。其余 2.52 GB/12.27 GB 包未下载；这不证明其内部 schema 相同，但在没有 raw-chain 证据前不继续扩大下载。
+
 ### 3.5 CoinJoin 过滤器源码—论文核验
 
 2026-09-09 已逐项读取 `BTCGraphConstruction` 固定 revision `3becbc44a951abbe1e85d374a66340a639059d1c` 的 detector、交易特征、CoinJoin 表写入、alias 构建和 SQL 排除路径。上游 `populate_coinjoins` 对 JoinMarket、Wasabi 1.0/1.1/2.0、Whirlpool mix 与 Whirlpool Tx0 六个标志取 OR；`populate_alias(..., exclude_coinjoin=True)` 随后按 CoinJoin 表中的区块和交易位置整体排除，因此命中的 Tx0 也会阻断共同输入 union。
@@ -190,7 +198,7 @@ Zenodo 官方 record API 随后恢复可读。取得的 record JSON 创建时间
 双链检索、关键全文核验和独立反方审查已经完成。关闭前仍需：
 
 1. 核验 BitLINK 全文是否包含可重放 cluster lineage；2026-09-09 已从作者主页取得并完整读取 `https://www.cs.unm.edu/~mueen/BitLink.pptx`（22 页，19,771,433 字节，SHA-256 `1DB891F815154C5E4E8BF49F9FE1AACEDFE0CD6A30EECCFE428A76AAC642CFCA`）。幻灯片关闭了“是否显式研究跨时间 cluster chain”这一疑问，但不是论文正文：ACM 正文仍返回 403，UNM 学位论文下载仍遇到 Cloudflare challenge。最近邻 checklist 第 1、2、4、5 项仍为 Unknown；第 3 项只确认概念级有序簇链，未确认可重放 lineage；禁止写“BitLINK 未做 `C_t/C_T`”“本项目首次研究 temporal cluster linkage”或“本项目首次连接 cluster chain”；
-2. Zenodo `22239038` 的 DataCite 与 record API 元数据、版本、许可、三个外层文件名、大小和 Zenodo MD5 声明已核验；仍需内部成员 manifest、实际 schema 和 lineage。当前明确 No-Go 为 PIT 重建数据源；
+2. Zenodo `22239038` 的 DataCite 与 record API 元数据、版本、许可、三个外层文件名、大小和 Zenodo MD5 声明已核验；最小训练包已经本地校验并完成中央目录／CSV header 审计，确认缺少本协议必需的 raw transaction/outpoint/script 与 union provenance 字段，作为 PIT 重建数据源 No-Go。node/edge/alias 列的精确语义及其余大包内部 schema 保持 Unknown，不因列名或文件名推断；
 3. 2026 新预印本的官方代码仓已在 2026-09-09 冻结为空仓快照；后续只有新 decision snapshot 才能改变该状态；
 4. 继续将其余纳入来源按 DOI/标题去重并补稳定 BibTeX 与页码定位；Yin 2019、BitLINK、2026 GNN 聚类预印本、Glassnode PIT 与 Möser–Narayanan FC 2022 已作为相互独立版本写入 `references.bib`。
 
