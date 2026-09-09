@@ -125,7 +125,11 @@ BigQuery `crypto_bitcoin` 当前仅是未核验候选：仓库内没有对应 ET
 
 arXiv `2609.01942` 报告三个训练图、一个验证图和一个测试图来自不重叠区块区间，并声明 Zenodo DOI `10.5281/zenodo.22239038`、CC BY 4.0。附录公开字段包括节点、地址级聚合边和 cluster 映射；正文没有给出逐 union 事件日志。
 
-官方 `hugoschnoering2/btc-graph-hc` 仓库在 2026-09-08 的 GitHub 元数据显示大小为 0，虽有默认分支名，但当前没有可读取实现。`BTCGraphConstruction` 仓库可读，README 为空，源码保留原始块解析和最终 alias 构建。Zenodo 记录与 API 在本轮路径中未返回可读取的官方 metadata；文件名、大小、哈希、record version、实际 schema 和 union lineage 均未核验。论文作者声明该工件为 CC BY 4.0，但这还不是对 Zenodo license 字段的独立核验。因此该数据不能作为当前可审计的 as-of 输入；若后续可访问，必须先保存官方 metadata、manifest 与 checksum，再判断是否具备 union event 或足够原始链数据。
+官方 `hugoschnoering2/btc-graph-hc` 仓库在 2026-09-08 的 GitHub 元数据显示大小为 0，虽有默认分支名，但当前没有可读取实现。`BTCGraphConstruction` 仓库可读，README 为空，源码保留原始块解析和最终 alias 构建。
+
+2026-09-09 的 DataCite 官方 DOI 注册记录已确认 Zenodo `10.5281/zenodo.22239038` 的标题为 *Bitcoin transaction graphs: training, labelled entities, and CoinJoins*，版本 `1.0`，issued date 为 2026-09-01，creators 为 Hugo Pierre Philippe Schnoering 与 Michalis Vazirgiannis，许可为 CC BY 4.0，并以 `IsVersionOf` 指向概念 DOI `10.5281/zenodo.22239037`。注册元数据的 deposited description 列出 `1_training_dataset.zip`、`2_labels_eval_dataset.zip` 和 `3_coinjoin_eval_dataset.zip`，并声称标注／CoinJoin 图目录含 `node_features.parquet`、`edge_features.parquet`、`clustering.parquet` 与 `metadata.json`。
+
+这关闭了书目、版本和许可核验，不等于核验实际文件。Zenodo record/API 本轮仍返回超时，DataCite 的 `sizes`、`formats` 为空且 `contentUrl` 为 `null`；因此文件 manifest、逐文件大小与 checksum、实际 schema、raw transaction/outpoint/script、主链／重组信息和 union lineage 仍为 Unknown。该 release 继续 No-Go 为当前 `C_t/C_T` 重放输入；若 Zenodo 恢复可访问，须先保存 record JSON、文件 manifest 与 checksum，再判断是否具备 union event 或足够原始链数据。
 
 ## 4. 贡献边界与反方结论
 
@@ -173,7 +177,7 @@ arXiv `2609.01942` 报告三个训练图、一个验证图和一个测试图来�
 双链检索、关键全文核验和独立反方审查已经完成。关闭前仍需：
 
 1. 核验 BitLINK 全文是否包含可重放 cluster lineage；2026-09-09 的独立核验已尝试 ACM landing/PDF、作者主页与 slides、UNM 学位论文记录与下载入口，但 ACM 返回 403、slides 无法由当前文本链读取、学位论文下载遇到 Cloudflare challenge，未取得可逐页核验正文。最近邻 checklist 第 1–5 项保持 Unknown，第 6 项只确认同行评审出版身份；禁止写“BitLINK 未做 `C_t/C_T`”或“本项目首次研究 temporal cluster linkage”；
-2. 获取并核验 Zenodo `22239038` 官方 metadata、文件 manifest、checksum 与实际 schema；当前明确 No-Go 为 PIT 重建数据源；
+2. Zenodo `22239038` 的 DataCite 注册元数据、版本和许可已核验；仍需取得 Zenodo record JSON、文件 manifest、checksum 与实际 schema。当前明确 No-Go 为 PIT 重建数据源；
 3. 对 2026 新预印本的代码空仓状态和后续版本做一次冻结快照；
 4. 继续将其余纳入来源按 DOI/标题去重并补稳定 BibTeX 与页码定位；Yin 2019、BitLINK、2026 GNN 聚类预印本、Glassnode PIT 与 Möser–Narayanan FC 2022 已作为相互独立版本写入 `references.bib`。
 

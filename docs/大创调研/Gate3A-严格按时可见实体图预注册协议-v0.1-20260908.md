@@ -204,3 +204,4 @@ S1/S2 不得用测试表现反向改变 S0 阈值、窗口、过滤器、标签�
 | 2026-09-08 | 独立反方提出固定支持、统计量唯一性、filter 伪真值、bootstrap 与三态逻辑问题 | 已把 `V_j` 改为创建时定义，限制实体代表到 `V_j`，形式化两个统计量，收紧过滤措辞与逐统计量停止线，并把扩大窗口定义为新 estimand | P0 已关闭；P1/P2 边界已写入，待 v1.0 实现核验 |
 | 2026-09-09 | 在冻结数据源前只实现纯标准库参考语义与合成契约测试 | 该实现不解析原始块、不访问标签、不计算真实效应；用于提前锁定 cutoff、域外中介、固定支持和两个主要统计量 | 8 项定向测试通过；不构成 S0 Pilot 或 v1.0 冻结 |
 | 2026-09-09 | BitLINK 独立全文核验仍未取得正文 | 官方作者来源只证明 temporal cluster linkage 高度相邻；最近邻 checklist 第 1–5 项均不能由元数据判定，正文不可得也不能作阴性证据 | 风险保持 Unknown；冻结版禁止“BitLINK 未做 `C_t/C_T`”与“首次 temporal cluster linkage”措辞 |
+| 2026-09-09 | 通过 DataCite 核验 Zenodo 数据集注册元数据 | 已确认版本 `1.0`、CC BY 4.0、数据作者、概念 DOI 和 deposited description；Zenodo 文件 API 仍超时，实际 manifest/checksum 与 lineage 未取得 | 书目与许可关闭；作为 as-of 重放输入仍 No-Go |
