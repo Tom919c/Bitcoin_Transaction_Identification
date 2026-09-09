@@ -2,7 +2,7 @@
 
 日期：2026-09-08
 
-状态：Gate 0 条件未关闭；Gate 1 聚焦增量审计已完成第一轮，但仍有来源与数据工件待核验；Gate 3A 未冻结
+状态：Gate 0 条件未关闭；Gate 1 聚焦增量审计已完成第一轮，Yin 2019 已全文闭环，BitLINK 与 Zenodo 工件仍未闭环；Gate 3A 已形成 v0.1 待冻结草案
 
 研究分支：`asof-entity-graph-pilot`
 
@@ -112,6 +112,7 @@
 | Khaleghpour & McKinney, *Leakage Safe Graph Features...*, arXiv `2603.06632` | Undermind 全文核验；预印本 | 用 `G_{<=t}` 计算因果图特征，评估 Brier/校准和 Precision@K | 校准与预算队列不是本项目可单独主张的新指标；仍未改变地址实体分区 |
 | Malik, *Do Transaction-Level and Actor-Level AML Queues Agree?*, arXiv `2604.23494` | Undermind 全文核验；预印本 | 固定 1% 预算比较交易级与地址级队列；文中 actor 明确定义为地址，不是真实解析实体 | 与队列粒度效应直接相邻；未研究聚类版本，要求本项目报告固定预算与单位映射 |
 | Zhong & Mueen, *BitLINK*, KDD 2024, DOI `10.1145/3637528.3672037` | 元数据/摘要核验，全文待补 | 使用时间签名跨时链接地址 cluster | 动态实体解析近邻；尚无证据表明它执行 final-vintage 对照和下游可信评测 |
+| Yin, Mukkamala & Vatrapu, *Regulating Cryptocurrencies...*, JMIS 2019, DOI `10.1080/07421222.2018.1550550` | 出版社元数据与作者公开全文核验 | 以 Chainalysis 提供的 957 个已分类地址簇作多类预测；数据截至区块 512,033，采用 75/25 随机式切分与训练内三折交叉验证；聚类含共同花费、外部情报和人工合并，未提供 lineage 或标签可得时间 | 否决“首次做 Bitcoin 实体簇类型预测”；不能断言其使用截止块后的未来分区，但其不透明终态聚类与随机切分是本项目必须控制的近邻风险 |
 | Schnoering et al., *Refining Heuristic-Based Bitcoin Address Clustering with GNNs*, arXiv `2609.01942` | 官方 arXiv HTML 全文核验；预印本 | 以启发式 cluster 为训练标签，用对比式 GNN 表征和层次聚类检测可疑合并；训练/验证/测试来自不重叠区块区间；发布的地址图字段是聚合节点、边和 cluster 映射 | 对“聚类置信度/细化 GNN”构成直接方法碰撞；其非重叠交易切分不等于 cutoff-specific identity；正文所称代码仓库当前为空，复现性仍需核验 |
 | `BTCGraphConstruction` 官方代码 | 官方 GitHub 源码核验 | `populate_alias.py` 按区块收集合并并更新 `UnionFind`，最终只落 `node_id -> alias`；没有 union-event logger | 为小窗口重放提供最接近上游实现，但不能直接把其最终 alias 当作历史分区 |
 
@@ -121,7 +122,7 @@
 
 arXiv `2609.01942` 报告三个训练图、一个验证图和一个测试图来自不重叠区块区间，并声明 Zenodo DOI `10.5281/zenodo.22239038`、CC BY 4.0。附录公开字段包括节点、地址级聚合边和 cluster 映射；正文没有给出逐 union 事件日志。
 
-官方 `hugoschnoering2/btc-graph-hc` 仓库在 2026-09-08 的 GitHub 元数据显示大小为 0，虽有默认分支名，但当前没有可读取实现。`BTCGraphConstruction` 仓库可读，README 为空，源码保留原始块解析和最终 alias 构建。Zenodo 记录的文件清单、大小、哈希和实际 schema 尚未独立取得。因此该新数据只能列为候选外部基线，不能作为已就绪的 as-of 输入。
+官方 `hugoschnoering2/btc-graph-hc` 仓库在 2026-09-08 的 GitHub 元数据显示大小为 0，虽有默认分支名，但当前没有可读取实现。`BTCGraphConstruction` 仓库可读，README 为空，源码保留原始块解析和最终 alias 构建。Zenodo 记录与 API 在本轮路径中未返回可读取的官方 metadata；文件名、大小、哈希、record version、实际 schema 和 union lineage 均未核验。论文作者声明该工件为 CC BY 4.0，但这还不是对 Zenodo license 字段的独立核验。因此该数据不能作为当前可审计的 as-of 输入；若后续可访问，必须先保存官方 metadata、manifest 与 checksum，再判断是否具备 union event 或足够原始链数据。
 
 ## 4. 贡献边界与反方结论
 
@@ -168,19 +169,20 @@ arXiv `2609.01942` 报告三个训练图、一个验证图和一个测试图来�
 
 双链检索、关键全文核验和独立反方审查已经完成。关闭前仍需：
 
-1. 核验 Yin et al. 2019 实体类型监督论文全文的构图与时间口径；
-2. 核验 BitLINK 全文是否包含可重放 cluster lineage；
-3. 获取并核验 Zenodo `22239038` 文件 manifest 与实际 schema；
-4. 对 2026 新预印本的代码空仓状态和后续版本做一次冻结快照；
-5. 将最终纳入来源按 DOI/标题去重，保存稳定 BibTeX 与页码定位。
+1. 核验 BitLINK 全文是否包含可重放 cluster lineage；当前仅有 DOI、作者主页、正式 CV 和学校学位库记录，不能据此推断其 cutoff、更新或输出结构；
+2. 获取并核验 Zenodo `22239038` 官方 metadata、文件 manifest、checksum 与实际 schema；当前明确 No-Go 为 PIT 重建数据源；
+3. 对 2026 新预印本的代码空仓状态和后续版本做一次冻结快照；
+4. 继续将其余纳入来源按 DOI/标题去重并补稳定 BibTeX 与页码定位；Yin 2019、BitLINK、2026 GNN 聚类预印本、Glassnode PIT 与 Möser–Narayanan FC 2022 已作为相互独立版本写入 `references.bib`。
+
+Yin et al. 2019 的剩余全文项已经关闭：其预测单位是专有地址簇，交易截止为区块 512,033（2018-03-04 23:58:21 UTC），采用 75/25 随机式切分和训练内三折交叉验证；全文没有 cluster lineage、label availability cutoff 或 `C_t/C_T` 对照。它是实体类型预测的 Critical 近邻，但不是已经核验的完整等价评测。
 
 ### Gate 2：方向保持，创新叙事已修订
 
 用户对“严格按时可见实体图与可信识别系统”的方向确认继续有效；确认不等于批准宽泛的首创表述。核心创新从“发现未来聚类泄漏”改为“可审计、受控、可复现地测量其对实体类型预测与决策的影响”。
 
-### Gate 3A：禁止冻结
+### Gate 3A：v0.1 待冻结
 
-除 Gate 0/1 阻断项外，还必须在查看 Pilot 结果前冻结：标识单位、主链和区块内顺序、启发式版本、过滤器、标签投影、cutoff、窗口选择规则、主次统计量、数值 Go/No-Go 阈值、重采样单位、调参预算和测试集打开规则。
+已形成[严格按时可见实体图预注册协议 v0.1](Gate3A-严格按时可见实体图预注册协议-v0.1-20260908.md)，预先写定 S0/S1/S2 分层、脚本单位、共同输入 union 日志、四窗口选择算法、主要结构统计量、1% 最小实际差异、时间块 bootstrap、三态停止规则和 test-once 纪律。它仍不是 `v1.0`：原始链来源、完整 schema/hash、`F_pub` 本地实现快照、BitLINK 风险处置和标签路线未关闭，不能运行正式 Pilot。
 
 标签时间目前是最高风险阻断项。若无法形成 `L_{<=t}`，第一阶段 Go/No-Go 只能依据不使用标签的 partition/graph 指标；实体类型模型实验必须降级为回顾性敏感性分析，不能宣称历史部署可信度。
 
@@ -188,7 +190,7 @@ arXiv `2609.01942` 报告三个训练图、一个验证图和一个测试图来�
 
 1. 补齐 Gate 1 的三项全文/工件核验并冻结去重后的聚焦来源表。
 2. 只读确认本机或获批来源中是否存在可用原始块/TXO 输入、版本、许可、哈希与容量。
-3. 使用 `research-planning`、`experiment-design` 和统计补充 Skill 形成 Gate 3A v1.0；先冻结阈值，再看数据。
+3. 审查 Gate 3A v0.1 的窗口、过滤器和 1% 数值门；关闭数据与实现 blocker 后升级为 v1.0，仍须先冻结阈值再看数据。
 4. 协议冻结后，仅实现 union provenance logger、确定性 replay 和一个会失败的最小检查。
 5. 运行小窗口无模型数据 Gate，由 Research Director 根据预注册阈值作 Go/No-Go；只有 Go 才进入模型、校准、拒判和系统接入。
 
