@@ -1,0 +1,58 @@
+{
+  "schema_version": "aws-btc-license-evidence-v1",
+  "retrieved_at": "2026-09-10T19:59:53.4963897+08:00",
+  "dataset": "AWS Public Blockchain Data / Bitcoin v1.0",
+  "sources": [
+    {
+      "role": "dataset_registry_metadata",
+      "url": "https://github.com/awslabs/open-data-registry/blob/5e477378f3c469a8677ecab07761798c1f92ad0c/datasets/aws-public-blockchain.yaml",
+      "raw_url": "https://raw.githubusercontent.com/awslabs/open-data-registry/5e477378f3c469a8677ecab07761798c1f92ad0c/datasets/aws-public-blockchain.yaml",
+      "revision": "5e477378f3c469a8677ecab07761798c1f92ad0c",
+      "bytes": 3642,
+      "sha256": "2c97e8b452b345ff60c6a9bea8db970b23b6587126e0d2fa827802a3a63ae0f4",
+      "verified_facts": [
+        "Bitcoin is listed as maintained by AWS at s3://aws-public-blockchain/v1.0/btc/.",
+        "The dataset-level License field points to the digital-assets examples LICENSE file."
+      ]
+    },
+    {
+      "role": "linked_license_text",
+      "url": "https://github.com/aws-solutions-library-samples/guidance-for-digital-assets-on-aws/blob/a72285ae82da1c38fd39c5b8c7c60e209372342b/LICENSE",
+      "raw_url": "https://raw.githubusercontent.com/aws-solutions-library-samples/guidance-for-digital-assets-on-aws/a72285ae82da1c38fd39c5b8c7c60e209372342b/LICENSE",
+      "revision": "a72285ae82da1c38fd39c5b8c7c60e209372342b",
+      "bytes": 927,
+      "sha256": "ef47b4ae2a1a8d38ef87b38dc5927967e7b472ffa3f7d125e89dbc8353a1e7af",
+      "verified_facts": [
+        "The text grants use, copy, modification, publication, distribution, sublicensing and sale rights without charge.",
+        "The defined licensed object is phrased as software and associated documentation files, not expressly as Parquet data."
+      ]
+    },
+    {
+      "role": "program_terms",
+      "url": "https://aws.amazon.com/opendata/open-data-sponsorship-program/terms/",
+      "last_updated_on_page": "2025-09-11",
+      "verified_facts": [
+        "Section 1.1(d) requires Program Content to be available to End Users under a permissive license requiring no monetary payment.",
+        "Section 1.1(d) says Program Content defaults to CC BY 4.0 when the participant fails to specify an applicable permissive license.",
+        "Section 1.2(a) requires the participant to warrant that it has the rights needed for that license."
+      ]
+    }
+  ],
+  "operational_interpretation": {
+    "status": "source_verified_with_public_redistribution_boundary",
+    "private_internal_freeze_and_analysis": "supported",
+    "public_raw_or_reconstructed_data_redistribution": "human_review_required",
+    "legal_advice": false,
+    "limitations": [
+      "The current program terms do not by themselves establish the terms in force when every historical object was first published.",
+      "The linked MIT-0 text defines Software and does not expressly define the Parquet objects as licensed data.",
+      "No external artifact publication or redistribution is authorized by this record."
+    ]
+  },
+  "gate_effect": {
+    "private_byte_freeze_may_proceed": true,
+    "gate_3a_frozen": false,
+    "s0_authorized": false,
+    "effect_metrics_read": false
+  }
+}
