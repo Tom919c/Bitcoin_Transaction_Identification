@@ -34,6 +34,7 @@ env/
 
 # Data files
 data/processed/
+data/raw/aws_btc_prefix_v0_1_20260910/
 *.pt
 *.pth
 
@@ -53,4 +54,4 @@ Thumbs.db
 bitcoin-dataset/
 Jupyter/
 wandb/
-experiments/   
+experiments/
