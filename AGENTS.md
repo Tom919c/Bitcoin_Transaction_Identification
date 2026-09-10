@@ -115,6 +115,7 @@ WorkBuddy 的运行载体是独立会话，不自动继承当前 Codex 对话；
 
 每次调用必须遵守：
 
+- 优先调用 MCP 工具 `workbuddy_deepseek`：它固定请求 `deepseek-v4.1-flash`、校验实际响应模型、默认 `plan`，并只返回最终正文与 `session_id`/轮次/耗时。需要返工时用 `resume_session_id` 续接原会话，不得用一个失去前文的新会话冒充“同一子代理反思”。Codex 尚未重载 MCP 时，可用桥接器 CLI 的 `--run`、`--resume-session-id` 和重复 `--add-dir` 参数执行同一流程。
 - 用最小、自包含 brief 写明目标、绝对路径或固定输入快照、允许修改的文件、禁止项、输出格式、证据和验收命令；禁止 WorkBuddy 再创建子代理或自行更换模型。
 - 像使用 Luna 一样，WorkBuddy 可以直接以仓库为 `cwd`，读取完成任务所必需的普通项目文件，无需逐文件向用户确认；handoff 仍应指定相关路径，避免无关上下文。与项目无关的检索使用最小独立工作目录。无论使用哪个子代理，均不得提供 `.env`、凭据、数据库 URL、私有／受限数据、未发表手稿、保密审稿材料或其他未经授权的内容。
 - 只读探索、资料发现和审查默认使用 `permission_mode=plan`；只有明确的单 writer 任务才使用 `acceptEdits`。不得用 `bypassPermissions`，除非用户针对具体任务另行明确授权。
