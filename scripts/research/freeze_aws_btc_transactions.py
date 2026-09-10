@@ -20,6 +20,8 @@ import preflight_aws_btc_prefix as source
 
 SCHEMA_VERSION = 1
 DEFAULT_RESERVE_GIB = 20
+DEFAULT_ATTEMPTS = 8
+DEFAULT_TIMEOUT_SECONDS = 180
 
 
 def script_sha256() -> str:
@@ -112,11 +114,23 @@ def storage_plan(
     }
 
 
-def freeze(items: list[dict], cache_dir: Path, workers: int) -> tuple[list[dict], dict]:
+def freeze(
+    items: list[dict],
+    cache_dir: Path,
+    workers: int,
+    attempts: int,
+    timeout_seconds: int,
+) -> tuple[list[dict], dict]:
     records: list[dict] = []
 
     def process(item: dict) -> dict:
-        payload, status, path = source.get_block_object(item, cache_dir)
+        payload, status, path = source.get_block_object(
+            item,
+            cache_dir,
+            lambda current: source.fetch_block_bytes(
+                current, attempts=attempts, timeout_seconds=timeout_seconds
+            ),
+        )
         return {
             **source.object_identity(item),
             "cache_identity": source.cache_identity(item),
@@ -159,6 +173,10 @@ def parser() -> argparse.ArgumentParser:
         "--reserve-gib", type=nonnegative_int, default=DEFAULT_RESERVE_GIB
     )
     argument_parser.add_argument("--workers", type=source.workers, default=4)
+    argument_parser.add_argument("--attempts", type=source.positive_int, default=DEFAULT_ATTEMPTS)
+    argument_parser.add_argument(
+        "--timeout-seconds", type=source.positive_int, default=DEFAULT_TIMEOUT_SECONDS
+    )
     argument_parser.add_argument("--self-test", action="store_true")
     return argument_parser
 
@@ -248,7 +266,9 @@ def main() -> int:
     )
 
     started = dt.datetime.now(dt.timezone.utc).isoformat()
-    records, counts = freeze(items, cache_dir, args.workers)
+    records, counts = freeze(
+        items, cache_dir, args.workers, args.attempts, args.timeout_seconds
+    )
     ended = dt.datetime.now(dt.timezone.utc).isoformat()
     if len(records) != len(items):
         raise RuntimeError(f"frozen object count mismatch: {len(records)} != {len(items)}")
@@ -271,6 +291,8 @@ def main() -> int:
             "output": str(output.resolve()),
             "reserve_gib": args.reserve_gib,
             "workers": args.workers,
+            "attempts": args.attempts,
+            "timeout_seconds": args.timeout_seconds,
             "argv": sys.argv[1:],
         },
         "runtime": {
