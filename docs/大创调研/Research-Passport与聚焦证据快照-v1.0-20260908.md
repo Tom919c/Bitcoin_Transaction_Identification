@@ -2,7 +2,7 @@
 
 日期：2026-09-08
 
-状态：Gate 0 条件未关闭；Gate 1 聚焦增量审计已完成第一轮，Yin 2019 已全文闭环，BitLINK 作者幻灯片已核验但论文正文仍未闭环；Zenodo 最小训练包已核验并对 PIT 重放作 No-Go，其他大包及内部语义保持 Unknown；AWS 公共比特币数据已完成匿名入口、对象清单与样本 schema 审计，但许可、快照、全量完整性和资源未关闭；Gate 3A 已形成 v0.1 待冻结草案
+状态：Gate 0 条件未关闭；Gate 1 聚焦增量审计已完成第一轮，Yin 2019 已全文闭环，BitLINK 作者幻灯片已核验但论文正文仍未闭环；Zenodo 最小训练包已核验并对 PIT 重放作 No-Go，其他大包及内部语义保持 Unknown；AWS 公共比特币数据已完成匿名入口、对象清单、样本 schema 与 50 GiB 早期前缀资源预检，但许可、快照、全量完整性和 source provenance mapping 未关闭；Gate 3A 已形成 v0.1 待冻结草案
 
 研究分支：`asof-entity-graph-pilot`
 
@@ -228,7 +228,7 @@ BitLINK 的当前证据边界不是“完整等价已排除”，而是“风险
 ## 6. 下一步验收顺序
 
 1. 补齐 Gate 1 的三项全文/工件核验并冻结去重后的聚焦来源表。
-2. 同步当前已审入口收束：优先从经授权 BigQuery dry-run、资格查询、冻结导出，或用户提供的 Bitcoin Core datadir/raw TXO snapshot 中选择一条；前者需核验扫描上限、tip、主链、父 outpoint、脚本与冻结导出哈希，后者需提供版本、许可、tip、manifest、哈希与容量。若出现其他原始链来源，必须先按同一硬门重新资格化，不能直接进入正式适配。
+2. 同步当前已审入口收束：AWS 50 GiB 预检仅提供早期资源边界，仍需先关闭许可、不可回溯快照、全量完整性与 source provenance mapping；正式入口须从经授权 BigQuery、用户提供的 Bitcoin Core/raw TXO snapshot，或完成同一硬门的 AWS 冻结前缀中选择一条，不能直接进入正式适配。
 3. Gate 3A 的窗口、过滤器、脚本单位、1% 数值门、登记字段和 S0-only 范围已预先写定；原始链来源与完整性 blocker 关闭后才能升级为 v1.0。
 4. 冻结前仅维护不访问真实数据的参考语义与合成契约测试；协议升级为 v1.0 后，再实现 union provenance logger、已选数据源适配器和正式运行检查。
 5. 运行小窗口无模型数据 Gate，由 Research Director 根据预注册阈值作 Go/No-Go；只有 Go 才进入模型、校准、拒判和系统接入。

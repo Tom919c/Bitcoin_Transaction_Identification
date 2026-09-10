@@ -1,0 +1,58 @@
+{
+  "status": "candidate_preflight_only",
+  "date": "2026-09-10",
+  "input": {
+    "bucket": "aws-public-blockchain",
+    "region": "us-east-2",
+    "transaction_object_limit_bytes": 53687091200,
+    "horizon_blocks": 52560,
+    "window_blocks": 2016,
+    "lookahead_days": 7,
+    "workers": 4,
+    "current_utc_partition_excluded": "2026-09-09",
+    "runtime": "Python 3.12.3, PyArrow 16.1.0, non-uv",
+    "command_arguments": ["--limit-gib", "50", "--workers", "4"],
+    "execution_script_path": "D:\\Temp\\aws_btc_prefix_preflight.py",
+    "execution_script_sha256": null,
+    "execution_script_revision_status": "not_captured_before_post_run_modification",
+    "current_post_run_script_sha256": "358ED031E23C3263F78E150DC8E5CB09616929DB014808E19AFC7A4F086709C1"
+  },
+  "inventory": {
+    "transaction_objects_listed": 6575,
+    "included_transaction_objects": 1890,
+    "included_compressed_s3_transaction_object_bytes": 53659133189,
+    "last_complete_included_date": "2014-03-12",
+    "block_lookahead_through": "2014-03-19",
+    "block_objects": 1897,
+    "block_bytes": 90449066,
+    "block_rows": 291390
+  },
+  "audit": {
+    "unique_height_range": [0, 291389],
+    "duplicate_heights": 0,
+    "prevhash_breaks": 0,
+    "misplaced_later_blocks": 0,
+    "first_later_partition_height": 290292,
+    "candidate_h_max": 290291,
+    "candidate_tip_hash": "00000000000000001296ee1fb5fdbbcf95f0519ad8c40c07414617d70dc16a38"
+  },
+  "cutoffs": {
+    "eligible_end": 237731,
+    "eligible_noncoinbase_transactions": 18131019,
+    "first_reaching_heights": [183399, 200724, 216332, 227188],
+    "aligned_cutoff_heights": [181440, 199584, 215712, 225792]
+  },
+  "independent_recalculation": "matched",
+  "provenance_status": "incomplete",
+  "repeat_status": "not_executed_usage_limit",
+  "effect_metrics_read": false,
+  "formal_gate": false,
+  "limitations": [
+    "缓存名只有修订身份哈希，没有 S3 key/listing revision 可逆映射，不能证明正式 source provenance 或 selected set。",
+    "成功执行前未冻结临时脚本哈希；脚本随后修改，当前哈希不能代替实际执行 revision。",
+    "许可、不可回溯快照、全量 transaction payload/金额/prevout 与 S0 资格仍未关闭。",
+    "第二次复跑因 Codex 账户用量限制在启动前被拒，未取得第二次结果。",
+    "此前审计证明 2014-03-13 是 50 GiB 首次越过日，但本轮未捕获该日精确对象字节。",
+    "结果仅覆盖由资源规则确定的早期历史前缀，不外推到当前时期。"
+  ]
+}
