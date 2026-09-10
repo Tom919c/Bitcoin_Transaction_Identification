@@ -51,6 +51,42 @@ def canonical_json(payload: object) -> bytes:
     )
 
 
+def preflight_output_parent(path: Path) -> None:
+    """Fail before stage 2 when its output location cannot support a new file."""
+    parent = path.parent
+    try:
+        parent.mkdir(parents=True, exist_ok=True)
+    except OSError as error:
+        raise OSError(f"cannot create stage-2 output parent directory: {parent}: {error}") from error
+    probe = parent / f".{path.name}.{os.getpid()}.output-probe"
+    try:
+        descriptor = os.open(probe, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    except FileExistsError as error:
+        raise FileExistsError(
+            f"refusing stage-2 output preflight: probe already exists: {probe}"
+        ) from error
+    except OSError as error:
+        raise OSError(f"cannot create stage-2 output probe: {probe}: {error}") from error
+    try:
+        try:
+            if os.write(descriptor, b"probe\n") != len(b"probe\n"):
+                raise OSError("stage-2 output probe write was incomplete")
+        finally:
+            os.close(descriptor)
+    except OSError as error:
+        try:
+            os.unlink(probe)
+        except OSError as cleanup_error:
+            raise OSError(
+                f"cannot write or remove stage-2 output probe: {probe}: {cleanup_error}"
+            ) from error
+        raise OSError(f"cannot write stage-2 output probe: {probe}: {error}") from error
+    try:
+        os.unlink(probe)
+    except OSError as error:
+        raise OSError(f"cannot remove stage-2 output probe: {probe}: {error}") from error
+
+
 def atomic_write_new(path: Path, payload: bytes) -> None:
     """Write once, atomically.  Refuse to overwrite a scientific artifact."""
     if path.exists():
@@ -1014,6 +1050,16 @@ def self_test() -> None:
     )
     with tempfile.TemporaryDirectory() as directory:
         path = Path(directory) / "new.json"
+        preflight_output_parent(path)
+        assert not (Path(directory) / f".{path.name}.{os.getpid()}.output-probe").exists()
+        stale_probe = Path(directory) / f".{path.name}.{os.getpid()}.output-probe"
+        stale_probe.write_bytes(b"stale")
+        try:
+            preflight_output_parent(path)
+            raise AssertionError("existing output probe was accepted")
+        except FileExistsError:
+            pass
+        stale_probe.unlink()
         atomic_write_new(path, b"{}")
         try:
             atomic_write_new(path, b"{}")
@@ -1194,6 +1240,7 @@ def main() -> int:
     output = Path(args.output)
     if output.exists():
         raise FileExistsError(f"refusing to overwrite existing file: {output}")
+    preflight_output_parent(output)
     result = run_stage_two(args)
     atomic_write_new(output, canonical_json(result))
     print(
