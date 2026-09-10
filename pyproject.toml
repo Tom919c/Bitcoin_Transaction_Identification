@@ -3,6 +3,9 @@ name = "btcaml-research"
 version = "0.2.2"
 description = "Sampling-aware edge-temporal directional graph learning for Bitcoin entity risk identification."
 requires-python = ">=3.10"
+dependencies = [
+    "pyarrow==16.1.0",
+]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
