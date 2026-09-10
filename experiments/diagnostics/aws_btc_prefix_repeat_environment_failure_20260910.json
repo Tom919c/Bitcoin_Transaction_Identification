@@ -1,0 +1,38 @@
+{
+  "schema_version": "aws-btc-prefix-execution-failure-v1",
+  "status": "execution_environment_failure",
+  "started_local": "2026-09-10T17:13:57.8730825+08:00",
+  "observed_local": "2026-09-10T18:33:27.3903154+08:00",
+  "cpu_seconds_at_observation": 4100.1875,
+  "process_id_at_observation": 23080,
+  "frozen_listing_sha256": "c237f1abc1c9cc220dc54112931481818a6d986f71b1e5f8d634b6d4dd1530f0",
+  "script_sha256": "50c4b0f7cfa66d543e15818ed54dfc806743e5195386ec2ca9602ea3b19e2430",
+  "intended_output": "experiments/diagnostics/aws_btc_prefix_preflight_v0_1_repeat_20260910.json",
+  "output_exists_before_interrupt": false,
+  "matching_temporary_files_before_interrupt": 0,
+  "last_completed_step": "processed 1897 of 1897 cached block objects",
+  "stack_sample": [
+    "tempfile._mkstemp_inner",
+    "tempfile.mkstemp",
+    "preflight_aws_btc_prefix.atomic_write_new",
+    "preflight_aws_btc_prefix.main"
+  ],
+  "interruption": {
+    "method": "stdin_ctrl_c",
+    "process_exit_code": 1,
+    "output_created": false
+  },
+  "counterfactual_rerun": {
+    "same_frozen_listing": true,
+    "same_script": true,
+    "explicit_output_write_access": true,
+    "wall_time_seconds": 16.7051921,
+    "block_objects_downloaded": 0,
+    "block_objects_reused": 1897,
+    "result_sha256": "baacbf8b5051fceb2c2ba8a6978ff3e4d9135b9a298723049bcb79a95da5f5a9",
+    "completed": true
+  },
+  "attribution": "The sampled stack, denied output location, absence of an output/temp file, and immediate completion of the same command with explicit write access support a sandbox write-confinement cause. This is not evidence of a data, Parquet, chain-continuity, or cutoff failure.",
+  "effect_metrics_read": false,
+  "formal_gate": false
+}

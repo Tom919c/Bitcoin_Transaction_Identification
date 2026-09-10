@@ -2,7 +2,7 @@
 
 日期：2026-09-08
 
-状态：Gate 0 条件未关闭；Gate 1 聚焦增量审计已完成第一轮，Yin 2019 已全文闭环，BitLINK 作者幻灯片已核验但论文正文仍未闭环；Zenodo 最小训练包已核验并对 PIT 重放作 No-Go，其他大包及内部语义保持 Unknown；AWS 公共比特币数据已完成匿名入口、对象清单、样本 schema 与 50 GiB 早期前缀资源预检，但许可、快照、全量完整性和 source provenance mapping 未关闭；Gate 3A 已形成 v0.1 待冻结草案
+状态：Gate 0 条件未关闭；Gate 1 聚焦增量审计已完成第一轮，Yin 2019 已全文闭环，BitLINK 作者幻灯片已核验但论文正文仍未闭环；Zenodo 最小训练包已核验并对 PIT 重放作 No-Go，其他大包及内部语义保持 Unknown；AWS 公共比特币数据已完成匿名入口、对象清单、样本 schema 与 50 GiB 早期前缀候选预检，并关闭 block-metadata selected-set 映射与执行脚本 revision 两项原型 P1，但许可、项目控制的 transaction 字节冻结和全量交易完整性仍未关闭；Gate 3A 已形成 v0.1 待冻结草案
 
 研究分支：`asof-entity-graph-pilot`
 
@@ -63,7 +63,7 @@ BigQuery `crypto_bitcoin` 仍是候选，但字段语义已得到更强的一手
 
 2026-09-09 官方入口审计审阅了 Bitcoin ETL README、public-datasets README、[Bitcoin ETL streaming 文档](https://github.com/blockchain-etl/blockchain-etl-streaming)和公开架构说明。在已审官方文档中，未发现无需部署者凭证即可访问、带版本标识的历史 GCS 快照；streaming 部署关于 GCS 的说明要求使用者创建并配置自己的 GCS bucket，以保存 `last_synced_block.txt` 状态，未给出公开历史数据对象、manifest 或回放保证。已审文档把 Pub/Sub 描述为持续流式出口，并报告 Bitcoin lag 为 3 块，但未承诺公共 topic 可从创世块回放到冻结高度的完整、版本化前缀；当前没有独立冻结导出／快照和完整性审计，不能把它资格化为 S0 输入。在当前已审官方入口范围和本地资产条件下，待资格化候选暂收束为：(1) BigQuery 经授权 dry-run、资格查询、冻结导出；(2) 用户提供的 Bitcoin Core datadir 或 raw TXO snapshot，经版本、tip、hash、容量审计。该收束不表示已经穷尽其他可能满足硬门的原始链来源。
 
-2026-09-10 的增量审计新增 [AWS 公共比特币数据源资格审计](AWS公共比特币数据源资格审计-20260910.md)。AWS Open Data Registry 允许无账户匿名访问 `s3://aws-public-blockchain/v1.0/btc/`；实际 Parquet 样本包含 block hash/height/prevhash、块内交易 index、coinbase、input prevout 和 parent output locking `script_hex` 等必要字段，指定现代交易也与独立 Blockstream API 一致。该证据只把 AWS 提升为 schema 与访问方式已做样本核验的候选。清单时点的 transaction 对象约 2,026.838 GiB，远超本机可用空间；桶未启用 S3 Versioning，且样本对象 `VersionId=null`，历史对象可被替换；金额实际为 `double`；Registry 的 MIT-0 链接指向措辞限定为软件／文档的许可文本。许可适用、由项目控制且可复查的不可变冻结导出、全量主链／prevout 完整性、整数聪转换和资源门仍为 pending，所以不关闭数据硬门，也不启动 S0。若以后采用早期完整前缀，末端必须在读取效应前只按资源规则预注册，并从创世块完整处理到每个 `T_j`；其结论不得外推到当前时期。
+2026-09-10 的增量审计新增 [AWS 公共比特币数据源资格审计](AWS公共比特币数据源资格审计-20260910.md)。AWS Open Data Registry 允许无账户匿名访问 `s3://aws-public-blockchain/v1.0/btc/`；实际 Parquet 样本包含 block hash/height/prevhash、块内交易 index、coinbase、input prevout 和 parent output locking `script_hex` 等必要字段，指定现代交易也与独立 Blockstream API 一致。该证据只把 AWS 提升为 schema 与访问方式已做样本核验的候选。50 GiB 候选预检现已由冻结清单、脚本哈希、1897 个 block object 身份/本地 SHA、首跑和零下载复跑支撑，两个成功结果在忽略缓存状态与输出路径后逐字段相等；这关闭了原型 selected-set 映射和执行 revision 两项 P1。一次沙箱写入限制导致的失败已经如实登记，脚本随后增加 stage 2 前输出探针并通过合成自测；该保护未被表述为第三次全量数据复跑。清单时点的 transaction 对象约 2,026.838 GiB，远超本机可用空间；桶未启用 S3 Versioning，且样本对象 `VersionId=null`，历史对象可被替换；金额实际为 `double`；Registry 的 MIT-0 链接指向措辞限定为软件／文档的许可文本。许可适用、由项目控制且可复查的 transaction 字节冻结、全量交易／prevout 完整性、整数聪转换和资源门仍为 pending，所以不关闭数据硬门，也不启动 S0。若以后采用早期完整前缀，末端必须在读取效应前只按资源规则预注册，并从创世块完整处理到每个 `T_j`；其结论不得外推到当前时期。
 
 ### 2.4 算力、环境与预算
 
@@ -229,7 +229,7 @@ BitLINK 的当前证据边界不是“完整等价已排除”，而是“风险
 ## 6. 下一步验收顺序
 
 1. 补齐 Gate 1 的三项全文/工件核验并冻结去重后的聚焦来源表。
-2. 同步当前已审入口收束：AWS 50 GiB 预检仅提供早期资源边界，仍需先关闭许可、不可回溯快照、全量完整性与 source provenance mapping；正式入口须从经授权 BigQuery、用户提供的 Bitcoin Core/raw TXO snapshot，或完成同一硬门的 AWS 冻结前缀中选择一条，不能直接进入正式适配。
+2. 同步当前已审入口收束：AWS 50 GiB 预检已关闭 block-metadata selected-set 映射与执行 revision，但仍只提供早期资源边界；必须继续关闭许可、项目控制的 transaction 字节冻结、全量交易／prevout／金额完整性与正式环境。正式入口须从经授权 BigQuery、用户提供的 Bitcoin Core/raw TXO snapshot，或完成同一硬门的 AWS 冻结前缀中选择一条，不能直接进入正式适配。
 3. Gate 3A 的窗口、过滤器、脚本单位、1% 数值门、登记字段和 S0-only 范围已预先写定；原始链来源与完整性 blocker 关闭后才能升级为 v1.0。
 4. 冻结前仅维护不访问真实数据的参考语义与合成契约测试；协议升级为 v1.0 后，再实现 union provenance logger、已选数据源适配器和正式运行检查。
 5. 运行小窗口无模型数据 Gate，由 Research Director 根据预注册阈值作 Go/No-Go；只有 Go 才进入模型、校准、拒判和系统接入。
