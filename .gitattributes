@@ -1,2 +1,3 @@
 scripts/research/preflight_aws_btc_prefix.py text eol=lf
+scripts/research/freeze_aws_btc_transactions.py text eol=lf
 experiments/diagnostics/aws_btc_*.json text eol=lf
