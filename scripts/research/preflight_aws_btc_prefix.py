@@ -11,6 +11,7 @@ import argparse
 import concurrent.futures
 import datetime as dt
 import hashlib
+import http.client
 import json
 import os
 import re
@@ -183,7 +184,12 @@ def fetch_bytes(url: str, attempts: int = 3, timeout_seconds: int = 90) -> bytes
         try:
             with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
                 return response.read()
-        except (urllib.error.URLError, TimeoutError, OSError) as error:
+        except (
+            urllib.error.URLError,
+            http.client.IncompleteRead,
+            TimeoutError,
+            OSError,
+        ) as error:
             last_error = error
             if attempt == attempts:
                 break
@@ -222,7 +228,12 @@ def fetch_block_bytes(
                     f"frozen ETag precondition failed for {identity['key']}"
                 ) from error
             last_error = error
-        except (urllib.error.URLError, TimeoutError, OSError) as error:
+        except (
+            urllib.error.URLError,
+            http.client.IncompleteRead,
+            TimeoutError,
+            OSError,
+        ) as error:
             last_error = error
         if attempt < attempts:
             time.sleep(attempt)
@@ -1117,6 +1128,21 @@ def self_test() -> None:
 
         assert fetch_block_bytes(cache_item, opener=matching_opener) == b"abc"
         assert request_headers == ['"cache"']
+        incomplete_calls: list[int] = []
+
+        class IncompleteResponse(LocalResponse):
+            def read(self) -> bytes:
+                incomplete_calls.append(1)
+                if len(incomplete_calls) == 1:
+                    raise http.client.IncompleteRead(b"ab", 1)
+                return self.payload
+
+        assert fetch_block_bytes(
+            cache_item,
+            attempts=2,
+            opener=lambda request, timeout: IncompleteResponse('"cache"', b"abc"),
+        ) == b"abc"
+        assert len(incomplete_calls) == 2
         try:
             fetch_block_bytes(
                 cache_item, opener=lambda request, timeout: LocalResponse('"wrong"', b"abc")
