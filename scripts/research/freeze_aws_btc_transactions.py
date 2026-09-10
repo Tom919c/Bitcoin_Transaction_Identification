@@ -8,6 +8,7 @@ import concurrent.futures
 import datetime as dt
 import hashlib
 import json
+import platform
 import shutil
 import sys
 import tempfile
@@ -271,6 +272,11 @@ def main() -> int:
             "reserve_gib": args.reserve_gib,
             "workers": args.workers,
             "argv": sys.argv[1:],
+        },
+        "runtime": {
+            "python_implementation": platform.python_implementation(),
+            "python_version": platform.python_version(),
+            "platform": platform.platform(),
         },
         "storage_plan_before": plan,
         "free_bytes_before": free_before,
