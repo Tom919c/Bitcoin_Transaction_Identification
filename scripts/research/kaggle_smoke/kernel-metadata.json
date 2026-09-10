@@ -1,5 +1,5 @@
 {
-  "id": "camellia99/asof-entity-graph-infrastructure-smoke",
+  "id": "camellia99/as-of-entity-graph-infrastructure-smoke",
   "title": "As-of Entity Graph Infrastructure Smoke",
   "code_file": "kaggle_smoke.py",
   "language": "python",
