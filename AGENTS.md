@@ -79,7 +79,7 @@ python scripts/update_skill_inventory.py   # 仅在清单过期时运行
 | Research Director | `gpt-5.6-sol` | 研究问题定义、证据综合、创新性与可行性裁决、协议冻结、Go/No-Go、结果解释、论文核心论证、内部评审综合和最终签字 |
 | Research Analyst | `gpt-5.6-terra` | 有边界的文献簇筛选、论文卡、数据/泄漏审计、实验规划、实现、结果整理与独立反方审查 |
 | Execution Analyst | `gpt-5.6-luna` | 文件检索、元数据提取、去重、格式转换、日志解析、表格汇总、确定性检查和已验证内容的机械整理 |
-| External Execution Analyst | WorkBuddy / `deepseek-v4.1-flash` | 与 Luna 同层级、当前不占 GPT 额度的外部执行通道；优先承担可独立验收、无需科学裁决且允许发送到外部模型的机械任务 |
+| Execution Analyst | WorkBuddy / `deepseek-v4.1-flash` | 与 Luna 完全相同的正式子代理角色，当前不占 GPT 额度；同样适配时优先于 Luna |
 
 委派规则：
 
@@ -105,18 +105,18 @@ python scripts/update_skill_inventory.py   # 仅在清单过期时运行
 - 子代理不得递归委派或继续创建子代理。每次 handoff 只携带完成任务所需的最小上下文、固定输入快照、明确产物格式、证据要求和验收标准。
 - Root orchestrator 必须审阅并最终整合所有交付，亲自完成与任务风险相称的最终验证；子代理的未核验结论不得直接进入 Research Passport、协议、claim–evidence ledger、论文或其他正式产物。
 
-### 4.2 WorkBuddy / DeepSeek-V4.1-Flash 协作规则
+### 4.2 WorkBuddy / DeepSeek-V4.1-Flash 子代理规则
 
-WorkBuddy 是独立外部会话，不共享当前 Codex 对话；本仓库把其中的 `deepseek-v4.1-flash` 定位为与 `gpt-5.6-luna` 同层级的 External Execution Analyst。只要任务属于下述 Luna 层级范围、边界清楚、预计能高质量完成、交付可独立验收、协调成本低于节省的 GPT 用量，且数据边界允许，就必须优先交给 WorkBuddy，而不是占用 Luna、Terra 或 Root。用户当前 WorkBuddy 路由不消耗其 GPT 额度；这只是本地账户与路由条件，不得写成 DeepSeek 官方 API 永久免费。
+WorkBuddy 的运行载体是独立会话，不自动继承当前 Codex 对话；在组织上必须把其中的 `deepseek-v4.1-flash` 当作与 `gpt-5.6-luna` 完全相同的正式 Execution Analyst 子代理。两者适用范围、信任等级、任务包、并发名额、单 writer、验收、返工和失败升级规则相同。只要任务属于下述执行层范围、边界清楚、预计能高质量完成、交付可独立验收、协调成本低于节省的 GPT 用量，且数据边界允许，就必须优先交给 WorkBuddy；当它与 Luna 同样适配时，WorkBuddy 的默认优先级更高。用户当前 WorkBuddy 路由不消耗其 GPT 额度；这只是本地账户与路由条件，不得写成 DeepSeek 官方 API 永久免费。
 
 定位依据截至 2026-09-11：[DeepSeek 官方更新日志](https://api-docs.deepseek.com/zh-cn/updates/)将 V4.1 Flash 描述为新架构系列中面向更快推理、更高吞吐和更高能力上限的模型，并公布代码、终端、工具和自动化评测；[官方模型与价格页](https://api-docs.deepseek.com/zh-cn/quick_start/pricing/)列出思考模式、1M 上下文、最大 384K 输出、JSON Output、Tool Calls、Responses API 与 Anthropic API，并声明经多方测试，其性能、费用、速度和总用时全面超过当时的 V4 Pro。上述是供应方主张，只支持任务路由，不替代本仓库对实际交付的验收。DeepSeek 官方 API 当前推荐的别名是 `deepseek-flash`，但已验证的 WorkBuddy model ID 是 `deepseek-v4.1-flash`；调用 WorkBuddy 时必须使用后者并检查返回元数据，不得静默换成别名、Pro、其他模型或 fallback。
 
-默认交给 WorkBuddy 的范围与 Luna 相同：仓库和文件探索、grep/search、定义与引用定位、日志读取、元数据提取、去重、格式转换、表格汇总、资料初步发现、重复编辑、已决定格式的文档整理、简单脚本、机械配置、运行命令与测试、收集结果、简单数据变换，以及冻结输入和验收标准下的低风险实验执行。明确且很小的实现任务也可先交给它，但中等重构、科学方法、实验设计、困难调试、安全决策、重大算法变更和结果解释仍按 Terra/Sol 路由。
+默认交给 WorkBuddy 的范围与 Luna 完全相同：仓库和文件探索、grep/search、定义与引用定位、日志读取、元数据提取、去重、格式转换、表格汇总、资料初步发现、重复编辑、已决定格式的文档整理、简单脚本、机械配置、运行命令与测试、收集结果、简单数据变换，以及冻结输入和验收标准下的低风险实验执行。明确且很小的实现任务也可先交给它，但中等重构、科学方法、实验设计、困难调试、安全决策、重大算法变更和结果解释仍按 Terra/Sol 路由。
 
 每次调用必须遵守：
 
 - 用最小、自包含 brief 写明目标、绝对路径或固定输入快照、允许修改的文件、禁止项、输出格式、证据和验收命令；禁止 WorkBuddy 再创建子代理或自行更换模型。
-- 外部资料检索使用不含仓库规则和记忆的最小独立工作目录；只有确需读写仓库时才把仓库作为 `cwd`。即使使用 `plan`，WorkBuddy 也可能自动载入工作区规则与记忆，因此不得向它提供 `.env`、凭据、数据库 URL、私有／受限数据、未发表手稿、保密审稿材料或其他未经授权的内容。
+- 像使用 Luna 一样，WorkBuddy 可以直接以仓库为 `cwd`，读取完成任务所必需的普通项目文件，无需逐文件向用户确认；handoff 仍应指定相关路径，避免无关上下文。与项目无关的检索使用最小独立工作目录。无论使用哪个子代理，均不得提供 `.env`、凭据、数据库 URL、私有／受限数据、未发表手稿、保密审稿材料或其他未经授权的内容。
 - 只读探索、资料发现和审查默认使用 `permission_mode=plan`；只有明确的单 writer 任务才使用 `acceptEdits`。不得用 `bypassPermissions`，除非用户针对具体任务另行明确授权。
 - Root 必须检查实际模型元数据、交付范围、来源、diff、日志和测试结果。WorkBuddy 的回答、搜索摘要和自述不能直接进入正式证据或科学结论。
 - 首次交付不合格时，Root 向同一 WorkBuddy 会话反馈具体失败点、反例和未满足的验收标准，要求其先反思根因再重做；修正后重新验收。若重复失败、结果不稳定或暴露出任务需要更高层判断，则停止继续消耗协调时间，按风险升级给 Luna、Terra 或 Root，并保留失败记录。
