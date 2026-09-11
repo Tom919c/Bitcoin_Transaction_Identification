@@ -35,6 +35,7 @@ env/
 # Data files
 data/processed/
 data/raw/aws_btc_prefix_v0_1_20260910/
+data/raw/literature/
 *.pt
 *.pth
 
