@@ -22,7 +22,7 @@ import freeze_aws_btc_transactions as freezer
 import preflight_aws_btc_prefix as source
 
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 SATOSHIS_PER_BTC = 100_000_000
 MAX_MONEY_SATS = 2_100_000_000_000_000
 DEFAULT_RESERVE_GIB = 20
@@ -41,6 +41,18 @@ BASE_COLUMNS = [
     "outputs",
     "date",
 ]
+BIP30_EXCEPTIONS = {
+    (
+        91_842,
+        bytes.fromhex("00000000000a4d0a398161ffc163c503763b1f4360639393e0e4c8e300e0caec"),
+        bytes.fromhex("d5d27987d2a3dfc724e359870c6644b40e497bdc0589a033220fe15429d88599"),
+    ): 91_812,
+    (
+        91_880,
+        bytes.fromhex("00000000000743f190a18c5577a3c2d2a1f610ae9601ac046a38084ccb7cd721"),
+        bytes.fromhex("e3bf3d07d4b0375638d5f1db5255fe07ba2c4cb067cd81b84ee974b6585fb468"),
+    ): 91_722,
+}
 
 
 class SpaceStop(RuntimeError):
@@ -311,6 +323,9 @@ def default_counters() -> dict[str, int | float]:
         "inputs": 0,
         "outputs": 0,
         "duplicate_txid_instances": 0,
+        "bip30_exception_overwrites": 0,
+        "bip30_overwritten_outpoints": 0,
+        "bip30_overwritten_value_sats": 0,
         "live_outpoints": 0,
         "peak_live_outpoints": 0,
         "max_amount_residual_sats": 0.0,
@@ -333,6 +348,19 @@ def create_state_schema(connection: sqlite3.Connection) -> None:
         ) WITHOUT ROWID;
         CREATE TABLE seen_txids (
             txid BLOB PRIMARY KEY
+        ) WITHOUT ROWID;
+        CREATE TABLE bip30_overwrites (
+            duplicate_height INTEGER NOT NULL,
+            block_hash BLOB NOT NULL,
+            txid BLOB NOT NULL,
+            vout INTEGER NOT NULL,
+            prior_value_sat INTEGER NOT NULL,
+            prior_script BLOB NOT NULL,
+            prior_created_height INTEGER NOT NULL,
+            prior_created_index INTEGER NOT NULL,
+            replacement_value_sat INTEGER NOT NULL,
+            replacement_script BLOB NOT NULL,
+            PRIMARY KEY (duplicate_height, txid, vout)
         ) WITHOUT ROWID;
         CREATE TABLE metadata (
             key TEXT PRIMARY KEY,
@@ -426,6 +454,21 @@ def validate_checkpoint_state(
     seen_count = int(connection.execute("SELECT COUNT(*) FROM seen_txids").fetchone()[0])
     if seen_count + int(counters["duplicate_txid_instances"]) != expected_transactions:
         raise RuntimeError("checkpoint seen-txid count is inconsistent")
+    overwrite_count, exception_count, overwrite_value = connection.execute(
+        "SELECT COUNT(*), COUNT(DISTINCT duplicate_height), "
+        "COALESCE(SUM(prior_value_sat), 0) FROM bip30_overwrites"
+    ).fetchone()
+    if int(overwrite_count) != int(counters["bip30_overwritten_outpoints"]):
+        raise RuntimeError("checkpoint BIP30 overwritten-outpoint count is inconsistent")
+    if int(exception_count) != int(counters["bip30_exception_overwrites"]):
+        raise RuntimeError("checkpoint BIP30 exception count is inconsistent")
+    if int(overwrite_value) != int(counters["bip30_overwritten_value_sats"]):
+        raise RuntimeError("checkpoint BIP30 overwritten-value total is inconsistent")
+    expected_exception_count = sum(
+        exception_height <= height for exception_height, _, _ in BIP30_EXCEPTIONS
+    )
+    if int(counters["bip30_exception_overwrites"]) != expected_exception_count:
+        raise RuntimeError("checkpoint BIP30 exception count disagrees with committed height")
     maximum_created = connection.execute("SELECT MAX(created_height) FROM utxo").fetchone()[0]
     if maximum_created is not None and int(maximum_created) > height:
         raise RuntimeError("checkpoint contains an outpoint created after its committed height")
@@ -553,16 +596,56 @@ def process_transaction(
     if not row["is_coinbase"] and row["input_count"] == 0:
         raise RuntimeError(f"{label} non-coinbase transaction has no inputs")
 
+    exception_prior_height = BIP30_EXCEPTIONS.get(
+        (row["height"], row["block_hash"], row["txid"])
+    )
     insertion = connection.execute(
         "INSERT OR IGNORE INTO seen_txids(txid) VALUES (?)", (row["txid"],)
     )
+    overwritten: list[tuple[int, int, bytes, int, int, int, bytes]] = []
     if insertion.rowcount == 0:
         live = connection.execute(
-            "SELECT 1 FROM utxo WHERE txid = ? LIMIT 1", (row["txid"],)
-        ).fetchone()
-        if live is not None:
-            raise RuntimeError(f"{label} repeats a txid with live historical outputs")
+            "SELECT vout, value_sat, script, created_height, created_index "
+            "FROM utxo WHERE txid = ? ORDER BY vout",
+            (row["txid"],),
+        ).fetchall()
+        if live:
+            if exception_prior_height is None:
+                raise RuntimeError(f"{label} repeats a txid with live historical outputs")
+            if not row["is_coinbase"] or row["position"] != 0 or row["inputs"]:
+                raise RuntimeError(f"{label} BIP30 exception is not a position-zero coinbase")
+            replacements = {output["index"]: output for output in row["outputs"]}
+            for prior in live:
+                vout = int(prior[0])
+                prior_value = int(prior[1])
+                prior_script = prior[2]
+                prior_height = int(prior[3])
+                prior_index = int(prior[4])
+                replacement = replacements.get(vout)
+                if not isinstance(prior_script, bytes):
+                    raise RuntimeError(f"{label} BIP30 prior locking script is not bytes")
+                if prior_height != exception_prior_height or prior_index != 0:
+                    raise RuntimeError(f"{label} BIP30 prior occurrence binding mismatch")
+                if replacement is None or (
+                    replacement["value_sat"], replacement["script"]
+                ) != (prior_value, prior_script):
+                    raise RuntimeError(f"{label} BIP30 replacement output differs from prior output")
+                overwritten.append(
+                    (
+                        vout,
+                        prior_value,
+                        prior_script,
+                        prior_height,
+                        prior_index,
+                        replacement["value_sat"],
+                        replacement["script"],
+                    )
+                )
+        elif exception_prior_height is not None:
+            raise RuntimeError(f"{label} BIP30 exception lacks a live prior occurrence")
         counters["duplicate_txid_instances"] += 1
+    elif exception_prior_height is not None:
+        raise RuntimeError(f"{label} BIP30 exception lacks its earlier txid instance")
 
     input_total = 0
     spent_in_transaction: set[tuple[bytes, int]] = set()
@@ -606,6 +689,44 @@ def process_transaction(
             raise RuntimeError(f"{label} input_value differs from reconstructed inputs")
         if input_total != output_total + row["fee"]:
             raise RuntimeError(f"{label} violates value conservation")
+
+    if overwritten:
+        for (
+            vout,
+            prior_value,
+            prior_script,
+            prior_height,
+            prior_index,
+            replacement_value,
+            replacement_script,
+        ) in overwritten:
+            deleted = connection.execute(
+                "DELETE FROM utxo WHERE txid = ? AND vout = ?", (row["txid"], vout)
+            )
+            if deleted.rowcount != 1:
+                raise RuntimeError(f"{label} failed to overwrite exactly one BIP30 outpoint")
+            connection.execute(
+                "INSERT INTO bip30_overwrites("
+                "duplicate_height, block_hash, txid, vout, prior_value_sat, prior_script, "
+                "prior_created_height, prior_created_index, replacement_value_sat, replacement_script"
+                ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (
+                    row["height"],
+                    row["block_hash"],
+                    row["txid"],
+                    vout,
+                    prior_value,
+                    prior_script,
+                    prior_height,
+                    prior_index,
+                    replacement_value,
+                    replacement_script,
+                ),
+            )
+            counters["live_outpoints"] -= 1
+            counters["bip30_overwritten_outpoints"] += 1
+            counters["bip30_overwritten_value_sats"] += prior_value
+        counters["bip30_exception_overwrites"] += 1
 
     for output in sorted(row["outputs"], key=lambda value: value["index"]):
         try:
@@ -814,6 +935,45 @@ def state_size(path: Path) -> dict[str, int]:
     return sizes
 
 
+def bip30_overwrite_events(connection: sqlite3.Connection) -> list[dict]:
+    rows = connection.execute(
+        "SELECT duplicate_height, block_hash, txid, vout, prior_value_sat, prior_script, "
+        "prior_created_height, prior_created_index, replacement_value_sat, replacement_script "
+        "FROM bip30_overwrites ORDER BY duplicate_height, vout"
+    ).fetchall()
+    return [
+        {
+            "duplicate_height": int(row[0]),
+            "block_hash": bytes(row[1]).hex(),
+            "txid": bytes(row[2]).hex(),
+            "vout": int(row[3]),
+            "prior_value_sat": int(row[4]),
+            "prior_script_hex": bytes(row[5]).hex(),
+            "prior_created_height": int(row[6]),
+            "prior_created_index": int(row[7]),
+            "replacement_value_sat": int(row[8]),
+            "replacement_script_hex": bytes(row[9]).hex(),
+        }
+        for row in rows
+    ]
+
+
+def validate_bip30_complete(connection: sqlite3.Connection, counters: dict) -> None:
+    events = bip30_overwrite_events(connection)
+    observed = {
+        (
+            event["duplicate_height"],
+            bytes.fromhex(event["block_hash"]),
+            bytes.fromhex(event["txid"]),
+        )
+        for event in events
+    }
+    if int(counters["bip30_exception_overwrites"]) != len(BIP30_EXCEPTIONS):
+        raise RuntimeError("not all frozen BIP30 exception overwrites were observed")
+    if observed != set(BIP30_EXCEPTIONS):
+        raise RuntimeError("BIP30 overwrite audit rows differ from the frozen exceptions")
+
+
 def parser() -> argparse.ArgumentParser:
     argument_parser = argparse.ArgumentParser(description=__doc__)
     argument_parser.add_argument("--listing")
@@ -934,6 +1094,85 @@ def self_test() -> None:
     else:
         raise AssertionError("live duplicate txid was accepted")
     connection.close()
+
+    bip30_connection = sqlite3.connect(":memory:")
+    create_state_schema(bip30_connection)
+    bip30_counters = default_counters()
+    bip30_txid = bytes.fromhex(
+        "d5d27987d2a3dfc724e359870c6644b40e497bdc0589a033220fe15429d88599"
+    )
+    original = sample_row(
+        bip30_txid, 91_812, 0, coinbase=True, inputs=[], value=5_000_000_000
+    )
+    original["outputs"][0]["script"] = b"\x51"
+    process_transaction(bip30_connection, original, bip30_counters)
+    duplicate = sample_row(
+        bip30_txid, 91_842, 0, coinbase=True, inputs=[], value=5_000_000_000
+    )
+    duplicate["block_hash"] = bytes.fromhex(
+        "00000000000a4d0a398161ffc163c503763b1f4360639393e0e4c8e300e0caec"
+    )
+    duplicate["outputs"][0]["script"] = b"\x51"
+    process_transaction(bip30_connection, duplicate, bip30_counters)
+    events = bip30_overwrite_events(bip30_connection)
+    assert len(events) == 1
+    assert events[0]["prior_created_height"] == 91_812
+    assert events[0]["duplicate_height"] == 91_842
+    assert events[0]["prior_value_sat"] == 5_000_000_000
+    assert events[0]["prior_script_hex"] == "51"
+    assert bip30_counters["duplicate_txid_instances"] == 1
+    assert bip30_counters["bip30_exception_overwrites"] == 1
+    assert bip30_counters["bip30_overwritten_outpoints"] == 1
+    assert bip30_counters["bip30_overwritten_value_sats"] == 5_000_000_000
+    live = bip30_connection.execute(
+        "SELECT created_height, value_sat, script FROM utxo WHERE txid = ? AND vout = 0",
+        (bip30_txid,),
+    ).fetchone()
+    assert live == (91_842, 5_000_000_000, b"\x51")
+    try:
+        validate_bip30_complete(bip30_connection, bip30_counters)
+    except RuntimeError as error:
+        assert "not all frozen" in str(error)
+    else:
+        raise AssertionError("an incomplete BIP30 exception set was accepted")
+    bip30_connection.close()
+
+    near_miss_connection = sqlite3.connect(":memory:")
+    create_state_schema(near_miss_connection)
+    near_miss_counters = default_counters()
+    second_bip30_txid = bytes.fromhex(
+        "e3bf3d07d4b0375638d5f1db5255fe07ba2c4cb067cd81b84ee974b6585fb468"
+    )
+    process_transaction(
+        near_miss_connection,
+        sample_row(
+            second_bip30_txid,
+            91_722,
+            0,
+            coinbase=True,
+            inputs=[],
+            value=5_000_000_000,
+        ),
+        near_miss_counters,
+    )
+    try:
+        process_transaction(
+            near_miss_connection,
+            sample_row(
+                second_bip30_txid,
+                91_880,
+                0,
+                coinbase=True,
+                inputs=[],
+                value=5_000_000_000,
+            ),
+            near_miss_counters,
+        )
+    except RuntimeError as error:
+        assert "live historical outputs" in str(error)
+    else:
+        raise AssertionError("near-miss BIP30 exception was accepted")
+    near_miss_connection.close()
 
     checkpoint_connection = sqlite3.connect(":memory:")
     create_state_schema(checkpoint_connection)
@@ -1112,6 +1351,7 @@ def main() -> int:
         final_live = int(connection.execute("SELECT COUNT(*) FROM utxo").fetchone()[0])
         if final_live != counters["live_outpoints"]:
             raise RuntimeError("tracked live outpoint count differs from SQLite state")
+        validate_bip30_complete(connection, counters)
         ended_utc = dt.datetime.now(dt.timezone.utc).isoformat()
         result = {
             "schema_version": SCHEMA_VERSION,
@@ -1135,6 +1375,7 @@ def main() -> int:
             "block_objects": block_info["block_object_count"],
             "schema_variants": len(schema["schema_variant_counts"]),
             **counters,
+            "bip30_overwrites": bip30_overwrite_events(connection),
             "state_database": {
                 "path": str(state_db),
                 "sizes": state_size(state_db),
