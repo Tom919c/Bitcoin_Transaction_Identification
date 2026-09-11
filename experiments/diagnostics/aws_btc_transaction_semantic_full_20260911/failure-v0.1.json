@@ -1,0 +1,67 @@
+{
+  "schema_version": "aws-btc-transaction-semantic-failure-v1",
+  "run_id": "aws-tx-semantics-full-20260911",
+  "protocol_version": "aws-tx-semantics-v0.1",
+  "status": "failed",
+  "artifact_created_at_utc": "2026-09-11T03:03:53.8805591Z",
+  "failure_time_precision": "The exact process exit timestamp was not retained; artifact_created_at_utc is the failure-recording time.",
+  "classification": "protocol_consensus_exception_mismatch",
+  "qualification_effect": "No source qualification, S0 authorization, label access, effect metric, or model experiment is granted.",
+  "bindings": {
+    "listing_sha256": "c237f1abc1c9cc220dc54112931481818a6d986f71b1e5f8d634b6d4dd1530f0",
+    "transaction_freeze_sha256": "c3c20defaf0741db819ae0b88c74f5ca7fb77a511d3bd3137cc176fe4457702a",
+    "block_preflight_sha256": "c5301f8a43c5b270759df5fb936812ebcdab63572d64364d542fcce7c515cc8e",
+    "schema_audit_sha256": "6f0c2414a85f163ac4a1f7139f8c3dbb2609ebfc596b678f3d204cc261b0ea06",
+    "code_revision": "5c2d12fac3f6dad57768a239db77e71038c5da80",
+    "script_path": "scripts/research/audit_aws_btc_transaction_semantics.py",
+    "script_sha256": "b001648562c87b6156a3d8805b3e81c3c1c80ac389346809919d42a6378a573a"
+  },
+  "last_durable_checkpoint": {
+    "height": 90624,
+    "sqlite_path": "data/raw/aws_btc_prefix_v0_1_20260910/semantic_state/utxo_v0_1.sqlite",
+    "sqlite_sha256": "4ed9086df936e2a55cf6bcf43daa5a618cdebe9f14b7099761a865c7de3d0eec",
+    "sqlite_bytes": 13852672,
+    "sqlite_last_write_utc": "2026-09-11T02:57:30.2240682Z",
+    "sqlite_quick_check": "ok",
+    "blocks": 90625,
+    "transactions": 140654,
+    "coinbase_transactions": 90625,
+    "noncoinbase_transactions": 50029,
+    "inputs": 107884,
+    "outputs": 170653,
+    "live_outpoints": 62769,
+    "peak_live_outpoints": 63409,
+    "seen_txids": 140654,
+    "duplicate_txid_instances": 0,
+    "max_amount_residual_sats": 0.00048828125,
+    "recovery_count": 1
+  },
+  "failure": {
+    "height": 91842,
+    "transaction_index": 0,
+    "object_key": "v1.0/btc/transactions/date=2010-11-14/part-00000-d00383fd-7af1-48ea-9cb3-496d25a7aa0e-c000.snappy.parquet",
+    "txid": "d5d27987d2a3dfc724e359870c6644b40e497bdc0589a033220fe15429d88599",
+    "prior_occurrence_height": 91812,
+    "error": "height=91842 index=0 repeats a txid with live historical outputs",
+    "transaction_observation": {
+      "is_coinbase": true,
+      "output_count": 1,
+      "output_value_sats": 5000000000
+    }
+  },
+  "interpretation": {
+    "dataset_corruption_claimed": false,
+    "reason": "Protocol v0.1 rejected every live-output txid overwrite, but mainnet historically grandfathered two BIP30 duplicate-coinbase violations. The failure is therefore a replay-protocol mismatch pending an explicit, exact exception specification.",
+    "primary_sources": [
+      "https://github.com/bitcoin/bips/blob/master/bip-0030.mediawiki",
+      "https://github.com/bitcoin/bitcoin/blob/master/src/validation.cpp",
+      "https://github.com/bitcoin/bitcoin/blob/master/src/coins.cpp"
+    ]
+  },
+  "preservation": {
+    "rolled_back_to_complete_checkpoint": true,
+    "v0_1_state_must_not_be_deleted_or_reused_by_modified_code": true,
+    "final_success_artifact_exists": false,
+    "resolution": "Freeze this negative result, create protocol v0.2, bind exact height/block-hash/txid exceptions, add overwrite auditing and self-tests, then restart from a new state database."
+  }
+}
