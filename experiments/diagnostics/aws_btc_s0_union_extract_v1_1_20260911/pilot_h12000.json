@@ -1,0 +1,37 @@
+{
+  "schema_version": "aws-btc-s0-union-extraction-checkpoint-v1.1",
+  "run_id": "aws-btc-s0-union-extract-v1.1-20260911",
+  "status": "resumable_operator_pause",
+  "recorded_at_utc": "2026-09-11T13:21:47.1794265Z",
+  "protocol_version": "gate3a-asof-entity-graph-v1.1",
+  "source_manifest_sha256": "e32ad2f33ecbc184eb04159f0adbb22dd2a4a1a47f1e280cbbca699432d67f3d",
+  "code_revision": "accd68ef75cee008f9a62643c848048832566b47",
+  "last_committed_height": 12000,
+  "state_database_bytes_at_checkpoint": 4997120,
+  "sqlite_quick_check": "ok",
+  "free_bytes_at_checkpoint": 82107355136,
+  "semantic_counters": {
+    "blocks": 12001,
+    "transactions": 12105,
+    "coinbase_transactions": 12001,
+    "noncoinbase_transactions": 104,
+    "inputs": 769,
+    "outputs": 12135,
+    "failures": 0
+  },
+  "s0_counters": {
+    "union_events": 664,
+    "window_transactions": 0,
+    "window_support": 0,
+    "blocks_with_stats": 12001,
+    "block_profile_stat_rows": 36003,
+    "duplicate_union_events": 0,
+    "suppressed_union_events_f_pub": 0,
+    "suppressed_union_events_f_wide": 0
+  },
+  "expected_zero_window_reason": "The first frozen window begins at height 179425.",
+  "effect_metrics_read": false,
+  "labels_read": false,
+  "models_authorized": false,
+  "s0_decision": null
+}
