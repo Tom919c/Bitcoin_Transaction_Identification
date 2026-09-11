@@ -1,0 +1,158 @@
+{
+  "schema_version": "aws-btc-s0-source-manifest-v1.0",
+  "status": "frozen_for_private_internal_s0",
+  "created_at_utc": "2026-09-11T11:43:31.8106369Z",
+  "source": {
+    "name": "AWS Public Blockchain Data - Bitcoin",
+    "registry_url": "https://registry.opendata.aws/aws-public-blockchain/",
+    "s3_prefix": "s3://aws-public-blockchain/v1.0/btc/",
+    "access_mode": "anonymous public object access",
+    "object_versioning": "not enabled; observed VersionId was null",
+    "local_freeze_rule": "Every selected transaction object is retained locally and bound by object identity, byte length, and SHA-256 in the transaction byte-freeze manifest.",
+    "license_boundary": "Registry metadata and linked text support private internal analysis of the frozen objects. This project does not infer permission to redistribute the source objects.",
+    "public_redistribution_authorized": false
+  },
+  "scope": {
+    "network": "bitcoin-mainnet",
+    "first_height": 0,
+    "last_height": 290291,
+    "tip_hash": "00000000000000001296ee1fb5fdbbcf95f0519ad8c40c07414617d70dc16a38",
+    "transaction_objects": 1890,
+    "transaction_object_bytes": 53659133189,
+    "block_objects": 1897,
+    "blocks": 290292,
+    "transactions": 34731184,
+    "noncoinbase_transactions": 34440892,
+    "inputs": 78085978,
+    "outputs": 87704214,
+    "eligible_end_height": 237731,
+    "historical_scope_warning": "This early-chain prefix cannot support claims about current Bitcoin behavior or all protocol eras."
+  },
+  "frozen_artifacts": [
+    {
+      "role": "selected object listing",
+      "path": "experiments/diagnostics/aws_btc_prefix_listing_v0_1_20260910.json",
+      "bytes": 4270992,
+      "sha256": "c237f1abc1c9cc220dc54112931481818a6d986f71b1e5f8d634b6d4dd1530f0"
+    },
+    {
+      "role": "transaction byte freeze",
+      "path": "experiments/diagnostics/aws_btc_transaction_byte_freeze_v0_1_20260910.json",
+      "bytes": 1293187,
+      "sha256": "c3c20defaf0741db819ae0b88c74f5ca7fb77a511d3bd3137cc176fe4457702a"
+    },
+    {
+      "role": "transaction schema audit",
+      "path": "experiments/diagnostics/aws_btc_transaction_schema_audit_v0_1_20260911.json",
+      "bytes": 2063549,
+      "sha256": "6f0c2414a85f163ac4a1f7139f8c3dbb2609ebfc596b678f3d204cc261b0ea06"
+    },
+    {
+      "role": "main-chain block preflight",
+      "path": "experiments/diagnostics/aws_btc_prefix_preflight_v0_1_project_cache_20260911.json",
+      "bytes": 1483221,
+      "sha256": "c5301f8a43c5b270759df5fb936812ebcdab63572d64364d542fcce7c515cc8e"
+    },
+    {
+      "role": "full transaction semantic qualification",
+      "path": "experiments/diagnostics/aws_btc_transaction_semantic_full_v0_2_20260911/summary.json",
+      "bytes": 5312,
+      "sha256": "7c8973b34921d77deefafe23ac07eecfd7d907dbec1fadb62677fb3a1b1c99b0"
+    },
+    {
+      "role": "independent qualification verification",
+      "path": "experiments/diagnostics/aws_btc_transaction_semantic_full_v0_2_20260911/verification.json",
+      "bytes": 2120,
+      "sha256": "f17c72cf9c421fbec6eb7219cd1e2615cd4ef0f068845bcc8862c0af6d7880f8"
+    }
+  ],
+  "semantic_qualification": {
+    "protocol": "docs/大创调研/AWS交易语义资格审计协议-v0.2-20260911.md",
+    "implementation_revision": "36b62dbd2159d478a3842ad999acf911bcdb3d81",
+    "script_sha256": "cad0d458142666ea714083443b06017722a52ac38f627a90c386538abc74a60e",
+    "source_qualification_passed": true,
+    "sqlite_quick_check": "ok",
+    "live_outpoints": 9618234,
+    "duplicate_txid_instances": 2,
+    "bip30_exception_overwrites": 2,
+    "bip30_overwritten_outpoints": 2,
+    "bip30_overwritten_value_sats": 10000000000,
+    "max_amount_residual_sats": 0.0078125,
+    "missing_prevout_failures": 0,
+    "value_conservation_failures": 0
+  },
+  "s0_design": {
+    "cutoff_heights": [181440, 199584, 215712, 225792],
+    "window_blocks": 2016,
+    "primary_horizon_blocks": 52560,
+    "sensitivity_horizon_blocks": [13140, 105120],
+    "eligible_end_height": 237731,
+    "profiles": ["F_pub", "F_wide"],
+    "diagnostic_profile": "F_none",
+    "primary_metrics": ["p_merge", "p_rewrite"],
+    "minimum_practical_difference": 0.01,
+    "bootstrap_replicates": 10000,
+    "bootstrap_block_lengths": [144, 72, 288]
+  },
+  "reference_code": [
+    {
+      "path": "src/btcaml/data/script_identity.py",
+      "sha256": "7bdc8243bc4af7ab33f663d6431d3e389dd43cd2ff1c8a0a62ea4027234e1143"
+    },
+    {
+      "path": "src/btcaml/data/asof_replay.py",
+      "sha256": "e5485688a7e26f9ffbdea0c48687d45f3ddf5e7d7468ff2388f8379d5d4fec29"
+    },
+    {
+      "path": "src/btcaml/data/coinjoin_filters.py",
+      "sha256": "39ef13c71b4df3e91ac8d365dc1df2b02fefdd4767e8bddb5eef175ebe18ab31",
+      "upstream_revision": "3becbc44a951abbe1e85d374a66340a639059d1c"
+    }
+  ],
+  "execution_boundary": {
+    "allowed_columns": [
+      "txid",
+      "hash",
+      "block_hash",
+      "block_number",
+      "index",
+      "input_count",
+      "output_count",
+      "is_coinbase",
+      "input_value",
+      "output_value",
+      "fee",
+      "inputs.spent_transaction_hash",
+      "inputs.spent_output_index",
+      "inputs.value",
+      "outputs.index",
+      "outputs.value",
+      "outputs.script_hex",
+      "date"
+    ],
+    "forbidden_inputs": [
+      "label",
+      "entity_type",
+      "alias",
+      "ground_truth",
+      "external attribution",
+      "model output",
+      "prior effect metric"
+    ],
+    "labels_read": false,
+    "effect_metrics_read": false,
+    "models_authorized": false,
+    "s0_only": true
+  },
+  "resource_observation": {
+    "semantic_state_database_bytes": 2491985920,
+    "free_bytes_after_semantic_replay": 82574606336,
+    "minimum_runtime_reserve_gib": 20,
+    "environment": {
+      "python": "3.12.3",
+      "pyarrow": "16.1.0",
+      "sqlite": "3.49.1",
+      "platform": "Windows 11"
+    }
+  }
+}
