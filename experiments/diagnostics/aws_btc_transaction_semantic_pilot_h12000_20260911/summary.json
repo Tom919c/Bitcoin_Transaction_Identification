@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "run_id": "aws-tx-semantics-pilot-h12000-20260911",
+  "status": "completed_recoverable_pause",
+  "protocol": "docs/大创调研/AWS交易语义资格审计协议-v0.1-20260911.md",
+  "code_revision": "5c2d12fac3f6dad57768a239db77e71038c5da80",
+  "script_sha256": "b001648562c87b6156a3d8805b3e81c3c1c80ac389346809919d42a6378a573a",
+  "bindings": {
+    "listing_sha256": "c237f1abc1c9cc220dc54112931481818a6d986f71b1e5f8d634b6d4dd1530f0",
+    "transaction_freeze_sha256": "c3c20defaf0741db819ae0b88c74f5ca7fb77a511d3bd3137cc176fe4457702a",
+    "schema_audit_sha256": "6f0c2414a85f163ac4a1f7139f8c3dbb2609ebfc596b678f3d204cc261b0ea06",
+    "block_preflight_sha256": "c5301f8a43c5b270759df5fb936812ebcdab63572d64364d542fcce7c515cc8e"
+  },
+  "started_utc": "2026-09-11T02:48:27.702511+00:00",
+  "completed_utc": "2026-09-11T02:48:34.0328251Z",
+  "verified_objects": {
+    "blocks": 1897,
+    "transactions": 1890,
+    "transaction_bytes": 53659133189,
+    "all_transaction_sha256_recomputed": true
+  },
+  "checkpoint": {
+    "last_complete_height": 12000,
+    "blocks": 12001,
+    "transactions": 12105,
+    "coinbase_transactions": 12001,
+    "noncoinbase_transactions": 104,
+    "inputs": 769,
+    "outputs": 12135,
+    "live_outpoints": 11366,
+    "peak_live_outpoints": 11366,
+    "seen_txids": 12105,
+    "duplicate_txid_instances": 0,
+    "max_amount_residual_sats": 9.5367431640625e-07,
+    "failures": 0,
+    "quick_check": "ok"
+  },
+  "state_database": {
+    "path": "data/raw/aws_btc_prefix_v0_1_20260910/semantic_state/utxo_v0_1.sqlite",
+    "bytes": 2048000,
+    "sha256_at_pause": "dbd13380a03507bd8a5f103084c4c98809a9caa1e8311847d1034dc7116ed869"
+  },
+  "resource_observation": {
+    "free_bytes_at_checkpoint": 87618416640,
+    "observed_database_bytes_per_transaction": 169.1862866584056,
+    "linear_full_projection_gib": 5.47248874996773,
+    "eight_times_linear_sensitivity_gib": 43.77990999974184,
+    "reserve_gib": 20,
+    "decision": "go_continue_full_semantic_source_audit_with_runtime_reserve_stop"
+  },
+  "nonsemantic_attempts": [
+    {
+      "status": "launcher_no_process",
+      "effect": "No process logs or state database were created; replaced by a monitored execution session."
+    },
+    {
+      "status": "argument_parse_rejected",
+      "effect": "A mistyped block-preflight SHA omitted one hexadecimal character; argparse rejected it before any source row was read."
+    }
+  ],
+  "labels_read": false,
+  "effect_metrics_read": false,
+  "formal_gate": false,
+  "s0_authorized": false,
+  "limitations": [
+    "The height-12000 prefix is sparse and is not a representative sample of late-period transaction mix.",
+    "The eight-times linear projection is only a capacity sensitivity check; the hard 20 GiB runtime reserve remains authoritative.",
+    "This pilot authorizes continuation of source qualification only."
+  ]
+}
