@@ -1,0 +1,53 @@
+{
+  "schema_version": "aws-btc-transaction-semantic-verification-v1",
+  "run_id": "aws-tx-semantics-full-v0.2-20260911",
+  "verified_at_utc": "2026-09-11T11:43:31.8106369Z",
+  "run_git_revision": "67002e7795a5815025a5a5b7bb558366fb3951ec",
+  "implementation_revision": "36b62dbd2159d478a3842ad999acf911bcdb3d81",
+  "script_sha256": "cad0d458142666ea714083443b06017722a52ac38f627a90c386538abc74a60e",
+  "summary": {
+    "path": "experiments/diagnostics/aws_btc_transaction_semantic_full_v0_2_20260911/summary.json",
+    "sha256": "7c8973b34921d77deefafe23ac07eecfd7d907dbec1fadb62677fb3a1b1c99b0",
+    "bytes": 5312,
+    "started_utc": "2026-09-11T03:20:02.586553+00:00",
+    "ended_utc": "2026-09-11T08:22:07.967576+00:00"
+  },
+  "state_database": {
+    "path": "data/raw/aws_btc_prefix_v0_1_20260910/semantic_state/utxo_v0_2.sqlite",
+    "sha256": "6cafc290b8e3b951417c85c5b6dd431e71c3d0c548ac45bdc6a7bdee4a34d924",
+    "bytes": 2491985920,
+    "read_only_quick_check": "ok",
+    "utxo_rows": 9618234,
+    "bip30_overwrite_rows": 2
+  },
+  "verified_result": {
+    "source_qualification_passed": true,
+    "last_complete_height": 290291,
+    "blocks": 290292,
+    "transactions": 34731184,
+    "inputs": 78085978,
+    "outputs": 87704214,
+    "duplicate_txid_instances": 2,
+    "bip30_exception_overwrites": 2,
+    "bip30_overwritten_outpoints": 2,
+    "bip30_overwritten_value_sats": 10000000000,
+    "live_outpoints": 9618234,
+    "failures": 0
+  },
+  "checks": [
+    "summary JSON parsed and all frozen counts were asserted",
+    "the two exact BIP30 height/block-hash/txid events were present",
+    "prior and replacement value/script pairs matched for both overwritten vout 0 records",
+    "SQLite PRAGMA quick_check returned ok in read-only mode",
+    "SQLite live UTXO and BIP30 event counts matched the summary",
+    "the v0.1 failed checkpoint remained present and was not reused"
+  ],
+  "scope": {
+    "transaction_semantic_source_qualification_closed": true,
+    "gate_3a_v1_frozen": false,
+    "s0_authorized": false,
+    "labels_read": false,
+    "effect_metrics_read": false,
+    "models_run": false
+  }
+}
