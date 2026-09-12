@@ -3,6 +3,7 @@ from __future__ import annotations
 import subprocess
 import sys
 import sqlite3
+import random
 from argparse import Namespace
 from pathlib import Path
 
@@ -43,6 +44,63 @@ def test_load_summary_rejects_self_consistent_nonprotocol_design(tmp_path: Path)
     summary["target_height"] = 1; path.write_bytes(audit.canonical(summary))
     with pytest.raises(ValueError, match="frozen S0 target"):
         audit.load_summary(path)
+
+
+def _naive_candidates(connection: sqlite3.Connection, summary: dict) -> dict[tuple[str, str], list[sqlite3.Row]]:
+    connection.row_factory = sqlite3.Row
+    result: dict[tuple[str, str], list[sqlite3.Row]] = {}
+    for cell in audit.cells(summary):
+        dsu = audit.DSU()
+        excluded = "exclude_f_pub" if cell["profile"] == "F_pub" else "exclude_f_wide"
+        for row in connection.execute(
+            f"SELECT script_id_a,script_id_b FROM union_events WHERE height<=? AND {excluded}=0 ORDER BY height,tx_index,event_index,script_id_a,script_id_b",
+            (cell["future"],),
+        ):
+            dsu.union(row[0], row[1])
+        roots = {dsu.find(row[0]) for row in connection.execute("SELECT script_id FROM window_support WHERE window_id=?", (cell["window_id"],))}
+        heap: list[tuple[bytes, bytes, sqlite3.Row]] = []
+        for row in connection.execute(
+            f"SELECT * FROM union_events WHERE height<=? AND {excluded}=0 ORDER BY height,tx_index,event_index,script_id_a,script_id_b",
+            (cell["future"],),
+        ):
+            if dsu.find(row["script_id_a"]) not in roots and dsu.find(row["script_id_b"]) not in roots:
+                continue
+            rank, event_id = audit.event_rank(row["event_id"])
+            item = (audit.reverse_bytes(rank), audit.reverse_bytes(event_id), row)
+            if len(heap) < audit.SAMPLE_TARGET:
+                audit.heapq.heappush(heap, item)
+            elif item[:2] > heap[0][:2]:
+                audit.heapq.heapreplace(heap, item)
+        result[cell["window_id"], cell["profile"]] = sorted((item[2] for item in heap), key=lambda row: audit.event_rank(row["event_id"]))
+    return result
+
+
+def test_incremental_candidates_match_naive_with_future_connectors_and_global_allocation() -> None:
+    state = sqlite3.connect(":memory:")
+    state.row_factory = sqlite3.Row
+    extract.create_s0_schema(state)
+    design = {"cutoff_heights": [2, 4, 6, 8], "primary_horizon_blocks": 2, "profiles": ["F_pub", "F_wide"]}
+    for cutoff in design["cutoff_heights"]:
+        state.execute("INSERT INTO window_support VALUES(?,?,?)", (f"t{cutoff}", b"a" * 32, cutoff))
+    rng = random.Random(20260912)
+    scripts = [b"a" * 32] + [number.to_bytes(32, "big") for number in range(1, 17)]
+    pairs = [(scripts[index], scripts[index + 1]) for index in range(len(scripts) - 1)]
+    pairs.extend((rng.choice(scripts), rng.choice(scripts)) for _ in range(1_300))
+    for number, (left, right) in enumerate(pairs):
+        event_id = number.to_bytes(32, "big")
+        height = 1 if number == 0 else 4 if number == 1 else rng.randrange(11)
+        state.execute(
+            "INSERT INTO union_events VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+            (event_id, b"h" * 32, height, number.to_bytes(32, "big"), number, 0, left, right, number % 17 == 0, number % 11 == 0, "{}"),
+        )
+    summary = {"design": design}
+    naive = _naive_candidates(state, summary)
+    instrumentation: dict[str, int] = {}
+    incremental = audit.candidates(state, summary, instrumentation)
+    assert list(incremental) == [(cell["window_id"], cell["profile"]) for cell in audit.cells(summary)]
+    assert {cell: [row["event_id"] for row in values] for cell, values in incremental.items()} == {cell: [row["event_id"] for row in values] for cell, values in naive.items()}
+    assert instrumentation["F_pub_dsu_cursors"] == instrumentation["F_wide_dsu_cursors"] == 1
+    assert [(cell, row["event_id"]) for cell, row in audit.allocate(incremental)] == [(cell, row["event_id"]) for cell, row in audit.allocate(naive)]
 
 
 def _hex(value: int) -> str:

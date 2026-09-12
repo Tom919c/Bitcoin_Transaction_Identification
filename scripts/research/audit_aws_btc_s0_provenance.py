@@ -146,31 +146,46 @@ def cells(summary: dict) -> list[dict]:
     ]
 
 
-def candidates(connection: sqlite3.Connection, summary: dict) -> dict[tuple[str, str], list[sqlite3.Row]]:
+def candidates(
+    connection: sqlite3.Connection,
+    summary: dict,
+    instrumentation: dict[str, int] | None = None,
+) -> dict[tuple[str, str], list[sqlite3.Row]]:
     connection.row_factory = sqlite3.Row
-    result: dict[tuple[str, str], list[sqlite3.Row]] = {}
-    for cell in cells(summary):
+    ordered_cells = cells(summary)
+    keyed: dict[tuple[str, str], list[sqlite3.Row]] = {}
+    for profile in PROFILES:
+        profile_cells = [cell for cell in ordered_cells if cell["profile"] == profile]
+        excluded_column = "exclude_f_pub" if profile == "F_pub" else "exclude_f_wide"
         dsu = DSU()
-        excluded_column = "exclude_f_pub" if cell["profile"] == "F_pub" else "exclude_f_wide"
-        for row in connection.execute(
-            f"SELECT script_id_a,script_id_b FROM union_events WHERE height<=? AND {excluded_column}=0 ORDER BY height,tx_index,event_index,script_id_a,script_id_b", (cell["future"],)
-        ):
-            dsu.union(row[0], row[1])
-        roots = {dsu.find(row[0]) for row in connection.execute("SELECT script_id FROM window_support WHERE window_id=?", (cell["window_id"],))}
-        heap: list[tuple[bytes, bytes, sqlite3.Row]] = []
-        for row in connection.execute(
-            f"SELECT * FROM union_events WHERE height<=? AND {excluded_column}=0 ORDER BY height,tx_index,event_index,script_id_a,script_id_b", (cell["future"],)
-        ):
-            if dsu.find(row["script_id_a"]) not in roots and dsu.find(row["script_id_b"]) not in roots:
-                continue
-            rank, event_id = event_rank(row["event_id"])
-            item = (reverse_bytes(rank), reverse_bytes(event_id), row)
-            if len(heap) < SAMPLE_TARGET:
-                heapq.heappush(heap, item)
-            elif item[:2] > heap[0][:2]:
-                heapq.heapreplace(heap, item)
-        result[cell["window_id"], cell["profile"]] = sorted((item[2] for item in heap), key=lambda row: event_rank(row["event_id"]))
-    return result
+        cursor = iter(connection.execute(
+            f"SELECT height,script_id_a,script_id_b FROM union_events WHERE {excluded_column}=0 "
+            "ORDER BY height,tx_index,event_index,script_id_a,script_id_b"
+        ))
+        next_row = next(cursor, None)
+        if instrumentation is not None:
+            instrumentation[f"{profile}_dsu_cursors"] = 1
+        for cell in profile_cells:
+            while next_row is not None and next_row["height"] <= cell["future"]:
+                dsu.union(next_row["script_id_a"], next_row["script_id_b"])
+                if instrumentation is not None:
+                    instrumentation[f"{profile}_dsu_rows"] = instrumentation.get(f"{profile}_dsu_rows", 0) + 1
+                next_row = next(cursor, None)
+            roots = {dsu.find(row[0]) for row in connection.execute("SELECT script_id FROM window_support WHERE window_id=?", (cell["window_id"],))}
+            heap: list[tuple[bytes, bytes, sqlite3.Row]] = []
+            for row in connection.execute(
+                f"SELECT * FROM union_events WHERE height<=? AND {excluded_column}=0 ORDER BY height,tx_index,event_index,script_id_a,script_id_b", (cell["future"],)
+            ):
+                if dsu.find(row["script_id_a"]) not in roots and dsu.find(row["script_id_b"]) not in roots:
+                    continue
+                rank, event_id = event_rank(row["event_id"])
+                item = (reverse_bytes(rank), reverse_bytes(event_id), row)
+                if len(heap) < SAMPLE_TARGET:
+                    heapq.heappush(heap, item)
+                elif item[:2] > heap[0][:2]:
+                    heapq.heapreplace(heap, item)
+            keyed[cell["window_id"], profile] = sorted((item[2] for item in heap), key=lambda row: event_rank(row["event_id"]))
+    return {(cell["window_id"], cell["profile"]): keyed[(cell["window_id"], cell["profile"])] for cell in ordered_cells}
 
 
 def allocate(candidates_by_cell: dict[tuple[str, str], list[sqlite3.Row]], target: int = SAMPLE_TARGET) -> list[tuple[tuple[str, str], sqlite3.Row]]:
