@@ -42,7 +42,11 @@ def canonical(value: object) -> bytes:
 
 
 def digest(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    value = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(8 * 1024 * 1024), b""):
+            value.update(chunk)
+    return value.hexdigest()
 
 
 def ro_connect(path: Path) -> sqlite3.Connection:

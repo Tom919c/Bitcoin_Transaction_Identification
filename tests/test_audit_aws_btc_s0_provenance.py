@@ -4,6 +4,7 @@ import subprocess
 import sys
 import sqlite3
 import random
+import hashlib
 from argparse import Namespace
 from pathlib import Path
 
@@ -35,6 +36,14 @@ def test_ro_connect_enforces_query_only_on_file_database(tmp_path: Path) -> None
     with pytest.raises(sqlite3.OperationalError):
         connection.execute("INSERT INTO probe VALUES(1)")
     connection.close()
+
+
+def test_digest_streams_large_files(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    path = tmp_path / "large.bin"
+    path.write_bytes(b"x" * (9 * 1024 * 1024) + b"y")
+    expected = hashlib.sha256(path.read_bytes()).hexdigest()
+    monkeypatch.setattr(Path, "read_bytes", lambda self: (_ for _ in ()).throw(AssertionError("not streaming")))
+    assert audit.digest(path) == expected
 
 
 def test_load_summary_rejects_self_consistent_nonprotocol_design(tmp_path: Path) -> None:
