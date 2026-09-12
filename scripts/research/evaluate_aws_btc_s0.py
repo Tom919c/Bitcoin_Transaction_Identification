@@ -5,7 +5,6 @@ import hashlib
 import json
 import random
 import sqlite3
-import tempfile
 import os
 import platform
 import math
@@ -18,19 +17,24 @@ REPLICATES = 10_000
 PRIMARY_HORIZON = 52560
 BLOCK_LENGTHS = (144, 72, 288)
 PROFILES = ("F_pub", "F_wide", "F_none")
+UNION_HASH_PROFILES = tuple(sorted(PROFILES))
 EXPECTED_MANIFEST = "e32ad2f33ecbc184eb04159f0adbb22dd2a4a1a47f1e280cbbca699432d67f3d"
-HEX = set("0123456789abcdef")
 
 
-def _sha(path): return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+def _sha(path):
+    digest = hashlib.sha256()
+    with open(path, "rb") as handle:
+        for chunk in iter(lambda: handle.read(8 * 1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 def _json(obj): return json.dumps(obj, sort_keys=True, ensure_ascii=True, separators=(",", ":"))
-def _hex(value, name):
-    value = bytes(value).hex() if isinstance(value, (bytes, bytearray)) else str(value)
-    if len(value) != 64 or set(value) - HEX: raise ValueError(f"invalid {name}")
+def _bytes(value, name):
+    if not isinstance(value, bytes) or len(value) != 32: raise ValueError(f"invalid {name}")
     return value
+def _hex(value, name): return _bytes(value, name).hex()
 def _ids(blob):
     if len(blob) % 32: raise ValueError("packed script IDs have invalid length")
-    ids = tuple(bytes(blob)[i:i + 32].hex() for i in range(0, len(blob), 32))
+    ids = tuple(bytes(blob)[i:i + 32] for i in range(0, len(blob), 32))
     if ids != tuple(sorted(set(ids))): raise ValueError("packed script IDs must be sorted and unique")
     return ids
 
@@ -41,25 +45,27 @@ def _hash_records(records):
     return digest.hexdigest()
 
 
+def _union_where(profile):
+    return {"F_pub": "exclude_f_pub=0", "F_wide": "exclude_f_wide=0", "F_none": "1"}[profile]
+
+
 def _union_hash(con):
-    """Hash complete provenance records while SQLite streams its ordered view."""
+    """Hash complete provenance records from indexed raw events, never profile view."""
     digest = hashlib.sha256()
-    query = """SELECT event_id,block_hash,block_height,txid,tx_index,event_index,
-               script_id_a,script_id_b,filter_profile,filter_decision,exclude_f_pub,
-               exclude_f_wide,evidence_json,heuristic_id,heuristic_version,
-               source_manifest_sha256,profile_view_version FROM union_event_records
-               ORDER BY filter_profile,block_height,tx_index,event_index,script_id_a,script_id_b,event_id"""
-    for row in con.execute(query):
-        event_id, block_hash, height, txid, tx_index, event_index, left, right, profile, decision, pub, wide, evidence, heuristic, version, manifest, view = row
-        record = {"event_id": _hex(event_id, "event_id"), "block_hash": _hex(block_hash, "block_hash"),
-                  "block_height": height, "txid": _hex(txid, "txid"), "tx_index": tx_index,
-                  "event_index": event_index, "script_id_a": _hex(left, "script_id_a"),
-                  "script_id_b": _hex(right, "script_id_b"), "filter_profile": profile,
-                  "filter_decision": decision, "exclude_f_pub": pub, "exclude_f_wide": wide,
-                  "evidence_json": evidence, "heuristic_id": heuristic,
-                  "heuristic_version": version, "source_manifest_sha256": manifest,
-                  "profile_view_version": view}
-        digest.update(_json(record).encode("ascii") + b"\n")
+    version, manifest = con.execute("SELECT heuristic_version,source_manifest_sha256 FROM run_context WHERE context_id=1").fetchone()
+    # Preserve the committed view hash's lexical profile-major byte order.
+    for profile in UNION_HASH_PROFILES:
+        query = "SELECT event_id,block_hash,height,txid,tx_index,event_index,script_id_a,script_id_b,exclude_f_pub,exclude_f_wide,evidence_json FROM union_events ORDER BY height,tx_index,event_index,script_id_a,script_id_b,event_id"
+        for event_id, block_hash, height, txid, tx_index, event_index, left, right, pub, wide, evidence in con.execute(query):
+            record = {"event_id": _hex(event_id, "event_id"), "block_hash": _hex(block_hash, "block_hash"),
+                      "block_height": height, "txid": _hex(txid, "txid"), "tx_index": tx_index,
+                      "event_index": event_index, "script_id_a": _hex(left, "script_id_a"),
+                      "script_id_b": _hex(right, "script_id_b"), "filter_profile": profile,
+                      "filter_decision": "exclude" if (profile == "F_pub" and pub) or (profile == "F_wide" and wide) else "include", "exclude_f_pub": pub, "exclude_f_wide": wide,
+                      "evidence_json": evidence, "heuristic_id": "common-input",
+                      "heuristic_version": version, "source_manifest_sha256": manifest,
+                      "profile_view_version": "s0-profile-view-v1"}
+            digest.update(_json(record).encode("ascii") + b"\n")
     return digest.hexdigest()
 
 def _atomic_new(path, payload):
@@ -84,15 +90,24 @@ class DSU:
     def union(self, a, b):
         a, b = self.find(a), self.find(b)
         if a != b: self.p[max(a, b)] = min(a, b)
+    def root(self, x):
+        return self.find(x) if x in self.p else x
+
+
+def _restricted_representatives(dsu, support):
+    minimum = {}
+    for script in support:
+        root = dsu.root(script)
+        if root not in minimum or script < minimum[root]:
+            minimum[root] = script
+    return {script: minimum[dsu.root(script)] for script in support}
 
 
 def _representatives(events, cutoff, support):
     d = DSU()
     for e in events:
         if e[0] <= cutoff: d.union(e[3], e[4])
-    groups = defaultdict(list)
-    for script in support: groups[d.find(script)].append(script)
-    return {s: min(groups[d.find(s)]) for s in support}
+    return _restricted_representatives(d, support)
 
 
 def iter_partition_cells(con, windows, support_by_window, horizons, instrumentation=None, target_height=286560):
@@ -105,9 +120,10 @@ def iter_partition_cells(con, windows, support_by_window, horizons, instrumentat
                           {(window["cutoff_height"] + horizon, window["window_id"], horizon)
                            for window, horizon in available})
         dsu = DSU()
-        cursor = iter(con.execute("SELECT block_height,script_id_a,script_id_b FROM union_event_records "
-                                  "WHERE filter_profile=? AND filter_decision='include' "
-                                  "ORDER BY block_height,tx_index,event_index,script_id_a,script_id_b", (profile,)))
+        if instrumentation is not None:
+            instrumentation["dsu_cursors"] = instrumentation.get("dsu_cursors", 0) + 1
+            instrumentation.setdefault("dsu_profiles", []).append(profile)
+        cursor = iter(con.execute("SELECT height,script_id_a,script_id_b FROM union_events WHERE " + _union_where(profile) + " ORDER BY height,tx_index,event_index,script_id_a,script_id_b,event_id"))
         event = next(cursor, None)
         ct_maps = {}
         last_horizon = {window["window_id"]: max(h for candidate, h in available
@@ -116,12 +132,10 @@ def iter_partition_cells(con, windows, support_by_window, horizons, instrumentat
         for boundary, window_id, horizon in required:
             while event is not None and event[0] <= boundary:
                 _, left, right = event
-                dsu.union(_hex(left, "script_id_a"), _hex(right, "script_id_b"))
+                dsu.union(_bytes(left, "script_id_a"), _bytes(right, "script_id_b"))
                 event = next(cursor, None)
             support = support_by_window[window_id]
-            groups = defaultdict(list)
-            for script in support: groups[dsu.find(script)].append(script)
-            representatives = {s: min(groups[dsu.find(s)]) for s in support}
+            representatives = _restricted_representatives(dsu, support)
             if not horizon:
                 ct_maps[window_id] = representatives
                 if instrumentation is not None:
@@ -134,10 +148,10 @@ def iter_partition_cells(con, windows, support_by_window, horizons, instrumentat
 
 def secondary_statistics(records, representatives_t, representatives_T):
     """Frozen descriptive structure statistics; never used by Go/No-Go."""
-    support = sorted(representatives_t)
-    ct_members = defaultdict(list)
+    support = representatives_t
+    ct_sizes = defaultdict(int)
     for script in support:
-        ct_members[representatives_t[script]].append(script)
+        ct_sizes[representatives_t[script]] += 1
     ct_roots_by_T = defaultdict(set)
     for script in support: ct_roots_by_T[representatives_T[script]].add(representatives_t[script])
     merge_groups = [roots for roots in ct_roots_by_T.values() if len(roots) >= 2]
@@ -171,7 +185,7 @@ def secondary_statistics(records, representatives_t, representatives_T):
                 new_edges.add((left, right))
         cross_transactions += crosses
         became_loop_transactions += crosses and became_loop
-    n = len(support); p_t = {key: len(value) / n for key, value in ct_members.items()}
+    n = len(support); p_t = {key: value / n for key, value in ct_sizes.items()}
     ct_T = defaultdict(int)
     for script in support: ct_T[representatives_T[script]] += 1
     p_T = {key: value / n for key, value in ct_T.items()}
@@ -179,9 +193,9 @@ def secondary_statistics(records, representatives_t, representatives_T):
     vi += sum(p * math.log(p) for p in p_t.values()) + sum(p * math.log(p) for p in p_T.values())
     percentile = lambda values, q: values[min(len(values) - 1, math.ceil(q * len(values)) - 1)] if values else 0
     group_components = sorted(map(len, merge_groups))
-    group_scripts = sorted(sum(len(ct_members[root]) for root in roots) for roots in merge_groups)
-    return {"affected_ct_entity_fraction": len(affected) / len(ct_members),
-            "node_compression_fraction": (len(ct_members) - len(ct_T)) / len(ct_members),
+    group_scripts = sorted(sum(ct_sizes[root] for root in roots) for roots in merge_groups)
+    return {"affected_ct_entity_fraction": len(affected) / len(ct_sizes),
+            "node_compression_fraction": (len(ct_sizes) - len(ct_T)) / len(ct_sizes),
             "cross_entity_to_self_loop_fraction": became_loop_transactions / cross_transactions if cross_transactions else 0.0,
             "cross_entity_to_self_loop_transaction_counts": {"numerator": became_loop_transactions, "denominator": cross_transactions, "definition": "noncoinbase transaction with a Ct cross-entity endpoint pair; numerator has at least one such pair merged in CT"},
             "edge_aggregation_fraction": (len(old_edges) - len(new_edges)) / len(old_edges) if old_edges else 0.0,
@@ -239,7 +253,7 @@ def _graph(records, reps, meta):
         digest.update(raw); byte_count += len(raw); counts[record["record_type"]] += 1
     write(meta)
     nodes = sorted(set(reps.values()))
-    for node in nodes: write({"record_type": "node", "script_id": node})
+    for node in nodes: write({"record_type": "node", "script_id": node.hex()})
     previous = None
     for r in records:
         h, bh, idx, txid, ins, outs, coinbase, insat, outsat, fee = r
@@ -248,15 +262,15 @@ def _graph(records, reps, meta):
         previous = key
         if coinbase: continue
         inp, out = sorted({reps[x] for x in ins}), sorted({reps[x] for x in outs})
-        tx = {"block_hash": bh, "block_height": h, "fee_sat": fee, "input_entities": inp,
-              "input_sat": insat, "output_entities": out, "output_sat": outsat,
-              "record_type": "transaction", "tx_index": idx, "txid": txid}
+        tx = {"block_hash": bh.hex(), "block_height": h, "fee_sat": fee, "input_entities": [x.hex() for x in inp],
+              "input_sat": insat, "output_entities": [x.hex() for x in out], "output_sat": outsat,
+              "record_type": "transaction", "tx_index": idx, "txid": txid.hex()}
         write(tx)
     for h, _, idx, txid, ins, outs, coinbase, _, _, _ in records:
         if coinbase: continue
         for source in sorted({reps[x] for x in ins}):
             for target in sorted({reps[x] for x in outs}):
-                write({"block_height": h, "record_type": "edge", "source": source, "target": target, "tx_index": idx, "txid": txid})
+                write({"block_height": h, "record_type": "edge", "source": source.hex(), "target": target.hex(), "tx_index": idx, "txid": txid.hex()})
     return {"sha256": digest.hexdigest(), "bytes": byte_count, "record_counts": counts}
 
 
@@ -307,37 +321,48 @@ def validate(summary, db):
         con.close(); raise
 
 
-def _window_data(con, window):
+def _window_support(con, window):
     wid = window["window_id"]
-    support_rows = [(_hex(x[0], "support"), x[1]) for x in con.execute("SELECT script_id,first_height FROM window_support WHERE window_id=?", (wid,))]
-    support, first_height = {x[0] for x in support_rows}, dict(support_rows)
+    first_height = {_bytes(script, "support"): height for script, height in con.execute("SELECT script_id,first_height FROM window_support WHERE window_id=?", (wid,))}
+    support = set(first_height)
     if not support or len(first_height) != len(support): raise ValueError("invalid support")
     if any(not isinstance(h, int) or not window["win_start_height"] <= h <= window["win_end_height"] for h in first_height.values()): raise ValueError("support first height outside window")
+    return support, first_height
+
+
+def _window_records(con, window, support):
+    wid = window["window_id"]
     records = []
     for r in con.execute("SELECT height,block_hash,tx_index,txid,input_script_ids,output_script_ids,is_coinbase,input_sat,output_sat,fee_sat FROM window_transactions WHERE window_id=? ORDER BY height,tx_index,txid", (wid,)):
         h,bh,idx,txid,ins,outs,coinbase,insat,outsat,fee=r
         if not window["win_start_height"] <= h <= window["win_end_height"]: raise ValueError("transaction outside window")
-        records.append((h,_hex(bh,"block_hash"),idx,_hex(txid,"txid"),_ids(ins),_ids(outs),bool(coinbase),insat,outsat,fee))
-    if any(set(r[4]+r[5])-support for r in records): raise ValueError("transaction endpoint outside support")
-    if any(not isinstance(r[8], int) or (not r[6] and (not isinstance(r[7], int) or not isinstance(r[9], int))) for r in records): raise ValueError("transaction amount must be integer")
-    return support, first_height, records
+        input_ids, output_ids, is_coinbase = _ids(ins), _ids(outs), bool(coinbase)
+        if any(script not in support for script in input_ids + output_ids): raise ValueError("transaction endpoint outside support")
+        if not isinstance(outsat, int) or (not is_coinbase and (not isinstance(insat, int) or not isinstance(fee, int))): raise ValueError("transaction amount must be integer")
+        records.append((h,_bytes(bh,"block_hash"),idx,_bytes(txid,"txid"),input_ids,output_ids,is_coinbase,insat,outsat,fee))
+    return records
 
 
 def _cell(window, profile, horizon, support, first_height, records, rt, rT, manifest, summary_hash):
-    later = defaultdict(set)
-    for script in support: later[rT[script]].add(rt[script])
+    first_ct_root, merged_future_roots = {}, set()
+    for script in support:
+        future_root, current_root = rT[script], rt[script]
+        if future_root in first_ct_root and first_ct_root[future_root] != current_root:
+            merged_future_roots.add(future_root)
+        else:
+            first_ct_root[future_root] = current_root
     byblock = {height: [0, 0, 0, 0] for height in range(window["win_start_height"], window["win_end_height"] + 1)}
     for script in support:
-        values = byblock[first_height[script]]; values[1] += 1; values[0] += len(later[rT[script]]) >= 2
+        values = byblock[first_height[script]]; values[1] += 1; values[0] += rT[script] in merged_future_roots
     for record in records:
         if record[6]: continue
         values = byblock[record[0]]; values[3] += 1
         values[2] += (sorted({rt[x] for x in record[4]}), sorted({rt[x] for x in record[5]})) != (sorted({rT[x] for x in record[4]}), sorted({rT[x] for x in record[5]}))
     blocks = [byblock[height] for height in sorted(byblock)]
     if not sum(x[1] for x in blocks) or not sum(x[3] for x in blocks): raise ValueError("zero denominator")
-    support_hash = _hash_records({"script_id": script, "first_height": first_height[script]} for script in sorted(support))
-    transaction_hash = _hash_records({"height":r[0],"block_hash":r[1],"tx_index":r[2],"txid":r[3],"input_script_ids":list(r[4]),"output_script_ids":list(r[5]),"is_coinbase":r[6],"input_sat":r[7],"output_sat":r[8],"fee_sat":r[9]} for r in records)
-    entry = {"window_id":window["window_id"],"horizon_blocks":horizon,"filter_profile":profile,"support_sha256":support_hash,"transaction_sha256":transaction_hash,"partition_sha256":{"Ct":_hash_records({"script_id":s,"representative":rt[s]} for s in sorted(support)),"CT":_hash_records({"script_id":s,"representative":rT[s]} for s in sorted(support))},"point":{"p_merge":sum(x[0] for x in blocks)/sum(x[1] for x in blocks),"p_rewrite":sum(x[2] for x in blocks)/sum(x[3] for x in blocks)},"bootstrap":{}}
+    support_hash = _hash_records({"script_id": script.hex(), "first_height": first_height[script]} for script in sorted(support))
+    transaction_hash = _hash_records({"height":r[0],"block_hash":r[1].hex(),"tx_index":r[2],"txid":r[3].hex(),"input_script_ids":[x.hex() for x in r[4]],"output_script_ids":[x.hex() for x in r[5]],"is_coinbase":r[6],"input_sat":r[7],"output_sat":r[8],"fee_sat":r[9]} for r in records)
+    entry = {"window_id":window["window_id"],"horizon_blocks":horizon,"filter_profile":profile,"support_sha256":support_hash,"transaction_sha256":transaction_hash,"partition_sha256":{"Ct":_hash_records({"script_id":s.hex(),"representative":rt[s].hex()} for s in sorted(support)),"CT":_hash_records({"script_id":s.hex(),"representative":rT[s].hex()} for s in sorted(support))},"point":{"p_merge":sum(x[0] for x in blocks)/sum(x[1] for x in blocks),"p_rewrite":sum(x[2] for x in blocks)/sum(x[3] for x in blocks)},"bootstrap":{}}
     entry["secondary"] = secondary_statistics(records, rt, rT)
     for length in BLOCK_LENGTHS: entry["bootstrap"][str(length)] = _bootstrap(blocks, manifest, window["window_id"], horizon, profile, length)
     meta = {"analysis_cutoff_height":window["cutoff_height"],"extractor_summary_sha256":summary_hash,"filter_profile":profile,"horizon_blocks":horizon,"partition_cutoff_height":window["cutoff_height"]+horizon,"partition_vintage":"B","record_type":"meta","schema_version":"asof-entity-endpoint-multigraph-v1","source_manifest_sha256":manifest,"window_id":window["window_id"]}
@@ -353,13 +378,18 @@ def evaluate(summary_path, db_path, output):
         if design.get("primary_horizon_blocks") != PRIMARY_HORIZON or design.get("bootstrap_replicates") != REPLICATES or tuple(design.get("bootstrap_block_lengths", [])) != BLOCK_LENGTHS: raise ValueError("frozen design mismatch")
         horizons = (PRIMARY_HORIZON, 13140, 105120)
         window_by_id = {window["window_id"]: window for window in windows}
-        inputs = {wid: _window_data(con, window) for wid, window in window_by_id.items()}
-        support_by_window = {wid: data[0] for wid, data in inputs.items()}
-        if any(not support for support in support_by_window.values()): raise ValueError("zero support denominator")
+        support_by_window = {wid: _window_support(con, window) for wid, window in window_by_id.items()}
+        if any(not support for support, _ in support_by_window.values()): raise ValueError("zero support denominator")
         union_hash = _union_hash(con)
         cells = []
-        for profile, wid, horizon, rt, rT in iter_partition_cells(con, windows, support_by_window, horizons, target_height=summary["last_complete_height"]):
-            cells.append(_cell(window_by_id[wid], profile, horizon, *inputs[wid], rt, rT, manifest, summary_hash))
+        for profile, wid, horizon, rt, rT in iter_partition_cells(con, windows, {key: value[0] for key, value in support_by_window.items()}, horizons, target_height=summary["last_complete_height"]):
+            support, first_height = support_by_window[wid]
+            # ponytail: reload one window per cell to cap peak RAM while the
+            # full-chain DSU is live; add a canonical disk cache only if I/O
+            # is measured to dominate the full evaluation.
+            records = _window_records(con, window_by_id[wid], support)
+            cells.append(_cell(window_by_id[wid], profile, horizon, support, first_height, records, rt, rT, manifest, summary_hash))
+            del records
         primary=[x for x in cells if x["horizon_blocks"]==PRIMARY_HORIZON and x["filter_profile"] in ("F_pub","F_wide")]
         expected_primary = {(f"t{cutoff}", profile) for cutoff in design["cutoff_heights"] for profile in ("F_pub", "F_wide")}
         if {(cell["window_id"], cell["filter_profile"]) for cell in primary} != expected_primary or len(primary) != 8:
@@ -386,11 +416,11 @@ def evaluate(summary_path, db_path, output):
 def self_test():
     assert _seed("a"*64,"t1",52560,"F_pub",144)==_seed("a"*64,"t1",52560,"F_pub",144)
     with sqlite3.connect(":memory:") as con:
-        con.execute("create table union_event_records(block_height,script_id_a,script_id_b,filter_profile,filter_decision,tx_index,event_index)")
-        for profile in PROFILES:
-            con.execute("insert into union_event_records values(2,?,?,?,?,?,?)", (bytes.fromhex("a" * 64), bytes.fromhex("b" * 64), profile, "include", 0, 0))
-        cells = list(iter_partition_cells(con, [{"window_id":"t1", "cutoff_height":1}], {"t1":{"a" * 64, "b" * 64}}, (1,), target_height=2))
-    assert len(cells) == len(PROFILES) and all(cell[3]["a" * 64] != cell[3]["b" * 64] and cell[4]["a" * 64] == cell[4]["b" * 64] for cell in cells)
+        con.execute("create table union_events(event_id,block_hash,height,txid,tx_index,event_index,script_id_a,script_id_b,exclude_f_pub,exclude_f_wide,evidence_json)")
+        a, b = bytes.fromhex("a" * 64), bytes.fromhex("b" * 64)
+        con.execute("insert into union_events values(?,?,?,?,?,?,?,?,?,?,?)", (bytes.fromhex("e" * 64), bytes.fromhex("c" * 64), 2, bytes.fromhex("d" * 64), 0, 0, a, b, 0, 0, "{}"))
+        cells = list(iter_partition_cells(con, [{"window_id":"t1", "cutoff_height":1}], {"t1":{a, b}}, (1,), target_height=2))
+    assert len(cells) == len(PROFILES) and all(cell[3][a] != cell[3][b] and cell[4][a] == cell[4][b] for cell in cells)
     print(_json({"self_test":"passed","network":"not_used","effect_metrics_read":False,"s0_decision":None}))
 
 def main():

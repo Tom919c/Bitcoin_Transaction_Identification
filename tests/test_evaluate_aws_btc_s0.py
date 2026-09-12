@@ -5,11 +5,14 @@ from btcaml.data.asof_replay import UnionEvent, replay_partition, restricted_rep
 
 ROOT=Path(__file__).resolve().parents[1]; P=ROOT/'scripts/research/evaluate_aws_btc_s0.py'
 spec=importlib.util.spec_from_file_location('ev',P); ev=importlib.util.module_from_spec(spec); spec.loader.exec_module(ev)
+X=ROOT/'scripts/research/extract_aws_btc_s0_events.py'
+xspec=importlib.util.spec_from_file_location('extract_s0',X); extract_s0=importlib.util.module_from_spec(xspec); xspec.loader.exec_module(extract_s0)
+b = lambda value: bytes.fromhex(value * 64)
 
 def test_graph_exact_bytes_and_seed_and_bootstrap():
     meta={"analysis_cutoff_height":1,"extractor_summary_sha256":"a"*64,"filter_profile":"F_pub","horizon_blocks":52560,"partition_cutoff_height":1,"partition_vintage":"B","record_type":"meta","schema_version":"asof-entity-endpoint-multigraph-v1","source_manifest_sha256":"b"*64,"window_id":"t1"}
-    row=(1,"c"*64,0,"d"*64,("a"*64,),("b"*64,),False,1,1,0)
-    graph=ev._graph([row],{"a"*64:"a"*64,"b"*64:"b"*64},meta)
+    row=(1,b("c"),0,b("d"),(b("a"),),(b("b"),),False,1,1,0)
+    graph=ev._graph([row],{b("a"):b("a"),b("b"):b("b")},meta)
     lines=[meta, {'record_type':'node','script_id':'a'*64}, {'record_type':'node','script_id':'b'*64}, {'block_hash':'c'*64,'block_height':1,'fee_sat':0,'input_entities':['a'*64],'input_sat':1,'output_entities':['b'*64],'output_sat':1,'record_type':'transaction','tx_index':0,'txid':'d'*64}, {'block_height':1,'record_type':'edge','source':'a'*64,'target':'b'*64,'tx_index':0,'txid':'d'*64}]
     raw=('\n'.join(ev._json(x) for x in lines)+'\n').encode()
     assert graph['sha256']==hashlib.sha256(raw).hexdigest(); assert ev._seed('b'*64,'t1',52560,'F_pub',144)==ev._seed('b'*64,'t1',52560,'F_pub',144)
@@ -36,10 +39,10 @@ def test_go_cannot_splice_metrics_across_windows():
     assert not all(sum(x['bootstrap']['144']['p_merge']['lower'] >= .01 and x['bootstrap']['144']['p_rewrite']['lower'] >= .01 for x in cells if x['filter_profile'] == p) >= 3 for p in ('F_pub','F_wide'))
 
 def test_secondary_statistics_are_descriptive_and_deterministic():
-    records = [(1, 'a'*64, 0, 'b'*64, ('1'*64,), ('2'*64,), False, 100, 2, 98),
-               (1, 'a'*64, 1, 'c'*64, ('3'*64,), ('4'*64,), False, 1, 8, 0)]
-    ct = {x*64:x*64 for x in '1234'}
-    future = {'1'*64:'1'*64, '2'*64:'1'*64, '3'*64:'3'*64, '4'*64:'4'*64}
+    records = [(1, b('a'), 0, b('b'), (b('1'),), (b('2'),), False, 100, 2, 98),
+               (1, b('a'), 1, b('c'), (b('3'),), (b('4'),), False, 1, 8, 0)]
+    ct = {b(x):b(x) for x in '1234'}
+    future = {b('1'):b('1'), b('2'):b('1'), b('3'):b('3'), b('4'):b('4')}
     stats = ev.secondary_statistics(records, ct, future)
     assert stats['node_compression_fraction'] == .25
     assert stats['cross_entity_to_self_loop_fraction'] == .5
@@ -50,10 +53,24 @@ def test_secondary_statistics_are_descriptive_and_deterministic():
     assert stats['amount_weighted_endpoint_rewrite_fraction'] == .2
     assert stats['amount_weight_definition'] == 'output_sat'
 
+def test_cell_merge_membership_and_streaming_file_hash(tmp_path, monkeypatch):
+    monkeypatch.setattr(ev, '_bootstrap', lambda *args: {'checked': True})
+    monkeypatch.setattr(ev, '_graph', lambda *args: {'checked': True})
+    support={b('1'),b('2'),b('3')}; first_height={script:1 for script in support}
+    rt={script:script for script in support}; future={b('1'):b('1'),b('2'):b('1'),b('3'):b('3')}
+    records=[(1,b('a'),0,b('b'),(b('1'),),(b('2'),),False,1,1,0)]
+    window={'window_id':'t1','cutoff_height':1,'win_start_height':1,'win_end_height':1}
+    cell=ev._cell(window,'F_pub',1,support,first_height,records,rt,future,'m'*64,'s'*64)
+    assert cell['point'] == {'p_merge':2/3,'p_rewrite':1.0}
+    path=tmp_path/'bytes.bin'; path.write_bytes(b'x'*(9*1024*1024)+b'y')
+    expected=hashlib.sha256(path.read_bytes()).hexdigest()
+    monkeypatch.setattr(Path, 'read_bytes', lambda self: (_ for _ in ()).throw(AssertionError('not streaming')))
+    assert ev._sha(path) == expected
+
 def test_graph_and_record_hash_streaming_match_exact_jsonl_bytes():
     meta={"analysis_cutoff_height":1,"extractor_summary_sha256":"a"*64,"filter_profile":"F_pub","horizon_blocks":52560,"partition_cutoff_height":1,"partition_vintage":"B","record_type":"meta","schema_version":"asof-entity-endpoint-multigraph-v1","source_manifest_sha256":"b"*64,"window_id":"t1"}
-    records=[(1,'c'*64,0,'d'*64,('1'*64,'2'*64),('3'*64,),False,2,3,0), (1,'c'*64,1,'e'*64,('3'*64,),('1'*64,),False,3,2,1)]
-    reps={x*64:x*64 for x in '123'}
+    records=[(1,b('c'),0,b('d'),(b('1'),b('2')),(b('3'),),False,2,3,0), (1,b('c'),1,b('e'),(b('3'),),(b('1'),),False,3,2,1)]
+    reps={b(x):b(x) for x in '123'}
     graph=ev._graph(records,reps,meta)
     lines=[meta, *({'record_type':'node','script_id':x*64} for x in '123'),
            {'block_hash':'c'*64,'block_height':1,'fee_sat':0,'input_entities':['1'*64,'2'*64],'input_sat':2,'output_entities':['3'*64],'output_sat':3,'record_type':'transaction','tx_index':0,'txid':'d'*64},
@@ -66,14 +83,46 @@ def test_graph_and_record_hash_streaming_match_exact_jsonl_bytes():
 
 def test_partition_cell_generator_streams_boundaries_and_releases_ct_maps():
     con = sqlite3.connect(':memory:')
-    con.execute('create table union_event_records(block_height,script_id_a,script_id_b,filter_profile,filter_decision,tx_index,event_index)')
-    for profile in ev.PROFILES:
-        con.execute('insert into union_event_records values(2,?,?,?,?,?,?)', (bytes.fromhex('a'*64), bytes.fromhex('b'*64), profile, 'include', 0, 0))
+    con.execute('create table union_events(event_id,block_hash,height,txid,tx_index,event_index,script_id_a,script_id_b,exclude_f_pub,exclude_f_wide,evidence_json)')
+    con.execute('insert into union_events values(?,?,?,?,?,?,?,?,?,?,?)', (b('e'),b('c'),2,b('d'),0,0,b('a'),b('b'),0,0,'{}'))
     windows = [{'window_id':'t1','cutoff_height':1}, {'window_id':'t3','cutoff_height':3}]
     instrument = {}
-    yielded = list(ev.iter_partition_cells(con, windows, {'t1':{'a'*64,'b'*64},'t3':{'a'*64,'b'*64}}, (1, 2), instrument))
+    yielded = list(ev.iter_partition_cells(con, windows, {'t1':{b('a'),b('b')},'t3':{b('a'),b('b')}}, (1, 2), instrument))
     assert [item[:3] for item in yielded] == [(p,w,h) for p in ev.PROFILES for w,h in [('t1',1),('t1',2),('t3',1),('t3',2)]]
     assert instrument['max_live_ct_maps'] <= 2
+    assert instrument['dsu_cursors'] == len(ev.PROFILES)
+    assert instrument['dsu_profiles'] == list(ev.PROFILES)
+
+def test_raw_union_hash_matches_legacy_view_and_bytes_partition():
+    con = sqlite3.connect(':memory:')
+    extract_s0.create_s0_schema(con)
+    con.execute('insert into run_context values(1,?,?,?,?,?,?,?,?)',
+                (1, 'common-input', 'v1', 's0-profile-view-v1', 'm'*64, 'r'*64, 2, '{}'))
+    # The first two rows deliberately tie on every protocol order field except
+    # event_id, exercising the legacy hash's final deterministic tie-breaker.
+    rows=[(b('e'),b('c'),1,b('d'),0,0,b('a'),b('b'),0,1,'{}'),
+          (b('f'),b('c'),1,b('d'),0,0,b('a'),b('b'),1,0,'{}'),
+          (b('9'),b('c'),2,b('d'),1,0,b('b'),b('c'),1,1,'{}')]
+    con.executemany('insert into union_events values(?,?,?,?,?,?,?,?,?,?,?)', rows)
+    digest=hashlib.sha256()
+    query = '''select event_id,block_hash,block_height,txid,tx_index,event_index,
+               script_id_a,script_id_b,filter_profile,filter_decision,exclude_f_pub,
+               exclude_f_wide,evidence_json,heuristic_id,heuristic_version,
+               source_manifest_sha256,profile_view_version from union_event_records
+               order by filter_profile,block_height,tx_index,event_index,script_id_a,script_id_b,event_id'''
+    for event_id,bh,height,txid,idx,event_idx,left,right,profile,decision,pub,wide,evidence,heuristic,version,manifest,view in con.execute(query):
+        digest.update(ev._json({'event_id':event_id,'block_hash':bh.hex(),'block_height':height,'txid':txid.hex(),'tx_index':idx,'event_index':event_idx,'script_id_a':left.hex(),'script_id_b':right.hex(),'filter_profile':profile,'filter_decision':decision,'exclude_f_pub':pub,'exclude_f_wide':wide,'evidence_json':evidence,'heuristic_id':heuristic,'heuristic_version':version,'source_manifest_sha256':manifest,'profile_view_version':view}).encode()+b'\n')
+    statements=[]; con.set_trace_callback(statements.append)
+    assert ev._union_hash(con) == digest.hexdigest()
+    assert ev.UNION_HASH_PROFILES == tuple(sorted(ev.PROFILES))
+    assert sum(' from union_events ' in statement.lower() for statement in statements) == len(ev.PROFILES)
+    assert not any('union_event_records' in statement.lower() for statement in statements)
+    byte_reps=ev._representatives([(1,0,0,b('a'),b('b')),(2,0,0,b('b'),b('c'))], 2, {b('a'),b('b'),b('c')})
+    hex_reps=ev._representatives([(1,0,0,'a'*64,'b'*64),(2,0,0,'b'*64,'c'*64)], 2, {'a'*64,'b'*64,'c'*64})
+    assert {key.hex(): value.hex() for key,value in byte_reps.items()} == hex_reps
+    dsu=ev.DSU(); dsu.union(b('a'), b('b'))
+    ev._restricted_representatives(dsu, {b('a'), b('b'), b('c')})
+    assert b('c') not in dsu.p
 
 def test_bootstrap_truncates_final_circular_block(monkeypatch):
     class FixedRandom:
