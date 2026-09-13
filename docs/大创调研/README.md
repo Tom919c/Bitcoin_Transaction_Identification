@@ -1,6 +1,6 @@
 # 大创项目调研与交付入口
 
-更新日期：2026-09-10。当前状态：用户已确认“严格按时可见实体图与可信识别系统”为唯一主方向，独立分支 `asof-entity-graph-pilot` 已建立。聚焦反证发现，“未来聚类知识回写历史会产生 look-ahead bias”已被 point-in-time 数据实践直接描述，2026 年 9 月的新预印本也已覆盖 GNN 聚类细化；本项目因此把贡献收紧为受控、可复现地测量分区版本对实体类型预测与决策的影响，不再把现象或聚类置信度方法本身作为新发现。Yin 2019 的实体簇分类全文已闭环；BitLINK 作者幻灯片已核验但论文正文仍未取得；Zenodo 最小训练包因缺少 raw transaction/prevout/script/union provenance 对 PIT 重放作 No-Go。AWS 公共比特币数据已通过匿名入口、清单和关键 schema 样本审计，但约 2.0 TiB 全量规模、无对象版本、`double` 金额、数据许可及全量完整性仍未关闭，只是待资格化候选。Gate 3A 已形成[v0.1 待冻结协议](Gate3A-严格按时可见实体图预注册协议-v0.1-20260908.md)，过滤器与脚本的预注册语义及本地参考实现已经锁定，当前仍不授权正式 S0 Pilot。计划中的 v1.0 仅授权无标签 S0；模型、标签与测试读取仍须 S0 Go 后另行冻结，不授权 2.52 亿级全图重建。详见[启动章程](严格按时可见实体图研究启动章程-20260908.md)、[Research Passport 与聚焦证据快照 v1.0](Research-Passport与聚焦证据快照-v1.0-20260908.md)和[AWS 数据源资格审计](AWS公共比特币数据源资格审计-20260910.md)。
+更新日期：2026-09-13。本段取代下文保留的历史状态。用户已确认“严格按时可见实体图与可信识别系统”为唯一主方向，独立分支 `asof-entity-graph-pilot` 已建立。BitLINK 所在 UNM 学位论文全文已取得并核验；BitLINK 位于第 5 章，通用 temporal cluster linkage、successor-cluster prediction 和 cluster-chain 首创主张均作 No-Go，固定历史支持上成对比较 `C_t/C_T` 的窄结构审计仍待 S0 证伪。AWS 早期完整前缀已通过全量交易语义资格审计并冻结为私有内部 S0 输入；公开再分发未获授权。Gate 3A [v1.3](Gate3A-严格按时可见实体图预注册协议-v1.3-20260912.md) 已冻结为 S0-only，union provenance 提取正从已验证 checkpoint 继续，尚未生成最终摘要、结构效应或 Go/No-Go 决策。模型、标签投影、S1/S2 和正式测试集读取仍未获授权；若 S0 Go，须另行冻结 S1 协议，重型图模型和多种子任务才路由至 Kaggle 私有 T4×2。详见[最新 Research Passport](Research-Passport与聚焦证据快照-v1.4-20260912.md)、[BitLINK 全文核验边界](BitLINK全文核验与主线边界-20260911.md)、[章节勘误](BitLINK全文核验勘误-20260912.md)、[AWS 数据源资格审计](AWS公共比特币数据源资格审计-20260910.md)和[Kaggle 算力接入审计](Kaggle私有算力接入审计-20260910.md)。
 
 ## 1. 当前目标与授权
 
