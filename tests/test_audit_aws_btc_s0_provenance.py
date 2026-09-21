@@ -232,3 +232,5 @@ def test_completed_resume_revalidates_frozen_inputs(tmp_path: Path, monkeypatch:
     assert calls["frozen"] == 1
     result = __import__("json").loads(output.read_text(encoding="utf-8"))
     assert result["parent_objects_verified_total"] == 0 and result["scan_counts_this_run"]["parent_objects"] == 0
+    assert result["assigned_cells"]["t181440|F_pub"] == 1
+    assert len(result["assigned_cells"]) == 8
